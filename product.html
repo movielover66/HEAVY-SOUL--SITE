@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="notice-bar">Free shipping over ₹1499 · Made-to-order pieces ship in 5–7 days</div>
+  <nav class="nav wrap">
+    <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2023</small></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="shop.html?category=Custom">Custom</a>
+      <a href="track.html">Track order</a>
+      <a href="policy.html">Policies</a>
+    </div>
+    <div class="nav-icons">
+      <a class="icon-btn" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+    </div>
+  </nav>
+  <div class="mobile-panel" id="mobilePanel">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="shop.html?category=Custom">Custom</a>
+    <a href="track.html">Track order</a>
+    <a href="policy.html">Policies</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="crumb" id="pdCrumb"><a href="index.html">Home</a> / <a href="shop.html">Shop</a></p>
+</div>
+
+<div id="pdRoot" class="wrap">
+  <div class="pd">
+    <div>
+      <div class="pd-gallery-main"><img id="pdMainImg" src="" alt=""></div>
+      <div class="pd-thumbs" id="pdThumbs"></div>
+    </div>
+    <div>
+      <div id="pdBadge" style="margin-bottom:12px;"></div>
+      <p class="pd-cat" id="pdCat"></p>
+      <h1 class="pd-title" id="pdTitle"></h1>
+      <div class="pd-price" id="pdPrice"></div>
+      <p class="pd-desc" id="pdDesc"></p>
+
+      <div class="pd-block">
+        <div class="pd-label"><span>Size</span><span>Size guide</span></div>
+        <div class="size-row" id="pdSizes"></div>
+      </div>
+
+      <div class="pd-block">
+        <div class="pd-label"><span>Quantity</span></div>
+        <div class="qty-row">
+          <button id="qtyMinus" aria-label="Decrease quantity">−</button>
+          <span id="pdQty">1</span>
+          <button id="qtyPlus" aria-label="Increase quantity">+</button>
+        </div>
+      </div>
+
+      <div class="pd-actions">
+        <button class="btn outline block" id="addToCartBtn">Add to bag</button>
+        <button class="btn block" id="buyNowBtn">Buy now</button>
+      </div>
+
+      <div class="pd-note hidden" id="pdNote">Made to order — share your design or photo on WhatsApp after checkout. COD orders on custom pieces require a 50% advance.</div>
+
+      <div class="accordion">
+        <details class="accordion-item" open>
+          <summary>Fabric &amp; fit</summary>
+          <p>Heavyweight cotton, garment-washed, cut with a relaxed/oversized silhouette. True to size — if between sizes, size up.</p>
+        </details>
+        <details class="accordion-item">
+          <summary>Shipping &amp; returns</summary>
+          <p>Ships across India in 3–5 days for ready stock, 5–7 days for made-to-order. See our full <a href="policy.html" style="text-decoration:underline;">shipping &amp; returns policy</a>.</p>
+        </details>
+        <details class="accordion-item">
+          <summary>Care</summary>
+          <p>Machine wash cold, inside out. Do not bleach. Line dry for best shape retention.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <section class="section tight" id="relatedSection">
+    <div class="section-head">
+      <div><p class="eyebrow">You may also like</p><h2>More from this edit</h2></div>
+    </div>
+    <div class="grid" id="relatedGrid"></div>
+  </section>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2026 Heavy Soul. All rights reserved.</span>
+      <span>Prices in INR · Ships across India</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/app.js"></script>
+<script src="js/product.js"></script>
+</body>
+</html>

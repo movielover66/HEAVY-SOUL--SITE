@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav wrap">
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2023</small></a>
+    <div></div>
+    <div class="nav-icons">
+      <a class="icon-btn" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+    </div>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="steps">
+    <div class="step done"><span class="dot">✓</span> Bag</div>
+    <div class="step active"><span class="dot">2</span> Shipping</div>
+    <div class="step"><span class="dot">3</span> Payment</div>
+  </div>
+
+  <div class="checkout-layout">
+    <div>
+      <h1 style="font-size:28px; margin-bottom:22px;">Shipping details</h1>
+      <div class="form-grid">
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" type="text" placeholder="Your full name">
+          <span class="field-err" id="err-name">Please enter your name</span>
+        </div>
+        <div class="field">
+          <label for="phone">Phone number</label>
+          <input id="phone" type="tel" placeholder="10-digit mobile number" inputmode="numeric">
+          <span class="field-err" id="err-phone">Enter a valid 10-digit mobile number</span>
+        </div>
+        <div class="field full">
+          <label for="email">Email (optional)</label>
+          <input id="email" type="email" placeholder="you@email.com">
+        </div>
+        <div class="field full">
+          <label for="address">Full address</label>
+          <textarea id="address" rows="3" placeholder="House / street / landmark"></textarea>
+          <span class="field-err" id="err-address">Please enter your full address</span>
+        </div>
+        <div class="field">
+          <label for="pin">PIN code</label>
+          <input id="pin" type="text" placeholder="6-digit PIN" inputmode="numeric">
+          <span class="field-err" id="err-pin">Enter a valid 6-digit PIN code</span>
+          <span class="hint" id="pinChecking"></span>
+        </div>
+        <div class="field">
+          <label for="state">State</label>
+          <input id="state" type="text" placeholder="Auto-filled from PIN code">
+        </div>
+      </div>
+      <button class="btn block" style="margin-top:28px;" onclick="goToPayment()">Continue to payment</button>
+    </div>
+
+    <div class="summary-card">
+      <h3>Your bag</h3>
+      <div id="checkoutItems"></div>
+      <div class="sum-row total"><span>Total</span><span id="checkoutTotal">₹0</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/checkout.js"></script>
+</body>
+</html>

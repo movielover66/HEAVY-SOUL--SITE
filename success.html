@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order confirmed — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav wrap">
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2023</small></a>
+    <div></div>
+    <div></div>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="empty-state">
+    <p class="eyebrow">Order submitted</p>
+    <h2 style="margin: 14px 0;">Thank you — we've got your order.</h2>
+    <p id="orderIdLine">Your order reference is being generated.</p>
+    <p style="max-width:440px; margin: 0 auto 30px;">We've opened WhatsApp with your order details — please send that message if you haven't already, so we can confirm and start processing.</p>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <a href="shop.html" class="btn outline">Continue shopping</a>
+      <a href="track.html" class="btn" id="trackLink">Track this order</a>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2026 Heavy Soul. All rights reserved.</span>
+      <span>Prices in INR · Ships across India</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const orderId = new URLSearchParams(window.location.search).get("order");
+  if (orderId) {
+    document.getElementById("orderIdLine").innerHTML = `Order ID: <b style="font-family:var(--mono); color:var(--accent);">${orderId}</b>`;
+    document.getElementById("trackLink").href = `track.html?order=${encodeURIComponent(orderId)}`;
+  }
+</script>
+</body>
+</html>

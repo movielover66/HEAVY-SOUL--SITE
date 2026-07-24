@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav wrap">
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2023</small></a>
+    <div></div>
+    <div></div>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="steps">
+    <div class="step done"><span class="dot">✓</span> Bag</div>
+    <div class="step done"><span class="dot">✓</span> Shipping</div>
+    <div class="step active"><span class="dot">3</span> Payment</div>
+  </div>
+
+  <div id="paymentMain">
+    <div class="timer-box" id="timerBox">
+      <div class="eyebrow">Complete payment within</div>
+      <div class="clock" id="clock">10:00</div>
+    </div>
+
+    <div class="checkout-layout">
+      <div>
+        <div class="method-toggle">
+          <button id="btnPrepaid" class="active" onclick="setMethod('prepaid')">Pay in full</button>
+          <button id="btnCod" onclick="setMethod('cod')">Cash on delivery</button>
+        </div>
+
+        <div class="qr-box">
+          <img src="assets/payment/qr-placeholder.svg" alt="UPI QR code">
+          <p style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;">Scan with any UPI app, or tap below</p>
+          <div class="upi-id-row">
+            <span id="upiIdText">—</span>
+            <button class="copy-btn" onclick="copyUPI()">Copy</button>
+          </div>
+          <a id="upiPayBtn" class="btn block" style="margin-top:16px;" href="#">Pay ₹<span id="upiPayAmount">0</span> via UPI app</a>
+        </div>
+
+        <div class="field">
+          <label for="utr">UPI transaction ID (UTR) — after paying</label>
+          <input id="utr" type="text" placeholder="12-digit UTR / reference number">
+        </div>
+
+        <button class="btn block" style="margin-top:20px;" onclick="placeOrder()">Submit order on WhatsApp</button>
+        <p class="hint" style="margin-top:12px;">Submitting opens WhatsApp with your order details pre-filled — send the message to confirm.</p>
+      </div>
+
+      <div class="summary-card">
+        <h3>Order summary</h3>
+        <div id="checkoutItems"></div>
+        <div class="sum-row"><span>Item total</span><span id="subtotalVal">₹0</span></div>
+        <div class="sum-row hidden" id="rowHandling"><span>COD handling</span><span id="handlingVal">₹0</span></div>
+        <div class="sum-row hidden" id="rowGrandTotal"><span>Total payable</span><span id="grandTotalVal">₹0</span></div>
+        <div class="sum-row total"><span id="dueLabel">Pay now</span><span id="dueVal">₹0</span></div>
+        <div class="sum-row hidden" id="rowRemaining"><span>Balance on delivery</span><span id="remainingVal">₹0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cancelled-view hidden" id="cancelledView">
+    <h2>Payment window expired</h2>
+    <p style="color:var(--ink-soft); margin:14px 0 26px;">Your order wasn't confirmed in time and has been cancelled. No amount was charged — you can check out again whenever you're ready.</p>
+    <a href="shop.html" class="btn">Back to shop</a>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/payment.js"></script>
+</body>
+</html>

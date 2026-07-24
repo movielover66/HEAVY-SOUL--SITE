@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Order — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .dot.pulse {
+    position: relative;
+  }
+  .dot.pulse::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    animation: pulseRing 1.6s ease-out infinite;
+  }
+  @keyframes pulseRing {
+    0%   { transform: scale(0.6); opacity: 0.8; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2e9e4c;
+    margin-right: 6px;
+    animation: liveBlink 1.4s ease-in-out infinite;
+  }
+  .live-dot.small { width: 6px; height: 6px; }
+  @keyframes liveBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .edd-banner {
+    margin-top: 18px;
+    padding: 10px 14px;
+    background: #f3f8f4;
+    border: 1px solid #d9e9dc;
+    border-radius: 6px;
+    font-size: 13.5px;
+    display: inline-block;
+  }
+
+  .checkpoint-timeline {
+    margin-top: 8px;
+  }
+  .checkpoint-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-left: 2px solid #e5e5e5;
+    margin-left: 4px;
+    padding-left: 16px;
+    opacity: 0;
+    animation: fadeSlideIn 0.4s ease forwards;
+  }
+  .checkpoint-item:last-child {
+    border-left-color: transparent;
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .checkpoint-dot {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    margin-left: -21px;
+    margin-top: 4px;
+  }
+  .checkpoint-dot.latest {
+    background: #2e9e4c;
+    box-shadow: 0 0 0 4px rgba(46, 158, 76, 0.15);
+  }
+  .checkpoint-status {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .checkpoint-meta {
+    font-size: 12.5px;
+    color: var(--ink-soft, #777);
+    display: flex;
+    gap: 10px;
+    margin-top: 2px;
+  }
+
+  /* ---- Track card shell ---- */
+  .track-card {
+    background: #fff;
+    border: 1px solid #ececec;
+    border-radius: 12px;
+    padding: 24px 20px 28px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.04);
+  }
+
+  /* ---- Horizontal progress stepper ---- */
+  .status-track {
+    margin-top: 18px;
+    position: relative;
+  }
+  .status-track-line {
+    position: absolute;
+    top: 14px;
+    left: 5%;
+    right: 5%;
+    height: 3px;
+    background: #e8e4e0;
+    border-radius: 3px;
+    z-index: 0;
+  }
+  .status-track-line-fill {
+    height: 100%;
+    background: #7a1f2b;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .status-track-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+  .step-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20%;
+  }
+  .step-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #f4f1ee;
+    border: 2px solid #e8e4e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .step-dot svg { width: 14px; height: 14px; }
+  .step-dot.done {
+    background: #7a1f2b;
+    border-color: #7a1f2b;
+  }
+  .step-dot.pulse {
+    box-shadow: 0 0 0 5px rgba(122,31,43,0.15);
+  }
+  .step-dot.pulse::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid #7a1f2b;
+    animation: pulseRing 1.6s ease-out infinite;
+  }
+  .step-label {
+    margin-top: 8px;
+    font-size: 11px;
+    text-align: center;
+    color: #999;
+    line-height: 1.3;
+  }
+  .step-label.done {
+    color: #2b2b2b;
+    font-weight: 600;
+  }
+
+  /* ---- Delivery details card ---- */
+  .info-card {
+    margin-top: 20px;
+    background: #faf8f6;
+    border: 1px solid #ece7e2;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+    color: var(--ink-soft, #666);
+  }
+  .info-card p { margin: 3px 0; }
+  .info-card-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #999;
+    margin-bottom: 6px !important;
+  }
+
+  /* ---- Rider / delivery partner card ---- */
+  .rider-card {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fbf3ee;
+    border: 1px solid #f0dfd2;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .rider-card.muted {
+    background: #f5f5f5;
+    border-color: #e5e5e5;
+  }
+  .rider-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b5502f;
+  }
+  .rider-card.muted .rider-icon { color: #999; }
+  .rider-icon svg { width: 20px; height: 20px; }
+  .rider-info { flex: 1; min-width: 0; }
+  .rider-service {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #b5502f;
+    font-weight: 600;
+  }
+  .rider-card.muted .rider-service { color: #999; }
+  .rider-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2b2b2b;
+  }
+  .rider-sub {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+  }
+  .rider-call {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #7a1f2b;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .rider-call svg { width: 14px; height: 14px; }
+
+  /* ---- Checkpoint icons (replaces plain dots) ---- */
+  .checkpoint-icon {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -25px;
+    margin-top: 0;
+  }
+  .checkpoint-icon svg { width: 14px; height: 14px; }
+  .checkpoint-icon.latest {
+    background: #2e9e4c;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(46, 158, 76, 0.15);
+  }
+  .checkpoint-item.latest .checkpoint-status {
+    color: #2e9e4c;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav wrap">
+    <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2023</small></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="track.html" class="active">Track order</a>
+      <a href="policy.html">Policies</a>
+    </div>
+    <div class="nav-icons">
+      <a class="icon-btn" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+    </div>
+  </nav>
+  <div class="mobile-panel" id="mobilePanel">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="track.html">Track order</a>
+    <a href="policy.html">Policies</a>
+  </div>
+</header>
+
+<div class="wrap" style="max-width:760px; padding-bottom:80px;">
+  <p class="crumb"><a href="index.html">Home</a> / Track order</p>
+  <h1 style="font-size:32px; margin-bottom:12px;">Track Your Order</h1>
+  <p style="margin-bottom:24px;">Enter your Order ID below to see the latest status of your delivery.</p>
+
+  <form id="trackForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px;">
+    <input
+      type="text"
+      id="orderIdInput"
+      placeholder="e.g. HS-20260724-448"
+      required
+      style="flex:1; min-width:220px; padding:14px 16px; border:1px solid #ddd; border-radius:6px; font-size:15px;"
+    >
+    <button type="submit" class="btn" style="padding:14px 28px;">Track Order</button>
+  </form>
+
+  <div id="trackResult"></div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2026 Heavy Soul. All rights reserved.</span>
+      <span>Prices in INR · Ships across India</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/track.js"></script>
+</body>
+</html>
