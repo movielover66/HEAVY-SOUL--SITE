@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+<rect width="400" height="500" fill="#F2EEE6"/>
+<rect x="0" y="0" width="400" height="500" fill="#0000000a" opacity="0.5"/>
+<rect x="16" y="16" width="368" height="468" fill="none" stroke="#DFD9CC" stroke-width="1"/>
+<g transform="translate(100,140) scale(1.0)"><path d="M75 45 L125 45 L132 220 L108 220 L100 110 L92 220 L68 220 Z" fill="none" stroke="#14120F" stroke-width="3"/></g>
+<text x="200" y="430" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#14120F">Wide Denim — Bone Wash</text>
+<text x="200" y="454" text-anchor="middle" font-family="monospace" font-size="11" letter-spacing="2" fill="#6E1420">BOTTOMS</text>
+</svg>

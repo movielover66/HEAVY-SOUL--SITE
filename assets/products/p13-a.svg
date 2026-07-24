@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+<rect width="400" height="500" fill="#F2EEE6"/>
+<rect x="0" y="0" width="400" height="500" fill="#6E142012" opacity="0.5"/>
+<rect x="16" y="16" width="368" height="468" fill="none" stroke="#DFD9CC" stroke-width="1"/>
+<g transform="translate(100,140) scale(1.0)"><path d="M75 60 L110 40 L140 55 L150 90 L128 100 L128 220 L72 220 L72 100 L50 90 L60 55 Z" fill="none" stroke="#14120F" stroke-width="3"/></g>
+<text x="200" y="430" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#14120F">Custom Print Tee</text>
+<text x="200" y="454" text-anchor="middle" font-family="monospace" font-size="11" letter-spacing="2" fill="#6E1420">CUSTOM</text>
+</svg>
