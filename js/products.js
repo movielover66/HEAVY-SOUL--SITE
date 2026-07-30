@@ -4,10 +4,10 @@
 const PRODUCTS = [
   {
     id: 1,
-    name: "Ink Oversized Tee",
+    name: "KTM WHITE 390",
     category: "T-Shirts",
     price: 899,
-    compareAt: 1099,
+    compareAt: 599,
     badge: "Best Seller",
     orderType: "collection",
     image: "assets/products/p1-a.svg",
@@ -19,7 +19,7 @@ const PRODUCTS = [
     id: 2,
     name: "Bone Boxy Tee",
     category: "T-Shirts",
-    price: 899,
+    price: 549,
     badge: "New",
     orderType: "collection",
     image: "assets/products/p2-a.svg",
