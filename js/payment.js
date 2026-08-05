@@ -76,17 +76,8 @@ function renderAmounts(){
     amountDue = advance;
   }
 
-  updateUpiLink(amountDue);
-}
-
-function updateUpiLink(amount){
-  const btn = document.getElementById("upiPayBtn");
-  const amountLabel = document.getElementById("upiPayAmount");
-  if (!btn) return;
-  amountLabel.textContent = amount;
-  const note = encodeURIComponent("HEAVY SOUL Order");
-  const link = `upi://pay?pa=${encodeURIComponent(SITE_CONFIG.UPI_ID)}&pn=${encodeURIComponent(SITE_CONFIG.UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${note}`;
-  btn.href = link;
+  const payBtn = document.getElementById("payBtn");
+  if (payBtn) payBtn.textContent = "Pay ₹" + amountDue;
 }
 
 function setMethod(method){
@@ -97,7 +88,6 @@ function setMethod(method){
 }
 
 renderAmounts();
-document.getElementById("upiIdText").textContent = SITE_CONFIG.UPI_ID;
 
 let deadline = Number(localStorage.getItem("paymentDeadline"));
 const windowMs = SITE_CONFIG.PAYMENT_WINDOW_MINUTES * 60 * 1000;
@@ -132,19 +122,12 @@ const tickInterval = setInterval(() => {
   if (remainingMs <= 2 * 60 * 1000) timerBox.classList.add("danger");
 }, 1000);
 
-function copyUPI(){
-  navigator.clipboard.writeText(SITE_CONFIG.UPI_ID);
-  showToast("UPI ID copied");
-}
-
-function sendOrderToSheet(orderId, shippingInfo, amountDue, paymentMethod, codCollectAmount, grandTotalAmount){
-  const url = SITE_CONFIG.APPS_SCRIPT_URL;
-  if (!url || url.includes("PASTE-YOUR")) return;
-
+function buildOrderPayload_(orderId, amountDue){
   const fullAddress = `${shippingInfo.address}, ${shippingInfo.state} - ${shippingInfo.pin}`;
-
-  const totalQty = cart.reduce((n, item) => n + (item.qty || 1), 0);
   const estWeight = totalQty * (SITE_CONFIG.WEIGHT_PER_ITEM_G || 300);
+  const handling = paymentMethod === "cod" ? (SITE_CONFIG.COD_HANDLING_PER_ITEM * totalQty) : 0;
+  const grandTotal = subtotal + handling;
+  const remaining = paymentMethod === "cod" ? (grandTotal - amountDue) : 0;
 
   const items = cart.map(item => ({
     name: item.name,
@@ -153,26 +136,33 @@ function sendOrderToSheet(orderId, shippingInfo, amountDue, paymentMethod, codCo
     price: item.price
   }));
 
+  return {
+    orderId: orderId,
+    customerName: shippingInfo.name,
+    phone: shippingInfo.phone,
+    address: shippingInfo.address,
+    city: shippingInfo.city || "",
+    state: shippingInfo.state,
+    pincode: shippingInfo.pin,
+    fullAddress: fullAddress,
+    amount: amountDue,
+    codAmount: remaining,
+    grandTotal: grandTotal,
+    paymentType: paymentMethod === "cod" ? "cod" : "prepaid",
+    weight: estWeight,
+    items: items
+  };
+}
+
+function sendOrderToSheet(orderPayload){
+  const url = SITE_CONFIG.APPS_SCRIPT_URL;
+  if (!url || url.includes("PASTE-YOUR")) return;
+
   fetch(url, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({
-      orderId: orderId,
-      customerName: shippingInfo.name,
-      phone: shippingInfo.phone,
-      address: shippingInfo.address,
-      city: shippingInfo.city || "",
-      state: shippingInfo.state,
-      pincode: shippingInfo.pin,
-      fullAddress: fullAddress,
-      amount: amountDue,
-      codAmount: codCollectAmount || 0,
-      grandTotal: grandTotalAmount || amountDue,
-      paymentType: paymentMethod === "cod" ? "cod" : "prepaid",
-      weight: estWeight,
-      items: items
-    })
+    body: JSON.stringify(orderPayload)
   }).catch(() => {});
 }
 
@@ -192,23 +182,13 @@ async function placeOrder(){
     showToast("Payment window has expired — please check out again");
     return;
   }
-
-  if (paymentMethod === "prepaid") {
-    // Online Payment hole Razorpay open koro
-    await startRazorpayPayment();
-  } else {
-    // COD hole UTR niye check koro
-    const utr = document.getElementById("utr").value.trim();
-    if (!utr) {
-      showToast("Enter your UPI transaction ID (UTR) after paying");
-      return;
-    }
-    finalizeOrder(utr);
-  }
+  // Prepaid = full amount via Razorpay. COD = advance amount via Razorpay,
+  // balance stays payable on delivery.
+  await startRazorpayPayment();
 }
 
 async function startRazorpayPayment() {
-  const amountDue = subtotal; 
+  const amountDue = paymentMethod === "prepaid" ? subtotal : calcCodAdvance();
   const url = SITE_CONFIG.APPS_SCRIPT_URL; 
   
   if (!url || url.includes("PASTE-YOUR")) {
@@ -216,21 +196,27 @@ async function startRazorpayPayment() {
       return;
   }
 
+  const payBtn = document.getElementById("payBtn");
+  if (payBtn) { payBtn.disabled = true; payBtn.textContent = "Please wait…"; }
+
+  // Order ID banano hocche payment-er AGE, jate webhook eta diye order match korte pare
+  const orderId = generateOrderId();
+  const orderPayload = buildOrderPayload_(orderId, amountDue);
+
   try {
-    // 1. Get Razorpay Order ID from Google Apps Script
+    // 1. Razorpay order create koro + order details Apps Script-e pathiye rakho
+    //    (webhook eta use kore payment confirm hole automatically order likhbe)
     const response = await fetch(url, {
       method: "POST",
       // Important: no-cors kora jabena, na hole json pawa jabena!
-      body: JSON.stringify({
-        type: "create_rzp_order",
-        amount: amountDue
-      })
+      body: JSON.stringify(Object.assign({ type: "create_rzp_order" }, orderPayload))
     });
     
     const rzpOrderData = await response.json();
 
     if (!rzpOrderData.success) {
       showToast("Payment creation failed: " + rzpOrderData.error);
+      resetPayButton_();
       return;
     }
 
@@ -243,8 +229,8 @@ async function startRazorpayPayment() {
       "description": "Order Payment",
       "order_id": rzpOrderData.order_id,
       "handler": function (response) {
-        // 3. Complete order on success
-        finalizeOrder(response.razorpay_payment_id);
+        // 3. Complete order on success (webhook will also write it — duplicate-safe)
+        finalizeOrder(response.razorpay_payment_id, orderId, orderPayload);
       },
       "prefill": {
         "name": shippingInfo.name,
@@ -253,26 +239,40 @@ async function startRazorpayPayment() {
       },
       "theme": {
         "color": "#14120F"
+      },
+      "modal": {
+        "ondismiss": function () {
+          resetPayButton_();
+        }
       }
     };
 
     var rzp = new Razorpay(options);
     rzp.on('payment.failed', function (response){
       showToast("Payment failed! " + response.error.description);
+      resetPayButton_();
     });
     rzp.open();
   } catch (error) {
     showToast("Server error. Please try again.");
     console.error(error);
+    resetPayButton_();
   }
 }
 
-function finalizeOrder(paymentRef) {
-  const orderId = generateOrderId();
+function resetPayButton_(){
+  const payBtn = document.getElementById("payBtn");
+  if (!payBtn) return;
+  payBtn.disabled = false;
   const amountDue = paymentMethod === "prepaid" ? subtotal : calcCodAdvance();
+  payBtn.textContent = "Pay ₹" + amountDue;
+}
+
+function finalizeOrder(paymentRef, orderId, orderPayload) {
+  const amountDue = orderPayload.amount;
   const handling = paymentMethod === "cod" ? (SITE_CONFIG.COD_HANDLING_PER_ITEM * totalQty) : 0;
-  const grandTotal = subtotal + handling;
-  const remaining = paymentMethod === "cod" ? (grandTotal - amountDue) : 0;
+  const grandTotal = orderPayload.grandTotal;
+  const remaining = orderPayload.codAmount;
 
   let orderLines = "";
   cart.forEach(item => {
@@ -299,14 +299,16 @@ ${orderLines}Item Total: ₹${subtotal}${paymentMethod === "cod" ? `\nCOD Handli
 Payment Method: ${paymentMethod === "prepaid" ? "Prepaid (Online)" : "COD (Advance Paid)"}
 Amount Paid Now: ₹${amountDue}${paymentMethod === "cod" ? `\nBalance (Pay on Delivery): ₹${remaining}` : ""}
 
-Payment Reference / UTR:
+Payment Reference (Razorpay):
 ${paymentRef}
 
 Track your order anytime: ${window.location.origin}${window.location.pathname.replace("payment.html","track.html")}?order=${encodeURIComponent(orderId)}
 
 Please verify payment and confirm the order.`;
 
-  sendOrderToSheet(orderId, shippingInfo, amountDue, paymentMethod, remaining, grandTotal);
+  // Backup write in case the webhook hasn't landed yet — Apps Script skips
+  // this as a duplicate if the webhook already created the row.
+  sendOrderToSheet(orderPayload);
 
   window.open(`https://wa.me/${SITE_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
 
