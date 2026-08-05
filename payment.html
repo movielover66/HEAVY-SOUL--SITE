@@ -36,23 +36,10 @@
           <button id="btnCod" onclick="setMethod('cod')">Cash on delivery</button>
         </div>
 
-        <div class="qr-box">
-          <img src="assets/payment/qr-placeholder.svg" alt="UPI QR code">
-          <p style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;">Scan with any UPI app, or tap below</p>
-          <div class="upi-id-row">
-            <span id="upiIdText">—</span>
-            <button class="copy-btn" onclick="copyUPI()">Copy</button>
-          </div>
-          <a id="upiPayBtn" class="btn block" style="margin-top:16px;" href="#">Pay ₹<span id="upiPayAmount">0</span> via UPI app</a>
-        </div>
+        <p class="hint" style="margin-bottom:16px;">You'll be redirected to a secure Razorpay checkout to complete payment — cards, UPI apps, netbanking and wallets all supported.</p>
 
-        <div class="field">
-          <label for="utr">UPI transaction ID (UTR) — after paying</label>
-          <input id="utr" type="text" placeholder="12-digit UTR / reference number">
-        </div>
-
-        <button class="btn block" style="margin-top:20px;" onclick="placeOrder()">Submit order</button>
-        <p class="hint" style="margin-top:12px;">Submitting opens WhatsApp with your order details pre-filled — send the message to confirm.</p>
+        <button class="btn block" style="margin-top:8px;" onclick="placeOrder()" id="payBtn">Proceed to pay</button>
+        <p class="hint" style="margin-top:12px;">After payment succeeds, WhatsApp opens with your order details pre-filled — send the message to confirm.</p>
       </div>
 
       <div class="summary-card">
