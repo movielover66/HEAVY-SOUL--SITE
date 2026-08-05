@@ -37,7 +37,7 @@
         </div>
 
         <div class="qr-box">
-          <img src="assets/payment/qr-.jpg" alt="UPI QR code">
+          <img src="assets/payment/qr-placeholder.svg" alt="UPI QR code">
           <p style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;">Scan with any UPI app, or tap below</p>
           <div class="upi-id-row">
             <span id="upiIdText">—</span>
@@ -51,7 +51,7 @@
           <input id="utr" type="text" placeholder="12-digit UTR / reference number">
         </div>
 
-        <button class="btn block" style="margin-top:20px;" onclick="placeOrder()">Submit order on WhatsApp</button>
+        <button class="btn block" style="margin-top:20px;" onclick="placeOrder()">Submit order</button>
         <p class="hint" style="margin-top:12px;">Submitting opens WhatsApp with your order details pre-filled — send the message to confirm.</p>
       </div>
 
@@ -73,6 +73,9 @@
     <a href="shop.html" class="btn">Back to shop</a>
   </div>
 </div>
+
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script src="js/config.js"></script>
 <script src="js/toast.js"></script>
