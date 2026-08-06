@@ -5,6 +5,18 @@
   "vars": {
     "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbxJNKei1redpGJjzpwnFFTBNvwsmGAnuPIFEmUdeIQulgE_CDA5rkZk-9LOMsA5gMXO/exec"
   },
+  "secrets_store_secrets": [
+    {
+      "binding": "RAZORPAY_KEY_ID",
+      "store_id": "70b0de51e63841d78d9a2f5817beb776",
+      "secret_name": "RAZORPAY_KEY_ID"
+    },
+    {
+      "binding": "RAZORPAY_KEY_SECRET",
+      "store_id": "70b0de51e63841d78d9a2f5817beb776",
+      "secret_name": "RAZORPAY_KEY_SECRET"
+    }
+  ],
   "assets": {
     "directory": "./",
     "binding": "ASSETS",
