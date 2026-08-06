@@ -38,15 +38,27 @@ const stateEl = document.getElementById("state");
 const pinEl = document.getElementById("pin");
 const pinChecking = document.getElementById("pinChecking");
 
-// ---- Auto-fill from a previous order on this device ----
+// ---- Auto-fill from a previous order on this device (localStorage fallback) ----
 const savedInfo = JSON.parse(localStorage.getItem("shippingInfo") || "null");
-if (savedInfo) {
-  nameEl.value = savedInfo.name || "";
-  phoneEl.value = savedInfo.phone || "";
-  document.getElementById("email").value = savedInfo.email || "";
-  addressEl.value = savedInfo.address || "";
-  stateEl.value = savedInfo.state || "";
-  pinEl.value = savedInfo.pin || "";
+function fillShippingFields(info) {
+  if (!info) return;
+  nameEl.value = info.name || "";
+  phoneEl.value = info.phone || "";
+  document.getElementById("email").value = info.email || "";
+  addressEl.value = info.address || "";
+  stateEl.value = info.state || "";
+  pinEl.value = info.pin || "";
+  if (info.city) stateEl.dataset.city = info.city;
+}
+fillShippingFields(savedInfo);
+
+// ---- If logged in, prefer the address saved to their account (works across devices) ----
+if (window.firebase) {
+  firebase.auth().onAuthStateChanged(async function (user) {
+    if (!user || typeof loadUserAddress !== "function") return;
+    const accountAddress = await loadUserAddress();
+    if (accountAddress) fillShippingFields(accountAddress);
+  });
 }
 
 function validateField(el, errId, isValid){
@@ -134,6 +146,11 @@ function goToPayment(){
   const city = stateEl.dataset.city || "";
   const shippingInfo = { name, phone, email, address, city, state, pin };
   localStorage.setItem("shippingInfo", JSON.stringify(shippingInfo));
+
+  // If logged in, also save to their account so it's there next time on any device
+  if (window.firebase && typeof saveUserAddress === "function") {
+    saveUserAddress(shippingInfo);
+  }
 
   logAbandonedCart(shippingInfo);
 

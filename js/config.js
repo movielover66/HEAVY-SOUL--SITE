@@ -39,6 +39,8 @@ const SITE_CONFIG = {
     apiKey: "AIzaSyAP8qb7o_cDBjaXhwE8jItCkDZ72fd6XmM",
     authDomain: "heavy-soul-auth.firebaseapp.com",
     projectId: "heavy-soul-auth",
+    storageBucket: "heavy-soul-auth.firebasestorage.app",
+    messagingSenderId: "421145657035",
     appId: "1:421145657035:web:9fab0fec092fb3b575e54e"
   },
 

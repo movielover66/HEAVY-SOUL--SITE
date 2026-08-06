@@ -305,6 +305,12 @@ Please verify payment and confirm the order.`;
   // this as a duplicate if the webhook already created the row.
   sendOrderToSheet(orderPayload);
 
+  // If the customer is logged in, save this order under their account too,
+  // so it shows up in "My Orders" on account.html. No-op for guest checkout.
+  if (window.firebase && typeof saveOrderRecord === "function") {
+    saveOrderRecord(orderPayload);
+  }
+
   window.open(`https://wa.me/${SITE_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
 
   clearInterval(tickInterval);

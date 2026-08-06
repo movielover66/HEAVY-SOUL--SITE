@@ -9,21 +9,32 @@ let currentOrderId = null;
 let refreshTimer = null;
 
 const urlOrder = new URLSearchParams(window.location.search).get("order");
+const autoFillNote = document.getElementById("autoFillNote");
 if (urlOrder) {
   input.value = urlOrder;
-  lookupOrder(urlOrder, true);
+  if (autoFillNote) autoFillNote.classList.add("show");
 }
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   const id = input.value.trim();
   if (!id) return;
+  if (autoFillNote) autoFillNote.classList.remove("show");
   lookupOrder(id, true);
 });
 
 async function lookupOrder(orderId, showLoading){
   if (showLoading) {
-    resultBox.innerHTML = `<p class="hint">Checking order status…</p>`;
+    resultBox.innerHTML = `
+      <div class="track-skeleton">
+        <div class="sk-line sk-w60"></div>
+        <div class="sk-steps">
+          <div class="sk-dot"></div><div class="sk-dot"></div><div class="sk-dot"></div><div class="sk-dot"></div><div class="sk-dot"></div>
+        </div>
+        <div class="sk-line sk-w40"></div>
+        <div class="sk-line sk-w80"></div>
+      </div>
+    `;
   }
 
   const url = SITE_CONFIG.APPS_SCRIPT_URL;
