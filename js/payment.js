@@ -198,13 +198,13 @@ async function startRazorpayPayment() {
   const orderPayload = buildOrderPayload_(orderId, amountDue);
 
   try {
-    // 1. Razorpay order fast-e create koro — eta Cloudflare Pages Function
+    // 1. Razorpay order fast-e create koro — eta Cloudflare Worker route
     //    (/api/create-order), Google Apps Script na. Eta shudhu Razorpay-r
-    //    sathe kotha bole, Sheet chhoi na, tai milliseconds-e ferot ase.
+    //    sathe kotha bole, tai milliseconds-e ferot ase.
     const response = await fetch("/api/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: amountDue, orderId: orderId })
+      body: JSON.stringify(Object.assign({ amount: amountDue }, orderPayload))
     });
 
     const rzpOrderData = await response.json();
@@ -214,11 +214,6 @@ async function startRazorpayPayment() {
       resetPayButton_();
       return;
     }
-
-    // Sheet-e "payment initiated" row-ta background-e (non-blocking) pathiye
-    // dicchi — eta popup khulte wait korায় na, kintu abandoned-cart tracking
-    // ager moto e thake.
-    sendOrderToSheet(Object.assign({ type: "create_rzp_order" }, orderPayload));
 
     // 2. Open Razorpay Checkout Pop-up
     var options = {
