@@ -6,7 +6,7 @@ const PRODUCTS = [
     id: 1,
     name: "KTM WHITE 390",
     category: "T-Shirts",
-    price: 549,
+    price: 1,
     compareAt: 899,
     badge: "Best Seller",
     orderType: "collection",
