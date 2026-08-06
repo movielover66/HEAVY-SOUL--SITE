@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="Log in or create your Heavy Soul account.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heavy Soul">
+<meta property="og:title" content="Account — Heavy Soul">
+<meta property="og:description" content="Log in or create your Heavy Soul account.">
+<meta property="og:image" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/assets/og-image.jpg">
+<meta property="og:url" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/account.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Account — Heavy Soul">
+<meta name="twitter:description" content="Log in or create your Heavy Soul account.">
+<meta name="twitter:image" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/assets/og-image.jpg">
+<title>Account — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .auth-wrap{ max-width: 420px; margin: 48px auto 80px; padding: 0 24px; }
+  .auth-tabs{ display:flex; border-bottom:1px solid var(--line); margin-bottom:28px; }
+  .auth-tab{ flex:1; text-align:center; padding:12px 0; font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .auth-tab.active{ color:var(--ink); border-bottom-color: var(--accent); }
+  .auth-panel{ display:none; flex-direction:column; gap:18px; }
+  .auth-panel.active{ display:flex; }
+  .auth-msg{ font-size:13px; color:var(--accent); display:none; }
+  .auth-msg.show{ display:block; }
+  .account-card{ border:1px solid var(--line); padding:24px; display:flex; flex-direction:column; gap:16px; }
+  .account-card h2{ font-size:20px; }
+  .account-row{ display:flex; justify-content:space-between; font-size:14px; padding:8px 0; border-bottom:1px solid var(--line); }
+  .account-row span:first-child{ color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="notice-bar">Free shipping over ₹1499 · Made-to-order pieces ship in 5–7 days</div>
+  <nav class="nav wrap">
+    <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="shop.html?category=Custom">Custom</a>
+      <a href="track.html">Track order</a>
+      <a href="policy.html">Policies</a>
+      <a href="account.html" id="navLoginLink">Login / Signup</a>
+    </div>
+    <div class="nav-icons">
+      <a class="icon-btn" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+    </div>
+  </nav>
+  <div class="mobile-panel" id="mobilePanel">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="shop.html?category=Custom">Custom</a>
+    <a href="track.html">Track order</a>
+    <a href="policy.html">Policies</a>
+    <a href="account.html" id="navLoginLinkMobile">Login / Signup</a>
+  </div>
+</header>
+
+<div class="auth-wrap">
+
+  <!-- Shown only when logged OUT -->
+  <div id="authBox">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Log in</div>
+      <div class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Sign up</div>
+    </div>
+
+    <form class="auth-panel active" id="panelLogin" onsubmit="return handleLogin(event)">
+      <div class="field">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" required placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" required placeholder="Your password">
+      </div>
+      <span class="auth-otp-edit" onclick="handleForgotPassword()">Forgot password?</span>
+      <span class="auth-msg" id="loginMsg"></span>
+      <button type="submit" class="btn accent block" id="loginBtn">Log in</button>
+    </form>
+
+    <form class="auth-panel" id="panelSignup" onsubmit="return handleSignup(event)">
+      <div class="field">
+        <label for="signupName">Full name</label>
+        <input id="signupName" type="text" required placeholder="Your name">
+      </div>
+      <div class="field">
+        <label for="signupEmail">Email</label>
+        <input id="signupEmail" type="email" required placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="signupPassword">Password</label>
+        <input id="signupPassword" type="password" required placeholder="At least 6 characters">
+      </div>
+      <span class="auth-msg" id="signupMsg"></span>
+      <button type="submit" class="btn accent block" id="signupBtn">Create account</button>
+    </form>
+
+    <div class="auth-or">OR</div>
+    <button class="auth-google-btn" onclick="accountGoogleSignIn()">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.3 1 7.3 2.7l6-6C33.9 6.5 29.2 4.5 24 4.5 12.9 4.5 4 13.4 4 24.5S12.9 44.5 24 44.5 44 35.6 44 24.5c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.9 18.9 13 24 13c2.8 0 5.3 1 7.3 2.7l6-6C33.9 6.5 29.2 4.5 24 4.5c-7.7 0-14.4 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 44.5c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9.5 39.9 16.2 44.5 24 44.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C40.5 36.3 44 31 44 24.5c0-1.4-.1-2.7-.4-4z"/></svg>
+      Continue with Google
+    </button>
+  </div>
+
+  <!-- Shown only when logged IN -->
+  <div class="account-card" id="accountBox" style="display:none;">
+    <h2>My account</h2>
+    <div class="account-row"><span>Name</span><span id="accName">—</span></div>
+    <div class="account-row"><span>Email</span><span id="accEmail">—</span></div>
+    <a href="track.html" class="btn outline block">Track an order</a>
+    <button class="btn block" onclick="authLogOut()">Log out</button>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+function switchAuthTab(which){
+  document.getElementById('tabLogin').classList.toggle('active', which === 'login');
+  document.getElementById('tabSignup').classList.toggle('active', which === 'signup');
+  document.getElementById('panelLogin').classList.toggle('active', which === 'login');
+  document.getElementById('panelSignup').classList.toggle('active', which === 'signup');
+}
+
+async function handleForgotPassword(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const msg = document.getElementById('loginMsg');
+  msg.classList.remove('show');
+  if (!email){
+    msg.textContent = 'আগে ইমেইলটা দিন, তারপর "Forgot password?"-এ চাপুন।';
+    msg.classList.add('show');
+    return;
+  }
+  try{
+    await authSendPasswordReset(email);
+    msg.textContent = 'পাসওয়ার্ড রিসেট লিংক ' + email + '-এ পাঠানো হয়েছে। ইনবক্স (এবং spam) চেক করুন।';
+    msg.style.color = '#2e9e4c';
+    msg.classList.add('show');
+  }catch(err){
+    msg.style.color = '';
+    msg.textContent = authErrorMessage(err);
+    msg.classList.add('show');
+  }
+}
+
+async function handleLogin(e){
+  e.preventDefault();
+  const msg = document.getElementById('loginMsg');
+  const btn = document.getElementById('loginBtn');
+  msg.classList.remove('show');
+  btn.disabled = true; btn.textContent = 'Logging in…';
+  try{
+    await authLogIn(
+      document.getElementById('loginEmail').value.trim(),
+      document.getElementById('loginPassword').value
+    );
+    window.location.href = 'account.html';
+  }catch(err){
+    msg.textContent = authErrorMessage(err);
+    msg.classList.add('show');
+    btn.disabled = false; btn.textContent = 'Log in';
+  }
+  return false;
+}
+
+async function handleSignup(e){
+  e.preventDefault();
+  const msg = document.getElementById('signupMsg');
+  const btn = document.getElementById('signupBtn');
+  msg.classList.remove('show');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  try{
+    await authSignUp(
+      document.getElementById('signupName').value.trim(),
+      document.getElementById('signupEmail').value.trim(),
+      document.getElementById('signupPassword').value
+    );
+    window.location.href = 'account.html';
+  }catch(err){
+    msg.textContent = authErrorMessage(err);
+    msg.classList.add('show');
+    btn.disabled = false; btn.textContent = 'Create account';
+  }
+  return false;
+}
+
+async function accountGoogleSignIn(){
+  try{
+    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    window.location.href = 'account.html';
+  }catch(err){
+    document.getElementById('loginMsg').textContent = err.message || 'Google login-এ সমস্যা হয়েছে।';
+    document.getElementById('loginMsg').classList.add('show');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  if (!authReady()) return;
+  firebase.auth().onAuthStateChanged(function(user){
+    document.getElementById('authBox').style.display = user ? 'none' : 'block';
+    document.getElementById('accountBox').style.display = user ? 'flex' : 'none';
+    if (user){
+      document.getElementById('accName').textContent = user.displayName || '—';
+      document.getElementById('accEmail').textContent = user.email || '—';
+    }
+  });
+});
+</script>
+
+</body>
+</html>

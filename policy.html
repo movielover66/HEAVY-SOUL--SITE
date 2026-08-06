@@ -3,6 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="Heavy Soul shipping, returns and privacy policies.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heavy Soul">
+<meta property="og:title" content="Policies — Heavy Soul">
+<meta property="og:description" content="Heavy Soul shipping, returns and privacy policies.">
+<meta property="og:image" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/assets/og-image.jpg">
+<meta property="og:url" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/policy.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Policies — Heavy Soul">
+<meta name="twitter:description" content="Heavy Soul shipping, returns and privacy policies.">
+<meta name="twitter:image" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/assets/og-image.jpg">
 <title>Policies — Heavy Soul</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,14 +23,18 @@
 <header class="site-header">
   <nav class="nav wrap">
     <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
-    <a href="index.html" class="brand">Heavy Soul<small>Est. 2023</small></a>
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
     <div class="nav-links">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="track.html">Track order</a>
       <a href="policy.html" class="active">Policies</a>
+      <a href="account.html" id="navLoginLink">Login / Signup</a>
     </div>
     <div class="nav-icons">
+      <a class="icon-btn" id="accountBtn" href="account.html" aria-label="Login / Signup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.7-3.6 5-5.5 7.5-5.5s5.8 1.9 7.5 5.5"/></svg>
+      </a>
       <a class="icon-btn" href="cart.html" aria-label="Cart">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
         <span class="cart-count" id="cartCount">0</span>
@@ -30,6 +46,7 @@
     <a href="shop.html">Shop</a>
     <a href="track.html">Track order</a>
     <a href="policy.html">Policies</a>
+    <a href="account.html" id="navLoginLinkMobile">Login / Signup</a>
   </div>
 </header>
 
@@ -51,6 +68,7 @@
     <a class="chip" href="#returns">Returns &amp; Exchange</a>
     <a class="chip" href="#privacy">Privacy</a>
     <a class="chip" href="#contact">Contact &amp; Grievance</a>
+    <a class="chip" href="#business">Business Details</a>
   </div>
 
   <h3 id="processing">1. Order Processing Time</h3>
@@ -128,6 +146,14 @@
     <li><b>WhatsApp:</b> for order updates, exchanges, or quick questions, message us with your Order ID.</li>
   </ul>
   <p>We usually reply within 24 hours on business days — we're a small, handmade brand, and every message matters to us.</p>
+
+  <h3 id="business">13. Business Details</h3>
+  <p>Heavy Soul is a registered trade under Saptagram Gram Panchayat, Chinsurah-Mogra Block, Hooghly District, West Bengal.</p>
+  <ul>
+    <li><b>Trade Registration No.:</b> 3549</li>
+    <li><b>Registered to:</b> Pritam Sana (Proprietor)</li>
+    <li><b>Registered address:</b> Chhota Khejuria, Addconagar P.O., Mogra P.S., Hooghly, West Bengal — 712121</li>
+  </ul>
 </div>
 
 <footer class="site-footer">
@@ -135,11 +161,16 @@
     <div class="footer-bottom">
       <span>© 2026 Heavy Soul. All rights reserved.</span>
       <span>Prices in INR · Ships across India</span>
+      <span>Trade Reg. No. 3549 (Saptagram GP, Hooghly)</span>
     </div>
   </div>
 </footer>
 
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/nav.js"></script>
 </body>

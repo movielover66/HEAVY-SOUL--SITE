@@ -3,6 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="Secure checkout for your Heavy Soul order — Prepaid or COD, shipped across India.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heavy Soul">
+<meta property="og:title" content="Checkout — Heavy Soul">
+<meta property="og:description" content="Secure checkout for your Heavy Soul order — Prepaid or COD, shipped across India.">
+<meta property="og:image" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/assets/og-image.jpg">
+<meta property="og:url" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/checkout.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Checkout — Heavy Soul">
+<meta name="twitter:description" content="Secure checkout for your Heavy Soul order — Prepaid or COD, shipped across India.">
+<meta name="twitter:image" content="https://heavy-soul-site.tukaisana88-3a0.workers.dev/assets/og-image.jpg">
 <title>Checkout — Heavy Soul</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -10,9 +22,12 @@
 
 <header class="site-header">
   <nav class="nav wrap">
-    <a href="index.html" class="brand">Heavy Soul<small>Est. 2023</small></a>
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
     <div></div>
     <div class="nav-icons">
+      <a class="icon-btn" id="accountBtn" href="account.html" aria-label="Login / Signup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.7-3.6 5-5.5 7.5-5.5s5.8 1.9 7.5 5.5"/></svg>
+      </a>
       <a class="icon-btn" href="cart.html" aria-label="Cart">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
         <span class="cart-count" id="cartCount">0</span>
@@ -73,9 +88,23 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/checkout.js"></script>
+<script>
+  // Guard: if someone opens checkout.html directly without logging in
+  // (skipping the cart page), send them back to the cart to log in first.
+  document.addEventListener("DOMContentLoaded", function () {
+    if (!authReady()) return;
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (!user) window.location.href = "cart.html";
+    });
+  });
+</script>
 </body>
 </html>
