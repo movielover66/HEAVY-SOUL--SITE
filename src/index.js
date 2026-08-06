@@ -1,27 +1,3 @@
-// Main Worker entry point.
-//
-// Everything except /api/create-order is handled exactly like before —
-// it just serves your site's static files (html/css/js/assets) via the
-// ASSETS binding, so nothing about the site itself changes.
-//
-// /api/create-order does TWO things:
-//   1. Creates the Razorpay order directly from Cloudflare's edge
-//      (milliseconds) — this is what the checkout popup needs, and why
-//      it now opens instantly instead of after a 5-second wait.
-//   2. Tells Apps Script to save the full order details to the
-//      "PendingOrders" sheet — this is REQUIRED, because when Razorpay
-//      later confirms payment, its webhook asks Apps Script to look up
-//      those saved details to actually create the order, book the
-//      NimbusPost shipment, and generate the invoice.
-//      This save happens via ctx.waitUntil(), so it runs in the
-//      background AFTER the response is already sent.
-//
-// REQUIRED SETUP (do this once):
-//   Cloudflare dashboard → Workers & Pages → heavy-soul-site →
-//   Settings → Variables and Secrets → add:
-//     RAZORPAY_KEY_ID     = rzp_live_TLJ04Y2T7hnl5m
-//     RAZORPAY_KEY_SECRET = <your Razorpay Key Secret>   (mark as "Secret")
-
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -30,14 +6,13 @@ export default {
       return handleCreateOrder(request, env, ctx);
     }
 
-    // Everything else: serve the static site, unchanged.
     return env.ASSETS.fetch(request);
   }
 };
 
 async function handleCreateOrder(request, env, ctx) {
   try {
-    const body = await request.json(); // full order payload: amount, orderId, customerName, phone, address, items, etc.
+    const body = await request.json();
     const amount = Number(body.amount);
 
     if (!amount || amount <= 0) {
@@ -48,7 +23,9 @@ async function handleCreateOrder(request, env, ctx) {
       return jsonResponse({ success: false, error: "Razorpay keys not configured on server" }, 500);
     }
 
-    const auth = btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`);
+    const keyId = await env.RAZORPAY_KEY_ID.get();
+    const keySecret = await env.RAZORPAY_KEY_SECRET.get();
+    const auth = btoa(`${keyId}:${keySecret}`);
 
     const rzpRes = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
@@ -57,7 +34,7 @@ async function handleCreateOrder(request, env, ctx) {
         "Authorization": `Basic ${auth}`
       },
       body: JSON.stringify({
-        amount: Math.round(amount * 100), // paise
+        amount: Math.round(amount * 100),
         currency: "INR",
         receipt: body.orderId || undefined,
         notes: { heavySoulOrderId: body.orderId || "" }
@@ -70,7 +47,6 @@ async function handleCreateOrder(request, env, ctx) {
       return jsonResponse({ success: false, error: rzpData?.error?.description || "Razorpay order creation failed" }, 500);
     }
 
-    // Background save to Apps Script's PendingOrders sheet.
     if (env.APPS_SCRIPT_URL) {
       ctx.waitUntil(
         fetch(env.APPS_SCRIPT_URL, {
