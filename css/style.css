@@ -198,6 +198,12 @@ h1,h2,h3,h4{ font-family: var(--serif); font-weight: 500; margin:0; letter-spaci
   width:16px; height:16px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
 }
+.icon-btn#accountBtn.logged-in::after{
+  content:"";
+  position:absolute; top:-2px; right:-2px;
+  width:8px; height:8px; border-radius:50%;
+  background: #2e9e4c; border: 1.5px solid var(--paper);
+}
 .nav-burger{ display:none; border:none; background:none; padding:6px; }
 .nav-burger span{ display:block; width:22px; height:1.5px; background:var(--ink); margin:5px 0; }
 
@@ -496,3 +502,72 @@ h1,h2,h3,h4{ font-family: var(--serif); font-weight: 500; margin:0; letter-spaci
 .policy-body p, .policy-body li{ color: var(--ink-soft); margin-bottom: 10px; font-size: 14px; }
 .policy-body li{ margin-left: 18px; list-style: disc; }
 .policy-nav{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:36px; }
+
+/* -------------------- auth bottom-sheet modal -------------------- */
+#authModalOverlay{
+  position: fixed; inset: 0; background: rgba(20,18,15,.55);
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition: opacity .2s ease;
+  z-index: 200;
+}
+#authModalOverlay.open{ opacity:1; pointer-events:auto; }
+.auth-sheet{
+  background: var(--paper); width:100%; max-width: 520px;
+  padding: 24px 24px 32px; border-top: 1px solid var(--line);
+  transform: translateY(16px); transition: transform .2s ease;
+}
+#authModalOverlay.open .auth-sheet{ transform: translateY(0); }
+.auth-sheet-close{
+  display:flex; justify-content:flex-end; margin-bottom: 6px;
+  font-size: 20px; cursor:pointer; color: var(--ink-soft);
+}
+.auth-sheet h2{ font-size: 24px; margin-bottom: 20px; }
+.auth-modal-step{ display:none; flex-direction:column; gap:14px; }
+.auth-modal-step.active{ display:flex; }
+.auth-modal-msg{ font-size:13px; color: var(--accent); display:none; }
+.auth-modal-msg.show{ display:block; }
+.auth-or{ display:flex; align-items:center; gap:12px; margin: 22px 0; color: var(--ink-soft); font-family: var(--mono); font-size: 11px; letter-spacing:.08em; }
+.auth-or::before, .auth-or::after{ content:""; flex:1; height:1px; background: var(--line); }
+.auth-google-btn{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  border:1px solid var(--line); background: var(--paper); padding:13px;
+  font-family: var(--sans); font-size: 14.5px; width:100%;
+}
+.auth-google-btn svg{ width:18px; height:18px; }
+.auth-otp-edit{ font-family: var(--mono); font-size: 12px; color: var(--ink-soft); text-decoration: underline; cursor:pointer; align-self:flex-start; }
+.auth-tabs{ display:flex; border-bottom:1px solid var(--line); margin-bottom:20px; }
+.auth-tab{ flex:1; text-align:center; padding:10px 0; font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.auth-tab.active{ color:var(--ink); border-bottom-color: var(--accent); }
+.auth-panel{ display:none; flex-direction:column; gap:14px; }
+.auth-panel.active{ display:flex; }
+
+/* ---- Size guide modal ---- */
+.size-guide-link{
+  background:none; border:none; padding:0; margin:0;
+  font-family: var(--sans); font-size: 13px; color: var(--ink-soft);
+  text-decoration: underline; cursor: pointer;
+}
+.size-guide-link:hover{ color: var(--accent); }
+.modal-overlay{
+  position: fixed; inset: 0; background: rgba(20,18,15,0.55);
+  display:flex; align-items:center; justify-content:center;
+  padding: 20px; z-index: 200;
+}
+.modal-overlay.hidden{ display:none; }
+.modal-box{
+  background: var(--paper); border: 1px solid var(--line);
+  max-width: 460px; width: 100%; max-height: 85vh; overflow-y: auto;
+  padding: 28px;
+}
+.modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px; }
+.modal-head h3{ font-size: 20px; }
+.modal-close{
+  background:none; border:none; font-size: 26px; line-height:1; color: var(--ink-soft);
+  cursor:pointer; padding: 0 4px;
+}
+.modal-close:hover{ color: var(--ink); }
+.size-guide-note{ font-size: 13px; color: var(--ink-soft); margin-bottom: 18px; }
+.size-table{ width:100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; margin-bottom: 18px; }
+.size-table th, .size-table td{ border: 1px solid var(--line); padding: 8px 10px; text-align: center; }
+.size-table th{ background: var(--paper-soft); font-weight: 500; }
+.size-guide-howto{ font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
