@@ -31,7 +31,7 @@ const PRODUCTS = [
     id: 3,
     name: "Oxblood Graphic Tee",
     category: "T-Shirts",
-    price: 1,
+    price: 999,
     badge: "Limited",
     orderType: "collection",
     image: "assets/products/p3-a.svg",

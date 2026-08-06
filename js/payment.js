@@ -20,10 +20,10 @@ cart.forEach(item => {
 
   checkoutItems.innerHTML += `
     <div class="mini-item">
-      <img src="${item.image}" alt="${item.name}">
+      <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
       <div>
-        <div class="name">${item.name}</div>
-        <div class="meta">Size ${item.size || "-"} · Qty ${qty}</div>
+        <div class="name">${escapeHtml(item.name)}</div>
+        <div class="meta">Size ${escapeHtml(item.size || "-")} · Qty ${qty}</div>
         <div class="meta">₹${lineTotal}${item.orderType === "custom" ? " · Made to order" : ""}</div>
       </div>
     </div>
@@ -317,5 +317,5 @@ Please verify payment and confirm the order.`;
   localStorage.removeItem("shippingInfo");
   localStorage.removeItem("paymentDeadline");
 
-  window.location.href = `success.html?order=${encodeURIComponent(orderId)}`;
+  window.location.href = `success.html?order=${encodeURIComponent(orderId)}&value=${amountDue}`;
 }

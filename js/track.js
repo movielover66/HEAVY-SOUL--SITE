@@ -37,7 +37,7 @@ async function lookupOrder(orderId, showLoading){
     const data = await res.json();
     if (!data.found) {
       stopAutoRefresh();
-      resultBox.innerHTML = `<p class="hint pin-error">No order found with ID "${orderId}". Please double-check, or contact us on WhatsApp.</p>`;
+      resultBox.innerHTML = `<p class="hint pin-error">No order found with ID "${escapeHtml(orderId)}". Please double-check, or contact us on WhatsApp.</p>`;
       return;
     }
     currentOrderId = orderId;

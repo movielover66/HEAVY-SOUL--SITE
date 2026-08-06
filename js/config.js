@@ -30,5 +30,39 @@ const SITE_CONFIG = {
   // Rough shipping weight per item, in grams. Used only for NimbusPost
   // shipment creation — doesn't need to be exact, just close enough
   // to avoid weight-discrepancy charges from the courier.
-  WEIGHT_PER_ITEM_G: 300
+  WEIGHT_PER_ITEM_G: 300,
+
+  // Firebase project config (free "Spark" plan is enough for Auth).
+  // Get this from: Firebase Console → Project settings → General →
+  // "Your apps" → Web app (</>) → SDK setup and configuration → Config.
+  FIREBASE_CONFIG: {
+    apiKey: "AIzaSyAP8qb7o_cDBjaXhwE8jItCkDZ72fd6XmM",
+    authDomain: "heavy-soul-auth.firebaseapp.com",
+    projectId: "heavy-soul-auth",
+    appId: "1:421145657035:web:9fab0fec092fb3b575e54e"
+  },
+
+  // Live site URL — used for og:url meta tags. No trailing slash.
+  SITE_URL: "https://heavy-soul-site.tukaisana88-3a0.workers.dev",
+
+  // Analytics — leave the placeholder values as-is to skip either one.
+  // GA4: Google Analytics → Admin → Data Streams → Web → Measurement ID (starts with "G-")
+  // Meta Pixel: Meta Events Manager → your Pixel → Pixel ID (a number)
+  ANALYTICS: {
+    GA4_ID: "G-XXXXXXXXXX",
+    META_PIXEL_ID: "0000000000000000"
+  }
 };
+
+// Shared HTML-escaping helper. Product data is our own, but this is
+// cheap insurance for anything that ever ends up in innerHTML —
+// use it whenever a name/label/text value is inserted into a template.
+function escapeHtml(str){
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}

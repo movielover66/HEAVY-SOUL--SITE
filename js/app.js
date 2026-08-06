@@ -7,14 +7,14 @@ function productCardHTML(p){
   return `
     <a class="card" href="product.html?id=${p.id}">
       <div class="card-media">
-        ${p.badge ? `<span class="tag ${p.orderType === 'custom' ? 'accent' : ''}">${p.badge}</span>` : ""}
-        <img class="main" src="${p.image}" alt="${p.name}">
-        <img class="alt" src="${alt}" alt="">
+        ${p.badge ? `<span class="tag ${p.orderType === 'custom' ? 'accent' : ''}">${escapeHtml(p.badge)}</span>` : ""}
+        <img class="main" src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}">
+        <img class="alt" src="${escapeHtml(alt)}" alt="">
         <span class="quick-add">View product</span>
       </div>
       <div class="card-body">
-        <div class="card-cat">${p.category}</div>
-        <h3 class="card-title">${p.name}</h3>
+        <div class="card-cat">${escapeHtml(p.category)}</div>
+        <h3 class="card-title">${escapeHtml(p.name)}</h3>
         <div class="card-price">${priceHTML}</div>
       </div>
     </a>

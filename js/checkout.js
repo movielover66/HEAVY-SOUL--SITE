@@ -14,10 +14,10 @@ if (orderCart.length === 0) {
     total += item.price * qty;
     checkoutItems.innerHTML += `
       <div class="mini-item">
-        <img src="${item.image}" alt="${item.name}">
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
         <div>
-          <div class="name">${item.name}</div>
-          <div class="meta">Size ${item.size || "-"} · Qty ${qty}</div>
+          <div class="name">${escapeHtml(item.name)}</div>
+          <div class="meta">Size ${escapeHtml(item.size || "-")} · Qty ${qty}</div>
           <div class="meta">₹${item.price * qty}</div>
         </div>
       </div>
@@ -25,6 +25,10 @@ if (orderCart.length === 0) {
   });
 }
 totalPriceEl.textContent = "₹" + total;
+
+if (orderCart.length > 0 && typeof trackEvent === "function") {
+  trackEvent("InitiateCheckout", { value: total, currency: "INR", num_items: orderCart.length });
+}
 
 // ---- Fields ----
 const nameEl = document.getElementById("name");

@@ -25,6 +25,9 @@ function addToCart(product, size, qty){
   }
   saveCart();
   if (typeof showToast === "function") showToast("Added to bag");
+  if (typeof trackEvent === "function") {
+    trackEvent("AddToCart", { item_name: product.name, value: product.price, currency: "INR" });
+  }
 }
 
 function changeQty(id, size, delta){
@@ -70,10 +73,10 @@ function renderCartPage(){
 
     container.innerHTML += `
       <div class="cart-row">
-        <img src="${item.image}" alt="${item.name}">
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
         <div>
-          <h3>${item.name}</h3>
-          <div class="meta">Size ${item.size || "-"} ${item.orderType === "custom" ? "· Made to order" : ""}</div>
+          <h3>${escapeHtml(item.name)}</h3>
+          <div class="meta">Size ${escapeHtml(item.size || "-")} ${item.orderType === "custom" ? "· Made to order" : ""}</div>
           <div class="qty-row" style="margin-top:10px;">
             <button onclick="changeQty(${item.id}, '${item.size}', -1)" aria-label="Decrease quantity">−</button>
             <span>${qty}</span>
