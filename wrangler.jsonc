@@ -1,0 +1,10 @@
+{
+  "name": "heavy-soul-site",
+  "compatibility_date": "2024-09-23",
+  "main": "src/index.js",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
+  }
+}
