@@ -189,12 +189,6 @@ async function placeOrder(){
 
 async function startRazorpayPayment() {
   const amountDue = paymentMethod === "prepaid" ? subtotal : calcCodAdvance();
-  const url = SITE_CONFIG.APPS_SCRIPT_URL; 
-  
-  if (!url || url.includes("PASTE-YOUR")) {
-      showToast("Apps Script URL is missing in config!");
-      return;
-  }
 
   const payBtn = document.getElementById("payBtn");
   if (payBtn) { payBtn.disabled = true; payBtn.textContent = "Please wait…"; }
@@ -204,14 +198,15 @@ async function startRazorpayPayment() {
   const orderPayload = buildOrderPayload_(orderId, amountDue);
 
   try {
-    // 1. Razorpay order create koro + order details Apps Script-e pathiye rakho
-    //    (webhook eta use kore payment confirm hole automatically order likhbe)
-    const response = await fetch(url, {
+    // 1. Razorpay order fast-e create koro — eta Cloudflare Pages Function
+    //    (/api/create-order), Google Apps Script na. Eta shudhu Razorpay-r
+    //    sathe kotha bole, Sheet chhoi na, tai milliseconds-e ferot ase.
+    const response = await fetch("/api/create-order", {
       method: "POST",
-      // Important: no-cors kora jabena, na hole json pawa jabena!
-      body: JSON.stringify(Object.assign({ type: "create_rzp_order" }, orderPayload))
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: amountDue, orderId: orderId })
     });
-    
+
     const rzpOrderData = await response.json();
 
     if (!rzpOrderData.success) {
@@ -219,6 +214,11 @@ async function startRazorpayPayment() {
       resetPayButton_();
       return;
     }
+
+    // Sheet-e "payment initiated" row-ta background-e (non-blocking) pathiye
+    // dicchi — eta popup khulte wait korায় na, kintu abandoned-cart tracking
+    // ager moto e thake.
+    sendOrderToSheet(Object.assign({ type: "create_rzp_order" }, orderPayload));
 
     // 2. Open Razorpay Checkout Pop-up
     var options = {

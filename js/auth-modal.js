@@ -156,6 +156,7 @@ async function handleModalSignup() {
     if (err.code === "auth/email-already-in-use") {
       // Safety net: enumeration protection said "new" but it isn't.
       goToLoginStep();
+      document.getElementById("authLoginPassword").value = password; // save them a retype
       authModalError("এই ইমেইলে আগেই অ্যাকাউন্ট আছে — পাসওয়ার্ড দিয়ে লগ-ইন করুন।");
     } else {
       authModalError(authErrorMessage(err));
