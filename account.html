@@ -30,6 +30,15 @@
   .account-card h2{ font-size:20px; }
   .account-row{ display:flex; justify-content:space-between; font-size:14px; padding:8px 0; border-bottom:1px solid var(--line); }
   .account-row span:first-child{ color:var(--ink-soft); }
+  .orders-section{ max-width: 640px; margin: 0 auto 80px; padding: 0 24px; }
+  .orders-section h2{ font-size:18px; margin-bottom:16px; }
+  .order-card{ border:1px solid var(--line); padding:18px; margin-bottom:14px; }
+  .order-card-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; flex-wrap:wrap; gap:6px; }
+  .order-card-id{ font-family:var(--mono); font-size:13px; color:var(--accent); }
+  .order-card-date{ font-size:12px; color:var(--ink-soft); }
+  .order-item-line{ display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--ink-soft); }
+  .order-card-total{ display:flex; justify-content:space-between; font-size:14px; font-weight:600; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .order-empty{ font-size:13px; color:var(--ink-soft); }
 </style>
 </head>
 <body>
@@ -122,11 +131,19 @@
 
 </div>
 
+<!-- My Orders — shown only when logged IN -->
+<div class="orders-section" id="ordersSection" style="display:none;">
+  <h2>My orders</h2>
+  <div id="ordersList"><p class="order-empty">Loading your orders…</p></div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="js/config.js"></script>
 <script src="js/analytics.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/orders.js"></script>
 <script src="js/nav.js"></script>
 <script>
 function switchAuthTab(which){
@@ -208,14 +225,52 @@ async function accountGoogleSignIn(){
   }
 }
 
+function renderOrderCard(order){
+  const date = order.createdAt && order.createdAt.toDate ? order.createdAt.toDate() : null;
+  const dateStr = date ? date.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
+  const itemsHtml = (order.items || []).map(item => `
+    <div class="order-item-line">
+      <span>${escapeHtml(item.name)}${item.size && item.size !== '-' ? ' (' + escapeHtml(item.size) + ')' : ''} × ${item.qty || 1}</span>
+      <span>₹${(item.price || 0) * (item.qty || 1)}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="order-card">
+      <div class="order-card-top">
+        <span class="order-card-id">${escapeHtml(order.orderId)}</span>
+        <span class="order-card-date">${dateStr}</span>
+      </div>
+      ${itemsHtml}
+      <div class="order-card-total">
+        <span>Total</span>
+        <span>₹${order.subtotal || order.amountPaid || 0}</span>
+      </div>
+      <a href="track.html?order=${encodeURIComponent(order.orderId)}" class="btn outline block" style="margin-top:14px;">Track now</a>
+    </div>
+  `;
+}
+
+async function loadAndRenderOrders(){
+  const listEl = document.getElementById('ordersList');
+  const orders = await loadUserOrders();
+  if (orders.length === 0) {
+    listEl.innerHTML = `<p class="order-empty">No orders yet. <a href="shop.html" style="color:var(--accent);">Start shopping →</a></p>`;
+    return;
+  }
+  listEl.innerHTML = orders.map(renderOrderCard).join('');
+}
+
 document.addEventListener('DOMContentLoaded', function(){
   if (!authReady()) return;
   firebase.auth().onAuthStateChanged(function(user){
     document.getElementById('authBox').style.display = user ? 'none' : 'block';
     document.getElementById('accountBox').style.display = user ? 'flex' : 'none';
+    document.getElementById('ordersSection').style.display = user ? 'block' : 'none';
     if (user){
       document.getElementById('accName').textContent = user.displayName || '—';
       document.getElementById('accEmail').textContent = user.email || '—';
+      loadAndRenderOrders();
     }
   });
 });
