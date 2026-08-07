@@ -9,10 +9,22 @@ function firestoreReady() {
   return window.firebase && firebase.apps.length > 0 && typeof firebase.firestore === "function";
 }
 
+// ---- Wait for Firebase Auth to finish restoring the session (runs async
+// on page load), instead of trusting currentUser to already be set. ----
+function currentUserAsync() {
+  return new Promise((resolve) => {
+    if (!firestoreReady()) { resolve(null); return; }
+    const unsub = firebase.auth().onAuthStateChanged((user) => {
+      unsub();
+      resolve(user);
+    });
+  });
+}
+
 // ---- Save the logged-in user's shipping address (called from checkout.js) ----
 async function saveUserAddress(shippingInfo) {
   if (!firestoreReady()) return;
-  const user = firebase.auth().currentUser;
+  const user = await currentUserAsync();
   if (!user) return;
   try {
     await firebase.firestore().collection("users").doc(user.uid).set({
@@ -33,7 +45,7 @@ async function saveUserAddress(shippingInfo) {
 // ---- Load the logged-in user's saved address, if any ----
 async function loadUserAddress() {
   if (!firestoreReady()) return null;
-  const user = firebase.auth().currentUser;
+  const user = await currentUserAsync();
   if (!user) return null;
   try {
     const doc = await firebase.firestore().collection("users").doc(user.uid).get();
@@ -45,9 +57,11 @@ async function loadUserAddress() {
 }
 
 // ---- Save an order against the logged-in user (called from payment.js after payment) ----
+// IMPORTANT: callers must `await` this before navigating away — otherwise
+// the browser can cancel the write mid-flight on redirect.
 async function saveOrderRecord(orderPayload) {
   if (!firestoreReady()) return;
-  const user = firebase.auth().currentUser;
+  const user = await currentUserAsync();
   if (!user) return; // guest checkout — order still exists in the Sheet, just won't show under "My Orders"
   try {
     await firebase.firestore().collection("orders").doc(orderPayload.orderId).set({
@@ -70,7 +84,7 @@ async function saveOrderRecord(orderPayload) {
 // ---- Load all past orders for the logged-in user, newest first ----
 async function loadUserOrders() {
   if (!firestoreReady()) return [];
-  const user = firebase.auth().currentUser;
+  const user = await currentUserAsync();
   if (!user) return [];
   try {
     const snap = await firebase.firestore()
