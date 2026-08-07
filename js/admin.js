@@ -18,12 +18,28 @@ async function apiPost(payload){
   if (!API_URL) throw new Error("APPS_SCRIPT_URL is not set in js/config.js");
   // text/plain avoids a CORS pre-flight request against Apps Script,
   // which doesn't handle OPTIONS — same trick used elsewhere on the site.
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
-  });
-  return res.json();
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+  } catch (networkErr) {
+    // Surface the *real* browser error instead of a generic message —
+    // this tells us whether it's a network/CORS failure, a redirect
+    // issue, etc.
+    throw new Error("NETWORK: " + (networkErr && networkErr.message ? networkErr.message : networkErr));
+  }
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (parseErr) {
+    // We got a response, but it wasn't JSON — usually means Apps Script
+    // returned an HTML page (login/permission/error page) instead of
+    // our jsonResponse_(). Surface the first bit of it for diagnosis.
+    throw new Error("BAD_RESPONSE (status " + res.status + "): " + text.slice(0, 200));
+  }
 }
 
 /* ========================= AUTH ========================= */
@@ -50,7 +66,7 @@ loginForm.addEventListener("submit", async (e) => {
       loginError.classList.add("show");
     }
   } catch (err) {
-    loginError.textContent = "Couldn't reach the server. Check your connection and try again.";
+    loginError.textContent = "Error: " + (err && err.message ? err.message : err);
     loginError.classList.add("show");
   } finally {
     loginBtn.disabled = false;
@@ -103,7 +119,7 @@ async function loadProducts(){
     renderList();
     listStatus.textContent = "";
   } catch (err) {
-    listStatus.textContent = "Couldn't load products. Check your connection and try again.";
+    listStatus.textContent = "Error: " + (err && err.message ? err.message : err);
   }
 }
 
