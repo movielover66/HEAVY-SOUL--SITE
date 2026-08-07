@@ -184,7 +184,7 @@ function findProduct(id) {
 }
 
 async function refreshProductsFromServer_() {
-  const url = window.SITE_CONFIG && SITE_CONFIG.APPS_SCRIPT_URL;
+  const url = (typeof SITE_CONFIG !== "undefined") && SITE_CONFIG.APPS_SCRIPT_URL;
   if (!url) return;
   try {
     const res = await fetch(`${url}?type=products`);
