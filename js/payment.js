@@ -263,7 +263,7 @@ function resetPayButton_(){
   payBtn.textContent = "Pay ₹" + amountDue;
 }
 
-function finalizeOrder(paymentRef, orderId, orderPayload) {
+async function finalizeOrder(paymentRef, orderId, orderPayload) {
   const amountDue = orderPayload.amount;
   const handling = paymentMethod === "cod" ? (SITE_CONFIG.COD_HANDLING_PER_ITEM * totalQty) : 0;
   const grandTotal = orderPayload.grandTotal;
@@ -302,13 +302,15 @@ Track your order anytime: ${window.location.origin}${window.location.pathname.re
 Please verify payment and confirm the order.`;
 
   // Backup write in case the webhook hasn't landed yet — Apps Script skips
-  // this as a duplicate if the webhook already created the row.
+  // this as a duplicate if the webhook already created the row. Fire-and-forget
+  // is fine here since it's a best-effort backup, not shown anywhere in the UI.
   sendOrderToSheet(orderPayload);
 
   // If the customer is logged in, save this order under their account too,
-  // so it shows up in "My Orders" on account.html. No-op for guest checkout.
+  // so it shows up in "My Orders" on account.html. MUST be awaited — the
+  // redirect right below can otherwise cancel this write mid-flight.
   if (window.firebase && typeof saveOrderRecord === "function") {
-    saveOrderRecord(orderPayload);
+    await saveOrderRecord(orderPayload);
   }
 
   window.open(`https://wa.me/${SITE_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
