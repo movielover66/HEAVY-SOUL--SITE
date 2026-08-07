@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<title>Admin — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Admin-only styles, kept separate from style.css so nothing else on
+     the site is affected. */
+  .admin-wrap{ max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+  .admin-login{ max-width: 360px; margin: 80px auto; padding: 28px; border: 1px solid var(--ink); }
+  .admin-login h1{ font-size: 20px; margin-bottom: 18px; }
+  .admin-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 24px; }
+  .admin-header h1{ font-size: 22px; }
+  .admin-row{ display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--paper-soft); }
+  .admin-row.is-hidden{ opacity:.55; }
+  .admin-thumb{ width:56px; height:56px; object-fit:cover; background:var(--paper-soft); border:1px solid var(--paper-soft); flex-shrink:0; }
+  .admin-row-info{ flex:1; min-width:0; }
+  .admin-row-name{ font-weight:600; font-size:14.5px; }
+  .admin-row-meta{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .admin-row-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .btn.sm{ padding:7px 12px; font-size:11.5px; }
+  .btn.danger{ border-color:var(--accent); color:var(--accent); }
+  .btn.danger:hover{ background:var(--accent); color:#fff; }
+  .admin-badge{ font-family:var(--mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--ink-faint); padding:1px 6px; }
+  .admin-empty{ color:var(--ink-soft); padding: 20px 0; }
+  .admin-status{ font-size:12.5px; color:var(--ink-soft); min-height:16px; }
+  #formSection{ margin-top: 28px; padding-top: 24px; border-top: 1.5px solid var(--ink); }
+  #formSection.hidden{ display:none; }
+  .admin-form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px 16px; margin-top: 16px; }
+  .admin-form-grid .field.full{ grid-column: 1 / -1; }
+  @media (max-width: 560px){ .admin-form-grid{ grid-template-columns: 1fr; } }
+  .field-err.show{ display:block; margin-top:8px; }
+  .admin-images{ margin-top: 6px; }
+  .image-grid{ display:flex; flex-wrap:wrap; gap:10px; margin: 10px 0; }
+  .admin-img-tile{ position:relative; width:84px; height:84px; }
+  .admin-img-tile img{ width:100%; height:100%; object-fit:cover; border:1.5px solid var(--paper-soft); }
+  .admin-img-tile.is-main img{ border-color: var(--accent); }
+  .admin-img-tag{ position:absolute; bottom:2px; left:2px; background:var(--accent); color:#fff; font-family:var(--mono); font-size:9px; text-transform:uppercase; padding:1px 4px; }
+  .admin-img-remove{ position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:var(--ink); color:#fff; border:none; font-size:11px; cursor:pointer; line-height:20px; }
+  .admin-toast{ position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); background:var(--ink); color:var(--paper); padding:10px 18px; font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease; z-index:999; }
+  .admin-toast.show{ opacity:1; transform:translate(-50%,0); }
+  .hidden{ display:none; }
+</style>
+</head>
+<body>
+
+<div class="admin-wrap">
+
+  <div id="loginScreen" class="admin-login">
+    <h1>Heavy Soul Admin</h1>
+    <form id="loginForm">
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" required placeholder="Admin password" autocomplete="current-password">
+      </div>
+      <p id="loginError" class="field-err">Wrong password.</p>
+      <button type="submit" id="loginBtn" class="btn block" style="margin-top:14px;">Log in</button>
+    </form>
+  </div>
+
+  <div id="panelScreen" class="hidden">
+    <div class="admin-header">
+      <h1>Products</h1>
+      <button id="logoutBtn" class="btn outline sm">Log out</button>
+    </div>
+
+    <button id="addProductBtn" class="btn block">+ Add product</button>
+    <p id="listStatus" class="admin-status"></p>
+    <div id="productList"></div>
+
+    <div id="formSection" class="hidden">
+      <h2 id="formTitle">Add product</h2>
+      <form id="productForm">
+        <div class="admin-form-grid">
+          <div class="field full">
+            <label for="fName">T-shirt name</label>
+            <input id="fName" type="text" required placeholder="e.g. Oxblood Graphic Tee">
+          </div>
+          <div class="field">
+            <label for="fCategory">Category</label>
+            <input id="fCategory" type="text" required placeholder="T-Shirts" list="categoryOptions">
+            <datalist id="categoryOptions">
+              <option value="T-Shirts"><option value="Hoodies"><option value="Shirts">
+              <option value="Bottoms"><option value="Outerwear"><option value="Accessories"><option value="Custom">
+            </datalist>
+          </div>
+          <div class="field">
+            <label for="fOrderType">Order type</label>
+            <select id="fOrderType">
+              <option value="collection">Ready stock (collection)</option>
+              <option value="custom">Made to order (custom)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fPrice">Price (₹)</label>
+            <input id="fPrice" type="number" min="1" step="1" required placeholder="549">
+          </div>
+          <div class="field">
+            <label for="fCompareAt">Compare-at price (₹, optional)</label>
+            <input id="fCompareAt" type="number" min="1" step="1" placeholder="Leave blank if no discount">
+          </div>
+          <div class="field">
+            <label for="fBadge">Badge (optional)</label>
+            <input id="fBadge" type="text" placeholder="New / Best Seller / Limited">
+          </div>
+          <div class="field">
+            <label for="fStatus">Visibility</label>
+            <select id="fStatus">
+              <option value="Active">Active — shown on site</option>
+              <option value="Hidden">Hidden — not shown yet</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="fSizes">Sizes (comma-separated)</label>
+            <input id="fSizes" type="text" required placeholder="S, M, L, XL, XXL">
+          </div>
+          <div class="field full">
+            <label for="fDescription">Description</label>
+            <textarea id="fDescription" rows="4" required placeholder="240 GSM heavyweight cotton, boxy fit..."></textarea>
+          </div>
+          <div class="field full admin-images">
+            <label>Photos (first one is used as the main photo)</label>
+            <div id="imageGrid" class="image-grid"></div>
+            <input id="imageInput" type="file" accept="image/*" multiple>
+            <p id="imageStatus" class="admin-status"></p>
+          </div>
+        </div>
+        <p id="formError" class="field-err"></p>
+        <div style="display:flex; gap:10px; margin-top:18px;">
+          <button type="submit" id="saveBtn" class="btn">Save product</button>
+          <button type="button" id="cancelFormBtn" class="btn outline">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
