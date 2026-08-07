@@ -45,7 +45,7 @@ const SITE_CONFIG = {
   },
 
   // Live site URL — used for og:url meta tags. No trailing slash.
-  SITE_URL: "https://heavy-soul-site.heavysoul.workers.dev",
+  SITE_URL: "https://heavysoul.in",
 
   // Analytics — leave the placeholder values as-is to skip either one.
   // GA4: Google Analytics → Admin → Data Streams → Web → Measurement ID (starts with "G-")

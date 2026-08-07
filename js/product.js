@@ -120,7 +120,7 @@ function renderProductPage_(){
   }
 
   // Structured data — lets Google show price/availability in search results
-  const siteUrl = ((typeof SITE_CONFIG !== "undefined") && SITE_CONFIG.SITE_URL) || "https://heavy-soul-site.tukaisana88-3a0.workers.dev";
+  const siteUrl = ((typeof SITE_CONFIG !== "undefined") && SITE_CONFIG.SITE_URL) || "https://heavysoul.in";
   const productSchema = {
     "@context": "https://schema.org/",
     "@type": "Product",
