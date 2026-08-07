@@ -8,7 +8,7 @@ let currentProducts = [];
 let editingId = null; // null = "add new" mode
 let pendingImages = []; // urls, in display order — first is the main photo
 
-const API_URL = window.SITE_CONFIG && SITE_CONFIG.APPS_SCRIPT_URL;
+const API_URL = (typeof SITE_CONFIG !== "undefined") && SITE_CONFIG.APPS_SCRIPT_URL;
 
 function getStoredPassword(){
   return localStorage.getItem(ADMIN_PW_KEY) || "";
