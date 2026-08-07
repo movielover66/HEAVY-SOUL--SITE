@@ -3,13 +3,16 @@ const chipRow = document.getElementById("chipRow");
 const sortSelect = document.getElementById("sortSelect");
 const resultCount = document.getElementById("resultCount");
 
-const categories = ["All", ...new Set(PRODUCTS.map(p => p.category))];
 let activeCategory = new URLSearchParams(window.location.search).get("category") || "All";
-if (!categories.includes(activeCategory)) activeCategory = "All";
 
-chipRow.innerHTML = categories.map(c =>
-  `<button class="chip ${c === activeCategory ? "active" : ""}" data-cat="${c}">${c}</button>`
-).join("");
+function renderChips(){
+  const categories = ["All", ...new Set(PRODUCTS.map(p => p.category))];
+  if (!categories.includes(activeCategory)) activeCategory = "All";
+  chipRow.innerHTML = categories.map(c =>
+    `<button class="chip ${c === activeCategory ? "active" : ""}" data-cat="${c}">${c}</button>`
+  ).join("");
+}
+renderChips();
 
 chipRow.addEventListener("click", (e) => {
   const btn = e.target.closest(".chip");
@@ -37,3 +40,10 @@ function render(){
 }
 
 render();
+
+// Live catalog finished loading after this page already painted —
+// rebuild the category chips (new categories may exist) and re-render.
+window.addEventListener("hs:productsUpdated", () => {
+  renderChips();
+  render();
+});

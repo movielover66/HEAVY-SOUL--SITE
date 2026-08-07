@@ -1,14 +1,18 @@
 const productId = new URLSearchParams(window.location.search).get("id");
-const product = findProduct(productId);
 
-if (!product) {
-  document.getElementById("pdRoot").innerHTML = `
-    <div class="empty-state">
-      <h2>Product not found</h2>
-      <p>This item may have been removed or the link is incorrect.</p>
-      <a class="btn" href="shop.html">Back to shop</a>
-    </div>`;
-} else {
+function renderProductPage_(){
+  const product = findProduct(productId);
+
+  if (!product) {
+    document.getElementById("pdRoot").innerHTML = `
+      <div class="empty-state">
+        <h2>Product not found</h2>
+        <p>This item may have been removed or the link is incorrect.</p>
+        <a class="btn" href="shop.html">Back to shop</a>
+      </div>`;
+    return false;
+  }
+
   document.title = `${product.name} — Heavy Soul`;
 
   document.getElementById("pdCrumb").innerHTML =
@@ -137,4 +141,16 @@ if (!product) {
   schemaTag.type = "application/ld+json";
   schemaTag.textContent = JSON.stringify(productSchema);
   document.head.appendChild(schemaTag);
+
+  return true;
+}
+
+// If the product isn't in the cached/fallback catalog yet (e.g. it was
+// just added in the admin panel), retry once the live catalog arrives
+// instead of leaving the visitor stuck on "Product not found".
+if (!renderProductPage_()) {
+  window.addEventListener("hs:productsUpdated", function retryRender_(){
+    window.removeEventListener("hs:productsUpdated", retryRender_);
+    renderProductPage_();
+  });
 }

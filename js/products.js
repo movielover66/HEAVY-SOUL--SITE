@@ -1,7 +1,7 @@
 // Single source of truth for all products on the site.
 // orderType: "collection" -> ready-made stock, COD advance = flat amount x qty
 // orderType: "custom"     -> made-to-order / customised, COD advance = 50% of item price
-const PRODUCTS = [
+const FALLBACK_PRODUCTS = [
   {
     id: 1,
     name: "KTM WHITE 390",
@@ -157,6 +157,46 @@ const PRODUCTS = [
   }
 ];
 
-function findProduct(id){
-  return PRODUCTS.find(p => p.id === Number(id));
+// ------------------------------------------------------------------
+// Live product loading.
+// PRODUCTS starts out as a copy of the cached (or fallback) catalog
+// so every page renders instantly with no network wait. In the
+// background we fetch the current catalog from the Apps Script
+// backend (the same one the admin panel writes to) and, if it
+// answers, swap PRODUCTS' contents in place and re-cache it — any
+// already-open page picks the change up via the "hs:productsUpdated"
+// event instead of needing a manual refresh.
+// ------------------------------------------------------------------
+const PRODUCTS_CACHE_KEY = "hs_products_cache_v1";
+
+function loadCachedOrFallbackProducts_() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(PRODUCTS_CACHE_KEY) || "null");
+    if (Array.isArray(cached) && cached.length) return cached;
+  } catch (e) { /* ignore corrupt cache */ }
+  return FALLBACK_PRODUCTS;
 }
+
+const PRODUCTS = [...loadCachedOrFallbackProducts_()];
+
+function findProduct(id) {
+  return PRODUCTS.find(p => String(p.id) === String(id));
+}
+
+async function refreshProductsFromServer_() {
+  const url = window.SITE_CONFIG && SITE_CONFIG.APPS_SCRIPT_URL;
+  if (!url) return;
+  try {
+    const res = await fetch(`${url}?type=products`);
+    const data = await res.json();
+    if (!data || !data.success || !Array.isArray(data.products) || !data.products.length) return;
+    PRODUCTS.length = 0;
+    PRODUCTS.push(...data.products);
+    try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(data.products)); } catch (e) { /* storage full/unavailable — safe to skip */ }
+    window.dispatchEvent(new CustomEvent("hs:productsUpdated"));
+  } catch (err) {
+    console.warn("Could not refresh live product catalog, using cached copy:", err);
+  }
+}
+
+refreshProductsFromServer_();

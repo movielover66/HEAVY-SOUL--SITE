@@ -29,3 +29,6 @@ function renderFeatured(){
 }
 
 document.addEventListener("DOMContentLoaded", renderFeatured);
+// Re-render if the live catalog finishes loading after the page paints
+// (e.g. a product was just added/edited in the admin panel).
+window.addEventListener("hs:productsUpdated", renderFeatured);
