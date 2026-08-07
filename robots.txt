@@ -10,4 +10,4 @@ Disallow: /account.html
 Disallow: /reset-password.html
 Disallow: /success.html
 
-Sitemap: https://heavy-soul-site.tukaisana88-3a0.workers.dev/sitemap.xml
+Sitemap: https://heavysoul.in/sitemap.xml
