@@ -78,6 +78,26 @@ function renderAmounts(){
 
   const payBtn = document.getElementById("payBtn");
   if (payBtn) payBtn.textContent = "Pay ₹" + amountDue;
+
+  // Mirror into the sticky pay bar so the amount + action stay visible while scrolling.
+  const barDueLabel = document.getElementById("barDueLabel");
+  const barDueVal = document.getElementById("barDueVal");
+  const barRemainingSub = document.getElementById("barRemainingSub");
+  if (barDueLabel) barDueLabel.textContent = dueLabel.textContent;
+  if (barDueVal) barDueVal.textContent = dueVal.textContent;
+  if (barRemainingSub) {
+    if (paymentMethod === "cod") {
+      barRemainingSub.textContent = "+ ₹" + remainingVal.textContent.replace("₹", "") + " on delivery";
+      barRemainingSub.classList.remove("hidden");
+    } else {
+      barRemainingSub.classList.add("hidden");
+    }
+  }
+
+  const codNote = document.getElementById("codNote");
+  const codExplainer = document.getElementById("codExplainer");
+  if (codNote) codNote.style.display = paymentMethod === "cod" ? "block" : "none";
+  if (codExplainer) codExplainer.style.display = paymentMethod === "cod" ? "block" : "none";
 }
 
 function setMethod(method){
@@ -105,6 +125,10 @@ function cancelOrder(){
   localStorage.removeItem("paymentDeadline");
   document.getElementById("paymentMain").classList.add("hidden");
   document.getElementById("cancelledView").classList.remove("hidden");
+  const payBar = document.getElementById("payBar");
+  const payBarSpacer = document.getElementById("payBarSpacer");
+  if (payBar) payBar.classList.add("hidden");
+  if (payBarSpacer) payBarSpacer.classList.add("hidden");
 }
 
 const tickInterval = setInterval(() => {

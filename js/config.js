@@ -18,7 +18,7 @@ const SITE_CONFIG = {
   // Optional: a deployed Google Apps Script Web App URL (ends in /exec)
   // used to log orders/abandoned carts to a Sheet and power track.html.
   // Leave as-is to skip this — everything else still works.
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxJNKei1redpGJjzpwnFFTBNvwsmGAnuPIFEmUdeIQulgE_CDA5rkZk-9LOMsA5gMXO/exec",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzHbUao38sh9dP6AiAu1p6cxeZl6KkZX56KPZaSi7t_1fwA6sBQgcudlT1tfgcqYSmR/exec",
 
   // COD terms
   COD_FLAT_ADVANCE: 150,        // flat advance per unit for ready stock items

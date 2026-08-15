@@ -25,6 +25,8 @@ if (orderCart.length === 0) {
   });
 }
 totalPriceEl.textContent = "₹" + total;
+const barTotalEl = document.getElementById("barTotal");
+if (barTotalEl) barTotalEl.textContent = "₹" + total;
 
 if (orderCart.length > 0 && typeof trackEvent === "function") {
   trackEvent("InitiateCheckout", { value: total, currency: "INR", num_items: orderCart.length });
@@ -35,6 +37,7 @@ const nameEl = document.getElementById("name");
 const phoneEl = document.getElementById("phone");
 const addressEl = document.getElementById("address");
 const stateEl = document.getElementById("state");
+const cityEl = document.getElementById("city");
 const pinEl = document.getElementById("pin");
 const pinChecking = document.getElementById("pinChecking");
 
@@ -48,7 +51,7 @@ function fillShippingFields(info) {
   addressEl.value = info.address || "";
   stateEl.value = info.state || "";
   pinEl.value = info.pin || "";
-  if (info.city) stateEl.dataset.city = info.city;
+  if (info.city) { cityEl.value = info.city; stateEl.dataset.city = info.city; }
 }
 fillShippingFields(savedInfo);
 
@@ -94,7 +97,7 @@ pinEl.addEventListener("input", () => {
   const valid = /^\d{6}$/.test(pinEl.value.trim());
   validateField(pinEl, "err-pin", valid);
   pinChecking.textContent = "";
-  pinChecking.classList.remove("pin-error");
+  pinChecking.classList.remove("pin-error", "ok");
 
   clearTimeout(pinLookupTimeout);
   if (!valid) return;
@@ -108,14 +111,19 @@ pinEl.addEventListener("input", () => {
       if (po) {
         stateEl.value = po.State;
         stateEl.classList.add("valid");
-        stateEl.dataset.city = po.District; // used for shipping label, not shown to customer
+        cityEl.value = po.District;
+        cityEl.classList.add("valid");
+        stateEl.dataset.city = po.District;
         pinChecking.textContent = `✓ Deliverable — ${po.District}, ${po.State}`;
+        pinChecking.classList.add("ok");
       } else {
         stateEl.dataset.city = "";
         pinChecking.textContent = "✓ Deliverable to this area";
+        pinChecking.classList.add("ok");
       }
     } catch {
       pinChecking.textContent = "✓ Deliverable to this area";
+      pinChecking.classList.add("ok");
     }
   }, 500);
 });
@@ -143,7 +151,7 @@ function goToPayment(){
     return;
   }
 
-  const city = stateEl.dataset.city || "";
+  const city = (cityEl.value || stateEl.dataset.city || "").trim();
   const shippingInfo = { name, phone, email, address, city, state, pin };
   localStorage.setItem("shippingInfo", JSON.stringify(shippingInfo));
 

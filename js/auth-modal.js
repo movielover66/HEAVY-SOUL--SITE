@@ -181,17 +181,101 @@ async function signInWithGoogle() {
 }
 
 // ---- shared "phone number" step for any brand-new account ----
+let _phoneVerified = false;
+
 function goToDetailsStep(prefillName) {
   document.getElementById("authDetailsName").value = prefillName || "";
   document.getElementById("authDetailsPhone").value = "";
+  document.getElementById("authOtpInput").value = "";
+  document.getElementById("authOtpField").style.display = "none";
+  document.getElementById("authVerifyOtpBtn").style.display = "none";
+  document.getElementById("authVerifyOtpBtn").disabled = false;
+  document.getElementById("authVerifyOtpBtn").textContent = "Verify OTP";
+  document.getElementById("authSendOtpBtn").textContent = "Send OTP";
+  document.getElementById("authSendOtpBtn").style.display = "block";
+  document.getElementById("authOtpInput").disabled = false;
+  document.getElementById("authDetailsBtn").style.display = "none";
+  _phoneVerified = false;
   showAuthStep("details");
 }
+
+// ---- phone OTP: send + verify (MSG91) ----
+async function sendPhoneOtp() {
+  const phone = document.getElementById("authDetailsPhone").value.trim();
+  if (!/^[6-9]\d{9}$/.test(phone)) { authModalError("সঠিক ১০ ডিজিটের মোবাইল নম্বর দিন।"); return; }
+
+  _phoneVerified = false;
+  const btn = document.getElementById("authSendOtpBtn");
+  btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    await hsSendOtp("91" + phone);
+    document.getElementById("authOtpField").style.display = "block";
+    document.getElementById("authVerifyOtpBtn").style.display = "block";
+    btn.textContent = "Resend OTP";
+  } catch (err) {
+    authModalError("OTP পাঠাতে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+    btn.textContent = "Send OTP";
+  }
+  btn.disabled = false;
+}
+
+async function verifyPhoneOtp() {
+  const otp = document.getElementById("authOtpInput").value.trim();
+  if (!/^\d{4,6}$/.test(otp)) { authModalError("সঠিক OTP দিন।"); return; }
+
+  const btn = document.getElementById("authVerifyOtpBtn");
+  btn.disabled = true; btn.textContent = "Verifying…";
+  await hsVerifyOtp(otp);
+  // result arrives async via the hs:otpVerified / hs:otpFailed events below
+}
+
+window.addEventListener("hs:otpVerified", async (e) => {
+  const accessToken = e.detail && e.detail.message;
+  const btn = document.getElementById("authVerifyOtpBtn");
+  btn.textContent = "Confirming…";
+
+  try {
+    const res = await fetch(SITE_CONFIG.APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ type: "verify_phone_otp", accessToken: accessToken })
+    });
+    const data = await res.json();
+
+    if (data && data.success) {
+      _phoneVerified = true;
+      const msg = document.getElementById("authModalMsg");
+      msg.classList.remove("show");
+      btn.textContent = "✓ Verified";
+      btn.disabled = true;
+      document.getElementById("authOtpInput").disabled = true;
+      document.getElementById("authSendOtpBtn").style.display = "none";
+      document.getElementById("authDetailsBtn").style.display = "block";
+    } else {
+      _phoneVerified = false;
+      authModalError("OTP verify করা যায়নি, আবার চেষ্টা করুন।");
+      btn.disabled = false; btn.textContent = "Verify OTP";
+    }
+  } catch (err) {
+    _phoneVerified = false;
+    authModalError("সার্ভার সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+    btn.disabled = false; btn.textContent = "Verify OTP";
+  }
+});
+
+window.addEventListener("hs:otpFailed", () => {
+  _phoneVerified = false;
+  authModalError("OTP ভুল হয়েছে, আবার চেষ্টা করুন।");
+  const btn = document.getElementById("authVerifyOtpBtn");
+  btn.disabled = false; btn.textContent = "Verify OTP";
+});
 
 async function completeSignupDetails() {
   const name = document.getElementById("authDetailsName").value.trim();
   const phone = document.getElementById("authDetailsPhone").value.trim();
   if (!name) { authModalError("নাম দিন।"); return; }
   if (!/^[6-9]\d{9}$/.test(phone)) { authModalError("সঠিক ১০ ডিজিটের মোবাইল নম্বর দিন।"); return; }
+  if (!_phoneVerified) { authModalError("আগে মোবাইল নম্বর OTP দিয়ে verify করুন।"); return; }
 
   const btn = document.getElementById("authDetailsBtn");
   btn.disabled = true; btn.textContent = "Saving…";
