@@ -48,20 +48,27 @@
           <button id="btnCod" onclick="setMethod('cod')">Cash on delivery</button>
         </div>
 
-        <p class="hint" style="margin-bottom:16px;">You'll be redirected to a secure Razorpay checkout to complete payment — cards, UPI apps, netbanking and wallets all supported.</p>
+        <p class="hint" style="margin-bottom:16px;">You'll be redirected to a secure Razorpay checkout — cards, UPI apps, netbanking and wallets all supported.</p>
+        <p class="hint" id="codExplainer" style="margin-bottom:16px; display:none;">With Cash on delivery, you pay a small advance now to confirm the order, and the rest to the courier when it arrives.</p>
 
-        <button class="btn block" style="margin-top:8px;" onclick="placeOrder()" id="payBtn">Proceed to pay</button>
-        <p class="hint" style="margin-top:12px;">After payment succeeds, WhatsApp opens with your order details pre-filled — send the message to confirm.</p>
+        <p class="hint" style="margin-top:4px;">After payment succeeds, WhatsApp opens with your order details pre-filled — send the message to confirm.</p>
       </div>
 
       <div class="summary-card">
         <h3>Order summary</h3>
         <div id="checkoutItems"></div>
-        <div class="sum-row"><span>Item total</span><span id="subtotalVal">₹0</span></div>
-        <div class="sum-row hidden" id="rowHandling"><span>COD handling</span><span id="handlingVal">₹0</span></div>
-        <div class="sum-row hidden" id="rowGrandTotal"><span>Total payable</span><span id="grandTotalVal">₹0</span></div>
-        <div class="sum-row total"><span id="dueLabel">Pay now</span><span id="dueVal">₹0</span></div>
-        <div class="sum-row hidden" id="rowRemaining"><span>Balance on delivery</span><span id="remainingVal">₹0</span></div>
+
+        <div class="receipt-row"><span class="k">Item total</span><span class="v" id="subtotalVal">₹0</span></div>
+        <div class="receipt-row hidden" id="rowHandling"><span class="k">COD handling</span><span class="v" id="handlingVal">₹0</span></div>
+        <div class="receipt-row hidden" id="rowGrandTotal"><span class="k">Total payable</span><span class="v" id="grandTotalVal">₹0</span></div>
+
+        <div class="receipt-stamp">
+          <span class="k" id="dueLabel">Pay now</span>
+          <span class="v" id="dueVal">₹0</span>
+        </div>
+
+        <div class="receipt-row muted hidden" id="rowRemaining"><span class="k">Balance on delivery</span><span class="v" id="remainingVal">₹0</span></div>
+        <p class="receipt-note" id="codNote" style="display:none;">You'll pay the balance in cash (or UPI) directly to the delivery agent when your order arrives.</p>
       </div>
     </div>
   </div>
@@ -70,6 +77,18 @@
     <h2>Payment window expired</h2>
     <p style="color:var(--ink-soft); margin:14px 0 26px;">Your order wasn't confirmed in time and has been cancelled. No amount was charged — you can check out again whenever you're ready.</p>
     <a href="shop.html" class="btn">Back to shop</a>
+  </div>
+</div>
+
+<div class="pay-bar-spacer" id="payBarSpacer"></div>
+<div class="pay-bar" id="payBar">
+  <div class="pay-bar-inner">
+    <div class="pay-bar-amount">
+      <span class="label" id="barDueLabel">Pay now</span>
+      <span class="value" id="barDueVal">₹0</span>
+      <span class="sub hidden" id="barRemainingSub"></span>
+    </div>
+    <button class="btn accent" onclick="placeOrder()" id="payBtn">Proceed to pay</button>
   </div>
 </div>
 

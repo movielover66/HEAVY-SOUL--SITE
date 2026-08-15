@@ -3,7 +3,7 @@
   "compatibility_date": "2024-09-23",
   "main": "src/index.js",
   "vars": {
-    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbxJNKei1redpGJjzpwnFFTBNvwsmGAnuPIFEmUdeIQulgE_CDA5rkZk-9LOMsA5gMXO/exec"
+    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzHbUao38sh9dP6AiAu1p6cxeZl6KkZX56KPZaSi7t_1fwA6sBQgcudlT1tfgcqYSmR/exec"
   },
   "secrets_store_secrets": [
     {

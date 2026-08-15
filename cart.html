@@ -75,7 +75,14 @@
       <div class="field">
         <input id="authDetailsPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="Mobile number">
       </div>
-      <button class="btn accent block" id="authDetailsBtn" onclick="completeSignupDetails()">Continue</button>
+      <button class="btn ghost block" id="authSendOtpBtn" onclick="sendPhoneOtp()" style="margin-bottom:8px;">Send OTP</button>
+
+      <div class="field" id="authOtpField" style="display:none;">
+        <input id="authOtpInput" type="tel" inputmode="numeric" maxlength="6" placeholder="Enter OTP">
+      </div>
+      <button class="btn ghost block" id="authVerifyOtpBtn" onclick="verifyPhoneOtp()" style="display:none; margin-bottom:8px;">Verify OTP</button>
+
+      <button class="btn accent block" id="authDetailsBtn" onclick="completeSignupDetails()" style="display:none;">Continue</button>
     </div>
   </div>
 </div>
@@ -150,6 +157,7 @@
 <script src="js/config.js"></script>
 <script src="js/analytics.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/msg91-otp.js"></script>
 <script src="js/auth-modal.js"></script>
 <script src="js/products.js"></script>
 <script src="js/toast.js"></script>
