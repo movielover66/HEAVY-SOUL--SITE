@@ -194,7 +194,7 @@ async function uHandleContinue() {
     if (doc.exists) {
       document.getElementById("uAuthLoginLabel").textContent =
         parsed.type === "phone" ? "+91 " + parsed.phone : raw.trim();
-      document.getElementById("uAuthForgotWrap").style.display = (parsed.type === "email") ? "block" : "none";
+      document.getElementById("uAuthForgotWrap").style.display = "block";
       uShowStep_("login");
     } else {
       document.getElementById("uAuthSignupLabel").textContent =
