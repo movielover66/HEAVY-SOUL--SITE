@@ -164,6 +164,7 @@ function buildOrderPayload_(orderId, amountDue){
     orderId: orderId,
     customerName: shippingInfo.name,
     phone: shippingInfo.phone,
+    email: shippingInfo.email || "",
     address: shippingInfo.address,
     city: shippingInfo.city || "",
     state: shippingInfo.state,
