@@ -61,24 +61,30 @@ function hsLoadOtpScript() {
 // identifier should be in the format the widget expects, e.g. "91XXXXXXXXXX".
 async function hsSendOtp(identifier) {
   await hsLoadOtpScript();
-  if (typeof window.sendOtp === "function") {
+  if (typeof window.sendOtp !== "function") {
+    console.error("MSG91 widget loaded but window.sendOtp is not available — check widgetId/tokenAuth/exposeMethods in HS_OTP_CONFIG.");
+    throw new Error("OTP widget not ready (sendOtp unavailable)");
+  }
+  return new Promise((resolve, reject) => {
     window.sendOtp(
       identifier,
-      () => console.log("OTP sent to", identifier),
-      (err) => console.warn("Failed to send OTP", err)
+      () => { console.log("OTP sent to", identifier); resolve(); },
+      (err) => { console.warn("Failed to send OTP", err); reject(err); }
     );
-  }
+  });
 }
 
 // Call this when the user submits the 4/6-digit code they received.
 async function hsVerifyOtp(otp) {
   await hsLoadOtpScript();
-  if (typeof window.verifyOtp === "function") {
-    window.verifyOtp(otp);
-    // result comes back via the success/failure callbacks in
-    // HS_OTP_CONFIG, which dispatch hs:otpVerified / hs:otpFailed —
-    // listen for those events wherever you call this from.
+  if (typeof window.verifyOtp !== "function") {
+    console.error("MSG91 widget loaded but window.verifyOtp is not available.");
+    throw new Error("OTP widget not ready (verifyOtp unavailable)");
   }
+  window.verifyOtp(otp);
+  // result comes back via the success/failure callbacks in
+  // HS_OTP_CONFIG, which dispatch hs:otpVerified / hs:otpFailed —
+  // listen for those events wherever you call this from.
 }
 
 // Call this if the user taps "Resend OTP".

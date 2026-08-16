@@ -192,9 +192,7 @@ function goToDetailsStep(prefillName) {
   document.getElementById("authVerifyOtpBtn").disabled = false;
   document.getElementById("authVerifyOtpBtn").textContent = "Verify OTP";
   document.getElementById("authSendOtpBtn").textContent = "Send OTP";
-  document.getElementById("authSendOtpBtn").style.display = "block";
   document.getElementById("authOtpInput").disabled = false;
-  document.getElementById("authDetailsBtn").style.display = "none";
   _phoneVerified = false;
   showAuthStep("details");
 }
@@ -204,6 +202,8 @@ async function sendPhoneOtp() {
   const phone = document.getElementById("authDetailsPhone").value.trim();
   if (!/^[6-9]\d{9}$/.test(phone)) { authModalError("সঠিক ১০ ডিজিটের মোবাইল নম্বর দিন।"); return; }
 
+  const msg = document.getElementById("authModalMsg");
+  msg.classList.remove("show");
   _phoneVerified = false;
   const btn = document.getElementById("authSendOtpBtn");
   btn.disabled = true; btn.textContent = "Sending…";
@@ -213,7 +213,7 @@ async function sendPhoneOtp() {
     document.getElementById("authVerifyOtpBtn").style.display = "block";
     btn.textContent = "Resend OTP";
   } catch (err) {
-    authModalError("OTP পাঠাতে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+    authModalError("OTP পাঠাতে সমস্যা হয়েছে: " + (err && err.message ? err.message : "unknown error"));
     btn.textContent = "Send OTP";
   }
   btn.disabled = false;
@@ -249,8 +249,6 @@ window.addEventListener("hs:otpVerified", async (e) => {
       btn.textContent = "✓ Verified";
       btn.disabled = true;
       document.getElementById("authOtpInput").disabled = true;
-      document.getElementById("authSendOtpBtn").style.display = "none";
-      document.getElementById("authDetailsBtn").style.display = "block";
     } else {
       _phoneVerified = false;
       authModalError("OTP verify করা যায়নি, আবার চেষ্টা করুন।");
