@@ -28,7 +28,7 @@
     },
     {
       "binding": "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY",
-      "store_id": "70b0de51e63841d78d9a2f5817beb76",
+      "store_id": "70b0de51e63841d78d9a2f5817beb776",
       "secret_name": "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY"
     }
   ],
