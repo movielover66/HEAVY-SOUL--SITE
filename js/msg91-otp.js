@@ -21,6 +21,29 @@ const HS_OTP_CONFIG = {
 let hsOtpScriptLoaded = false;
 let hsOtpScriptLoading = null;
 
+// MSG91's widget sets window.sendOtp/verifyOtp/retryOtp up asynchronously
+// AFTER initSendOTP() runs (it does its own internal setup/network calls) —
+// calling resolve() immediately after initSendOTP() was the bug: the first
+// "Send OTP" tap could fire before those methods existed yet, while a
+// resend (moments later) worked because the async setup had finished by
+// then. This polls for window.sendOtp to actually exist before resolving.
+function hsWaitForOtpMethods(timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    (function check() {
+      if (typeof window.sendOtp === "function") {
+        resolve();
+        return;
+      }
+      if (Date.now() - start > timeoutMs) {
+        reject(new Error("OTP widget did not become ready in time"));
+        return;
+      }
+      setTimeout(check, 100);
+    })();
+  });
+}
+
 function hsLoadOtpScript() {
   if (hsOtpScriptLoaded) return Promise.resolve();
   if (hsOtpScriptLoading) return hsOtpScriptLoading;
@@ -38,8 +61,12 @@ function hsLoadOtpScript() {
       s.onload = () => {
         if (typeof window.initSendOTP === "function") {
           window.initSendOTP(HS_OTP_CONFIG);
-          hsOtpScriptLoaded = true;
-          resolve();
+          hsWaitForOtpMethods(8000)
+            .then(() => {
+              hsOtpScriptLoaded = true;
+              resolve();
+            })
+            .catch(reject);
         } else {
           reject(new Error("initSendOTP not available after script load"));
         }
@@ -62,8 +89,14 @@ function hsLoadOtpScript() {
 async function hsSendOtp(identifier) {
   await hsLoadOtpScript();
   if (typeof window.sendOtp !== "function") {
-    console.error("MSG91 widget loaded but window.sendOtp is not available — check widgetId/tokenAuth/exposeMethods in HS_OTP_CONFIG.");
-    throw new Error("OTP widget not ready (sendOtp unavailable)");
+    // Belt-and-suspenders: shouldn't happen now that hsLoadOtpScript waits
+    // for window.sendOtp, but give it one more short chance before failing.
+    try {
+      await hsWaitForOtpMethods(3000);
+    } catch (e) {
+      console.error("MSG91 widget loaded but window.sendOtp is not available — check widgetId/tokenAuth/exposeMethods in HS_OTP_CONFIG.");
+      throw new Error("OTP widget not ready (sendOtp unavailable)");
+    }
   }
   return new Promise((resolve, reject) => {
     window.sendOtp(
