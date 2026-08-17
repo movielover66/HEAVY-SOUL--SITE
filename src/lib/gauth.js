@@ -20,7 +20,8 @@ function pemToArrayBuffer(pem) {
   const clean = pem
     .replace(/-----BEGIN PRIVATE KEY-----/, "")
     .replace(/-----END PRIVATE KEY-----/, "")
-    .replace(/\s+/g, "");
+    .replace(/\\n/g, "")   // literal backslash-n text (secret pasted with escaped newlines, not real line breaks)
+    .replace(/\s+/g, "");  // any actual whitespace/newlines
   const binary = atob(clean);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
