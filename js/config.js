@@ -11,6 +11,8 @@ const SITE_CONFIG = {
   // Name shown to the customer's UPI app as the payee.
   UPI_PAYEE_NAME: "HEAVY SOUL",
 
+  RAZORPAY_KEY_ID: "rzp_live_TLJ04Y2T7hnl5m",
+
   // WhatsApp number that receives new orders, in country code + number,
   // no spaces or plus sign (e.g. 91XXXXXXXXXX).
   WHATSAPP_NUMBER: "919339909978",
