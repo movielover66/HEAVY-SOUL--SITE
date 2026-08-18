@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Size Guide | Heavy Soul</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Reset & Global Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        body { background-color: #ffffff; color: #000000; padding: 0 0 50px 0; }
+        
+        /* 1. Top Navigation */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eeeeee; position: sticky; top: 0; background: #ffffff; z-index: 100; }
+        .top-nav i { font-size: 1.2rem; cursor: pointer; color: #000; }
+        .top-nav .logo { font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-transform: uppercase; }
+        .top-nav .nav-icons { display: flex; gap: 15px; visibility: hidden; /* Hidden but keeps layout balanced */ }
+
+        /* 2. Page Header */
+        .page-header { text-align: center; padding: 25px 20px 15px; }
+        .page-header h1 { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* 3. Illustration Section */
+        .illustration-container { display: flex; justify-content: center; padding: 20px; margin-bottom: 10px; }
+        .illustration-container svg { width: 100%; max-width: 250px; height: auto; }
+
+        /* 4. Toggle Buttons (Inches / CM) */
+        .toggle-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .toggle-btn { padding: 10px 25px; border: 1px solid #000000; background-color: #ffffff; color: #000000; font-weight: 800; font-size: 0.85rem; cursor: pointer; border-radius: 3px; text-transform: uppercase; transition: 0.2s ease; }
+        .toggle-btn.active { background-color: #000000; color: #ffffff; }
+
+        /* 5. Size Table */
+        .table-container { padding: 0 20px; margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; text-align: center; }
+        th, td { border: 1px solid #dddddd; padding: 12px 10px; font-size: 0.9rem; }
+        th { font-weight: 800; text-transform: uppercase; background-color: #f9f9f9; font-size: 0.8rem; letter-spacing: 0.5px; color: #333; }
+        td { font-weight: 600; color: #111; }
+        td:first-child { font-weight: 800; background-color: #f9f9f9; } /* Highlight Size column */
+
+        /* 6. Helpful Tip */
+        .tip-section { padding: 0 20px; font-size: 0.85rem; font-weight: 600; color: #555555; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
+        <div class="logo">HEAVY SOUL</div>
+        <div class="nav-icons">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Oversized T-Shirt Size Guide</h1>
+    </div>
+
+    <!-- T-Shirt Measurement Diagram (SVG) -->
+    <div class="illustration-container">
+        <!-- A minimal SVG representing the t-shirt diagram from the design -->
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- T-shirt Outline -->
+            <path d="M 50 30 Q 100 50 150 30 L 190 70 L 160 100 L 150 90 L 150 180 L 50 180 L 50 90 L 40 100 L 10 70 Z" fill="none" stroke="#000000" stroke-width="2" stroke-linejoin="round"/>
+            <!-- Neckline -->
+            <path d="M 75 35 Q 100 55 125 35" fill="none" stroke="#000000" stroke-width="2"/>
+            
+            <!-- Chest Measurement Line -->
+            <line x1="50" y1="90" x2="150" y2="90" stroke="#000000" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <text x="100" y="85" font-family="Arial" font-size="10" font-weight="bold" text-anchor="middle" fill="#000">CHEST</text>
+            
+            <!-- Length Measurement Line -->
+            <line x1="125" y1="45" x2="125" y2="180" stroke="#000000" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <!-- Rotated Text for Length -->
+            <g transform="translate(120, 115)">
+                <text x="0" y="0" font-family="Arial" font-size="10" font-weight="bold" text-anchor="middle" fill="#000" transform="rotate(-90)">LENGTH</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Toggle Buttons -->
+    <div class="toggle-container">
+        <button class="toggle-btn active" id="btnInches" onclick="setUnit('inches')">Inches</button>
+        <button class="toggle-btn" id="btnCm" onclick="setUnit('cm')">CM</button>
+    </div>
+
+    <!-- Size Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Size</th>
+                    <th>Chest</th>
+                    <th>Length</th>
+                </tr>
+            </thead>
+            <tbody id="sizeTableBody">
+                <!-- Data will be injected here by JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Helpful Tip -->
+    <div class="tip-section">
+        Tip: If you prefer more baggy look, go one size up.
+    </div>
+
+    <!-- JavaScript for Toggle Functionality -->
+    <script>
+        // Data exactly from the design reference
+        const sizeData = {
+            inches: [
+                { size: 'S', chest: 40, length: 27 },
+                { size: 'M', chest: 42, length: 28 },
+                { size: 'L', chest: 44, length: 29 },
+                { size: 'XL', chest: 46, length: 30 },
+                { size: 'XXL', chest: 48, length: 31 }
+            ],
+            cm: [
+                { size: 'S', chest: 101, length: 68 },
+                { size: 'M', chest: 106, length: 71 },
+                { size: 'L', chest: 111, length: 73 },
+                { size: 'XL', chest: 116, length: 76 },
+                { size: 'XXL', chest: 121, length: 78 }
+            ]
+        };
+
+        const tableBody = document.getElementById('sizeTableBody');
+        const btnInches = document.getElementById('btnInches');
+        const btnCm = document.getElementById('btnCm');
+
+        // Function to render table
+        function renderTable(unit) {
+            let html = '';
+            sizeData[unit].forEach(row => {
+                html += `
+                    <tr>
+                        <td>${row.size}</td>
+                        <td>${row.chest}</td>
+                        <td>${row.length}</td>
+                    </tr>
+                `;
+            });
+            tableBody.innerHTML = html;
+        }
+
+        // Function to handle unit change
+        function setUnit(unit) {
+            if (unit === 'inches') {
+                btnInches.classList.add('active');
+                btnCm.classList.remove('active');
+            } else {
+                btnCm.classList.add('active');
+                btnInches.classList.remove('active');
+            }
+            renderTable(unit);
+        }
+
+        // Initialize table with inches on load
+        window.onload = () => {
+            renderTable('inches');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist | Heavy Soul</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Reset & Global Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        body { background-color: #ffffff; color: #000000; padding-bottom: 80px; }
+        
+        /* 1. Top Navigation */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eeeeee; position: sticky; top: 0; background: #ffffff; z-index: 100; }
+        .top-nav i { font-size: 1.2rem; cursor: pointer; color: #000; }
+        .top-nav .logo { font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-transform: uppercase; }
+
+        /* 2. Page Title */
+        .page-header { text-align: left; padding: 20px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .page-header h1 { font-size: 1.2rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+        .item-count { font-size: 0.85rem; color: #666666; font-weight: 700; }
+
+        /* 3. Wishlist Grid */
+        .wishlist-grid { padding: 10px 20px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .product-card { position: relative; display: flex; flex-direction: column; }
+        .image-placeholder { width: 100%; aspect-ratio: 4/5; background-color: #000000; border-radius: 3px; overflow: hidden; position: relative; margin-bottom: 10px; }
+        .image-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Remove Button */
+        .remove-btn { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; background-color: #ffffff; color: #000000; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; transition: 0.2s; }
+        .remove-btn:hover { background-color: #f5f5f5; color: #d32f2f; }
+
+        .product-title { font-weight: 800; font-size: 0.9rem; margin-bottom: 4px; color: #000000; }
+        .product-price { font-weight: 700; font-size: 0.85rem; color: #555555; margin-bottom: 12px; }
+        
+        /* Add to Cart Button for Wishlist */
+        .btn-add-cart { width: 100%; padding: 10px 0; background-color: #ffffff; color: #000000; border: 1px solid #000000; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: 0.2s; margin-top: auto; }
+        .btn-add-cart:hover { background-color: #000000; color: #ffffff; }
+
+        /* Empty Wishlist State (Hidden by default) */
+        .empty-state { display: none; text-align: center; padding: 50px 20px; }
+        .empty-state i { font-size: 3rem; color: #dddddd; margin-bottom: 15px; }
+        .empty-state h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 10px; }
+        .empty-state p { font-size: 0.85rem; color: #666666; margin-bottom: 25px; }
+        .btn-shop-now { display: inline-block; padding: 12px 30px; background-color: #000000; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; border-radius: 3px; }
+
+        /* 4. Bottom Navigation (Sticky) */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #eeeeee; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
+        .nav-item { text-align: center; color: #999999; text-decoration: none; font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: 600; }
+        .nav-item.active { color: #000000; }
+        .nav-item i { font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
+        <div class="logo">HEAVY SOUL</div>
+        <i class="fa-solid fa-cart-shopping" onclick="window.location.href='cart.html'"></i>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header" id="pageHeader">
+        <h1>Wishlist</h1>
+        <div class="item-count"><span id="wishlistCount">2</span> Items</div>
+    </div>
+
+    <!-- Wishlist Grid -->
+    <div class="wishlist-grid" id="wishlistGrid">
+        
+        <!-- Item 1 -->
+        <div class="product-card" id="wishlistItem1">
+            <div class="image-placeholder">
+                <div class="remove-btn" onclick="removeWishlistItem('wishlistItem1')">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+                <img src="https://via.placeholder.com/400x500/000000/FFFFFF?text=Mind+Chaos" alt="Mind Chaos">
+            </div>
+            <div class="product-title">Mind Chaos</div>
+            <div class="product-price">₹799</div>
+            <button class="btn-add-cart" onclick="moveToCart('Mind Chaos')">Add to Cart</button>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="product-card" id="wishlistItem2">
+            <div class="image-placeholder">
+                <div class="remove-btn" onclick="removeWishlistItem('wishlistItem2')">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+                <img src="https://via.placeholder.com/400x500/000000/FFFFFF?text=Silent+World" alt="Silent World">
+            </div>
+            <div class="product-title">Silent World</div>
+            <div class="product-price">₹799</div>
+            <button class="btn-add-cart" onclick="moveToCart('Silent World')">Add to Cart</button>
+        </div>
+
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+        <i class="fa-regular fa-heart"></i>
+        <h2>Your wishlist is empty</h2>
+        <p>Save your favorite Heavy Soul items here <br>to buy them later.</p>
+        <a href="shop.html" class="btn-shop-now">Explore Collection</a>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="shop.html" class="nav-item">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span>Shop</span>
+        </a>
+        <a href="wishlist.html" class="nav-item active"> <!-- Wishlist is Active -->
+            <i class="fa-solid fa-heart"></i>
+            <span>Wishlist</span>
+        </a>
+        <a href="account.html" class="nav-item">
+            <i class="fa-regular fa-user"></i>
+            <span>Account</span>
+        </a>
+        <a href="cart.html" class="nav-item">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Cart</span>
+        </a>
+    </nav>
+
+    <!-- JavaScript for Wishlist Logic -->
+    <script>
+        let itemsCount = 2;
+
+        function removeWishlistItem(itemId) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                item.style.display = 'none';
+                itemsCount--;
+                updateWishlistUI();
+            }
+        }
+
+        function moveToCart(productName) {
+            alert(productName + " added to your cart!");
+        }
+
+        function updateWishlistUI() {
+            document.getElementById('wishlistCount').innerText = itemsCount;
+            
+            if (itemsCount === 0) {
+                document.getElementById('wishlistGrid').style.display = 'none';
+                document.getElementById('pageHeader').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

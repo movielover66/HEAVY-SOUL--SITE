@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Delivered | Heavy Soul</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Reset & Global Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        body { background-color: #ffffff; color: #000000; padding-bottom: 40px; text-align: center; }
+        
+        /* 1. Top Navigation */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eeeeee; position: sticky; top: 0; background: #ffffff; z-index: 100; }
+        .top-nav i { font-size: 1.2rem; cursor: pointer; color: #000; }
+        .top-nav .logo { font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-transform: uppercase; }
+
+        /* 2. Illustration Section */
+        .illustration-container { padding: 40px 20px 20px; display: flex; justify-content: center; }
+        .illustration-container img { max-width: 220px; width: 100%; height: auto; }
+
+        /* 3. Delivery Status */
+        .delivery-status { padding: 0 20px; margin-bottom: 25px; }
+        .status-icon { width: 45px; height: 45px; background-color: #4CAF50; color: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; margin: 0 auto 10px; }
+        .delivery-status h1 { font-size: 1.4rem; font-weight: 900; color: #4CAF50; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .delivery-date { font-size: 0.85rem; font-weight: 700; color: #333333; margin-bottom: 15px; }
+        .success-msg { font-size: 0.85rem; font-weight: 500; color: #555555; line-height: 1.4; margin-bottom: 25px; }
+
+        /* 4. Download Invoice Button */
+        .btn-invoice { padding: 12px 25px; background-color: #ffffff; color: #000000; border: 1px solid #000000; border-radius: 3px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; cursor: pointer; letter-spacing: 0.5px; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 40px; }
+        .btn-invoice:hover { background-color: #f5f5f5; }
+
+        /* 5. Review Section */
+        .review-section { padding: 0 20px; border-top: 1px solid #eeeeee; padding-top: 30px; }
+        .review-section h2 { font-size: 1rem; font-weight: 800; margin-bottom: 15px; }
+        
+        .stars-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .stars-container i { font-size: 2rem; color: #dddddd; cursor: pointer; transition: 0.2s; }
+        .stars-container i.active { color: #FFD700; } /* Gold color for selected stars */
+        
+        .btn-review { width: calc(100% - 40px); max-width: 300px; margin: 0 auto; padding: 16px; background-color: #000000; color: #ffffff; font-weight: 900; font-size: 0.9rem; text-transform: uppercase; border: none; border-radius: 3px; cursor: pointer; letter-spacing: 0.5px; display: block; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <i class="fa-solid fa-bars"></i>
+        <div class="logo">HEAVY SOUL</div>
+        <i class="fa-solid fa-bag-shopping"></i>
+    </nav>
+
+    <!-- Illustration -->
+    <div class="illustration-container">
+        <!-- Placeholder for the Delivery vector illustration -->
+        <img src="https://via.placeholder.com/300x250/f9f9f9/333333?text=Delivery+Illustration" alt="Delivery Successful">
+    </div>
+
+    <!-- Delivery Status -->
+    <div class="delivery-status">
+        <div class="status-icon">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <h1>DELIVERED</h1>
+        <div class="delivery-date" id="deliveryDate">Recently delivered</div>
+        <div class="success-msg">Your order has been delivered<br>successfully.</div>
+        
+        <button class="btn-invoice" onclick="downloadInvoice()">
+            DOWNLOAD INVOICE <i class="fa-solid fa-download"></i>
+        </button>
+    </div>
+
+    <!-- Review Section -->
+    <div class="review-section">
+        <h2>How was your experience?</h2>
+        <div class="stars-container" id="starRating">
+            <i class="fa-solid fa-star" data-value="1"></i>
+            <i class="fa-solid fa-star" data-value="2"></i>
+            <i class="fa-solid fa-star" data-value="3"></i>
+            <i class="fa-solid fa-star" data-value="4"></i>
+            <i class="fa-solid fa-star" data-value="5"></i>
+        </div>
+        <button class="btn-review" onclick="submitReview()">LEAVE A REVIEW</button>
+    </div>
+
+    <!-- JavaScript for Interactive Stars -->
+    <script>
+        const stars = document.querySelectorAll('#starRating i');
+        let currentRating = 0;
+
+        // Add click event to stars
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                currentRating = this.getAttribute('data-value');
+                updateStars(currentRating);
+            });
+        });
+
+        function updateStars(rating) {
+            stars.forEach(star => {
+                if (star.getAttribute('data-value') <= rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function downloadInvoice() {
+            alert("Downloading Invoice PDF...");
+        }
+
+        function submitReview() {
+            if(currentRating === 0) {
+                alert("Please select a star rating first!");
+            } else {
+                // Redirect to the final Review Page
+                window.location.href = "review.html";
+            }
+        }
+    </script>
+</body>
+</html>

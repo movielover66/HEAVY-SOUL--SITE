@@ -1,213 +1,458 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<meta name="description" content="Heavy Soul — heavyweight streetwear essentials cut for everyday armor. Tees, hoodies, outerwear and custom prints, made in small batches.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Heavy Soul">
-<meta property="og:title" content="Heavy Soul — Heavyweight Streetwear">
-<meta property="og:description" content="Heavy Soul — heavyweight streetwear essentials cut for everyday armor. Tees, hoodies, outerwear and custom prints, made in small batches.">
-<meta property="og:image" content="https://heavysoul.in/assets/og-image.jpg">
-<meta property="og:url" content="https://heavysoul.in/">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Heavy Soul — Heavyweight Streetwear">
-<meta name="twitter:description" content="Heavy Soul — heavyweight streetwear essentials cut for everyday armor. Tees, hoodies, outerwear and custom prints, made in small batches.">
-<meta name="twitter:image" content="https://heavysoul.in/assets/og-image.jpg">
-<title>Heavy Soul — Heavyweight Streetwear</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heavy Soul | Oversized. Bold. Fearless.</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Universal Transition & Loader Elements inside Head -->
+    <link rel="stylesheet" href="style/style.css">
+    <script src="js/script.js" defer></script>
+
+    <style>
+        /* CSS Reset & Global Settings */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: #ffffff; 
+            color: #000000; 
+            padding-bottom: 90px; 
+            animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        /* Page Open / Entry Animation */
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 1. Top Navigation */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eeeeee; background: #ffffff; position: sticky; top: 0; z-index: 100; }
+        .top-nav .menu-icon, .top-nav .nav-icons i { font-size: 1.2rem; cursor: pointer; color: #000; }
+        .top-nav .logo { font-weight: 900; font-size: 1.4rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; color: #000; }
+        .top-nav .nav-icons { display: flex; gap: 15px; }
+
+        /* 2. Banner Slider Styles */
+        .hero-slider-container {
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            background-color: #000000;
+        }
+
+        .slider-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            width: 100%;
+        }
+
+        .slide {
+            min-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .slide img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Dots Indicator */
+        .slider-dots {
+            position: absolute;
+            bottom: 15px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: #ffffff;
+            transform: scale(1.2);
+        }
+        
+        /* 3. Streetwear Marquee Ticker USP Bar */
+        .usp-ticker {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 12px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            border-bottom: 1px solid #222222;
+        }
+        .ticker-track {
+            display: inline-block;
+            animation: marquee 18s linear infinite;
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+        .ticker-track span {
+            margin: 0 15px;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* 4. Category Quick Links */
+        .categories-section { padding: 25px 20px; border-bottom: 1px solid #eeeeee; background: #ffffff; }
+        .categories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        
+        .category-card { 
+            position: relative; 
+            height: 160px; 
+            border-radius: 4px; 
+            overflow: hidden; 
+            text-decoration: none; 
+            display: flex; 
+            align-items: flex-end; 
+            padding: 12px; 
+            background: #000000; 
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .category-card:active { transform: scale(0.96); }
+        
+        .category-card img { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: transform 0.4s ease;
+            opacity: 0.8;
+        }
+        
+        .category-card:hover img { 
+            transform: scale(1.08); 
+        }
+        
+        .category-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 60%);
+            z-index: 1;
+        }
+        
+        .category-name { 
+            position: relative; 
+            z-index: 2; 
+            color: #ffffff; 
+            font-size: 0.75rem; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            width: 100%;
+            text-align: center;
+        }
+
+        /* 5. Best Sellers Section */
+        .best-sellers { padding: 25px 20px; border-bottom: 1px solid #eeeeee; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h2 { font-size: 1.2rem; font-weight: 900; text-transform: uppercase; }
+        .section-header a { color: #666666; font-size: 0.8rem; text-decoration: none; font-weight: 600; }
+        
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .product-card { text-decoration: none; color: inherit; cursor: pointer; transition: transform 0.15s ease; }
+        .product-card:active { transform: scale(0.96); }
+        .product-card .image-placeholder { width: 100%; aspect-ratio: 4/5; background-color: #f5f5f5; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; border-radius: 4px; overflow: hidden; }
+        .product-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .product-card:hover img { transform: scale(1.03); }
+        .product-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+        .product-price { font-weight: 600; font-size: 0.9rem; color: #333333; }
+
+        /* 6. Lookbook Horizontal Slider */
+        .lookbook-section { padding: 25px 0; border-bottom: 1px solid #eeeeee; background-color: #ffffff; }
+        .lookbook-slider { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .lookbook-slider::-webkit-scrollbar { display: none; }
+        .lookbook-card { min-width: 220px; height: 300px; border-radius: 4px; overflow: hidden; scroll-snap-align: start; flex-shrink: 0; background-color: #000; }
+        .lookbook-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
+        .lookbook-card:hover img { transform: scale(1.05); }
+
+        /* 7. Mini Reviews Section */
+        .home-reviews { padding: 25px 20px; background-color: #fafafa; border-bottom: 1px solid #eeeeee; }
+        .review-box { background: #fff; border: 1px solid #eeeeee; padding: 15px; border-radius: 4px; margin-top: 15px; }
+        .review-text { font-size: 0.85rem; color: #333; font-weight: 500; margin-bottom: 8px; line-height: 1.4; }
+
+        /* 8. Bottom Navigation (Sticky) */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #eeeeee; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.02); }
+        .nav-item { text-align: center; color: #999999; text-decoration: none; font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: 600; transition: color 0.2s ease; }
+        .nav-item.active { color: #000000; }
+        .nav-item i { font-size: 1.2rem; }
+    </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="notice-bar">Free shipping over ₹1499 · Made-to-order pieces ship in 5–7 days</div>
-  <nav class="nav wrap">
-    <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
-    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
-    <div class="nav-links">
-      <a href="index.html" class="active">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="shop.html?category=Custom">Custom</a>
-      <a href="track.html">Track order</a>
-      <a href="policy.html">Policies</a>
-      <a href="account.html" id="navLoginLink">Login / Signup</a>
-    </div>
-    <div class="nav-icons">
-      <a class="icon-btn" id="accountBtn" href="account.html" aria-label="Login / Signup">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.7-3.6 5-5.5 7.5-5.5s5.8 1.9 7.5 5.5"/></svg>
-      </a>
-      <a class="icon-btn" href="cart.html" aria-label="Cart">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
-        <span class="cart-count" id="cartCount">0</span>
-      </a>
-    </div>
-  </nav>
-  <div class="mobile-panel" id="mobilePanel">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="shop.html?category=Custom">Custom</a>
-    <a href="track.html">Track order</a>
-    <a href="policy.html">Policies</a>
-    <a href="account.html" id="navLoginLinkMobile">Login / Signup</a>
-  </div>
-</header>
+    <!-- Page Loader Bar Element -->
+    <div id="pageLoaderBar"></div>
 
-<section class="hero">
-  <div class="hero-tag">
-    <div class="hole"></div>
-    <strong>Heavy Soul</strong>
-    <span>No. 001 / Ink</span>
-  </div>
-  <div class="wrap hero-inner">
-    <p class="eyebrow on-dark">Heavyweight streetwear</p>
-    <h1>Built like armor,<br>worn like <em>skin</em>.</h1>
-    <p>240–420 GSM essentials cut for everyday wear — oversized tees, heavyweight hoodies and outerwear, plus one-off custom prints made to order.</p>
-    <div class="hero-ctas">
-      <a href="shop.html" class="btn accent">Shop the edit</a>
-      <a href="shop.html?category=Custom" class="btn outline">Design your own</a>
-    </div>
-  </div>
-</section>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <i class="fa-solid fa-bars menu-icon" onclick="window.location.href='menu.html'"></i>
+        <a href="index.html" class="logo">HEAVY SOUL</a>
+        <div class="nav-icons">
+            <i class="fa-solid fa-magnifying-glass" onclick="window.location.href='shop.html'"></i>
+            <i class="fa-regular fa-bell" onclick="alert('No new notifications')"></i>
+        </div>
+    </nav>
 
-<section class="section tight">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">Shop by category</p>
-        <h2>Find your fit</h2>
-      </div>
-    </div>
-    <div class="cat-strip">
-      <a class="cat-tile" href="shop.html?category=T-Shirts">
-        <img class="swatch" src="assets/banner/cat-tshirts.jpg" alt="">
-        <span>T-Shirts</span>
-      </a>
-      <a class="cat-tile" href="shop.html?category=Hoodies">
-        <img class="swatch" src="assets/banner/cat-hoodies.jpg" alt="">
-        <span>Hoodies</span>
-      </a>
-      <a class="cat-tile" href="shop.html?category=Bottoms">
-        <img class="swatch" src="assets/banner/cat-bottoms.jpg" alt="">
-        <span>Bottoms</span>
-      </a>
-      <a class="cat-tile" href="shop.html?category=Outerwear">
-        <img class="swatch" src="assets/banner/cat-outerwear.jpg" alt="">
-        <span>Outerwear</span>
-      </a>
-    </div>
-  </div>
-</section>
+      <!-- Banner Slider Section -->
+    <div class="hero-slider-container" id="shop">
+        <div class="slider-track" id="sliderTrack">
+            <!-- Slide 1 -->
+            <div class="slide">
+                <img src="assets/banner/slider1.jpg" alt="Banner 1">
+            </div>
+            <!-- Slide 2 -->
+            <div class="slide">
+                <img src="assets/banner/slider2.jpg" alt="Banner 2">
+            </div>
+            <!-- Slide 3 -->
+            <div class="slide">
+                <img src="assets/banner/slider3.jpg" alt="Banner 3">
+            </div>
+            <!-- Slide 4 -->
+            <div class="slide">
+                <img src="assets/banner/slider4.jpg" alt="Banner 4">
+            </div>
+            <!-- Slide 5 -->
+            <div class="slide">
+                <img src="assets/banner/slider5.jpg" alt="Banner 5">
+            </div>
+        </div>
 
-<section class="section">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">Selected pieces</p>
-        <h2>Best sellers &amp; new arrivals</h2>
-      </div>
-      <a class="view-all" href="shop.html">View all →</a>
+        <!-- Slider Dots Pagination (5 ta dots) -->
+        <div class="slider-dots" id="sliderDots">
+            <span class="dot active" onclick="currentSlide(0)"></span>
+            <span class="dot" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+            <span class="dot" onclick="currentSlide(4)"></span>
+        </div>
     </div>
-    <div class="grid" id="featuredGrid"></div>
-  </div>
-</section>
 
-<section class="section tight">
-  <div class="wrap split">
-    <div class="media"><img src="assets/products/p6-a.jpg" alt="Heavy Soul construction detail"></div>
-    <div>
-      <p class="eyebrow">The material</p>
-      <h2>Weight is the point.</h2>
-      <p style="color:var(--ink-soft); max-width:420px; margin-top:16px;">Every piece starts at 240 GSM and up — cotton heavy enough to hold its shape, garment-washed so it never feels stiff. We keep the palette to ink, bone and oxblood so everything in the edit mixes with everything else.</p>
-      <div class="stat-row">
-        <div class="stat"><b>240+</b><span>GSM minimum</span></div>
-        <div class="stat"><b>3</b><span>Core colourways</span></div>
-        <div class="stat"><b>5–7d</b><span>Custom turnaround</span></div>
-      </div>
+        <!-- Slider Dots Pagination -->
+        <div class="slider-dots" id="sliderDots">
+            <span class="dot active" onclick="currentSlide(0)"></span>
+            <span class="dot" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+        </div>
     </div>
-  </div>
-</section>
 
-<section class="band">
-  <div class="wrap">
-    <p class="eyebrow on-dark">Custom prints</p>
-    <h2>Send your own design. We'll put it on 240 GSM cotton.</h2>
-    <p>DTF printing on our signature boxy tee — your artwork, your photo, your logo. Made to order, so please allow a little extra time.</p>
-    <a href="shop.html?category=Custom" class="btn accent">Start a custom order</a>
-    <div class="perk-row">
-      <div class="perk">
-        <div class="num">01</div>
-        <h4>Pick your base</h4>
-        <p>Choose the tee, size and colourway.</p>
-      </div>
-      <div class="perk">
-        <div class="num">02</div>
-        <h4>Send your art</h4>
-        <p>Share the design over WhatsApp after checkout.</p>
-      </div>
-      <div class="perk">
-        <div class="num">03</div>
-        <h4>We print &amp; ship</h4>
-        <p>Made to order in 5–7 days, tracked to your door.</p>
-      </div>
+    <!-- Streetwear Marquee Ticker USP Bar -->
+    <div class="usp-ticker">
+        <div class="ticker-track">
+            <span>⚡ 240 GSM HEAVYWEIGHT COTTON</span>
+            <span>•</span>
+            <span>COD AVAILABLE ACROSS INDIA</span>
+            <span>•</span>
+            <span>7-DAY HASSLE-FREE RETURNS</span>
+            <span>•</span>
+            <span>100% SECURE CHECKOUT</span>
+            <span>•</span>
+            <span>⚡ 240 GSM HEAVYWEIGHT COTTON</span>
+            <span>•</span>
+            <span>COD AVAILABLE ACROSS INDIA</span>
+            <span>•</span>
+            <span>7-DAY HASSLE-FREE RETURNS</span>
+            <span>•</span>
+            <span>100% SECURE CHECKOUT</span>
+        </div>
     </div>
-  </div>
-</section>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="footer-grid">
-      <div>
-        <div class="brand">Heavy Soul</div>
-        <p style="color:var(--ink-soft); margin-top:14px; max-width:280px; font-size:13.5px;">Heavyweight streetwear essentials, cut for everyday armor. Designed in small batches, built to outlast trends.</p>
-      </div>
-      <div>
-        <h5>Shop</h5>
-        <ul>
-          <li><a href="shop.html?category=T-Shirts">T-Shirts</a></li>
-          <li><a href="shop.html?category=Hoodies">Hoodies</a></li>
-          <li><a href="shop.html?category=Bottoms">Bottoms</a></li>
-          <li><a href="shop.html?category=Custom">Custom</a></li>
-        </ul>
-      </div>
-      <div>
-        <h5>Support</h5>
-        <ul>
-          <li><a href="track.html">Track order</a></li>
-          <li><a href="policy.html">Shipping &amp; returns</a></li>
-          <li><a href="policy.html">Privacy policy</a></li>
-          <li><a href="cart.html">Your bag</a></li>
-        </ul>
-      </div>
-      <div>
-        <h5>Stay in the loop</h5>
-        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:14px;">New drops, restocks, no spam.</p>
-        <form onsubmit="event.preventDefault(); showToast('Thanks — you\'re on the list');" style="display:flex; border:1px solid var(--line);">
-          <input type="email" required placeholder="you@email.com" style="border:none; flex:1; padding:11px 12px; background:transparent;">
-          <button class="btn" style="border:none;">Join</button>
-        </form>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 Heavy Soul. All rights reserved.</span>
-      <span>Prices in INR · Ships across India</span>
-      <span>Trade Reg. No. 3549 (Saptagram GP, Hooghly)</span>
-    </div>
-  </div>
-</footer>
+    <!-- Category Quick Links -->
+    <section class="categories-section">
+        <div class="section-header" style="margin-bottom: 12px;">
+            <h2>Shop By Category</h2>
+        </div>
+        <div class="categories-grid">
+            <!-- Oversized -->
+            <a href="shop.html" class="category-card">
+                <img src="assets/category/oversized.jpg" alt="Oversized">
+                <div class="category-overlay"></div>
+                <div class="category-name">Oversized</div>
+            </a>
+            
+            <!-- Graphics -->
+            <a href="shop.html" class="category-card">
+                <img src="assets/category/graphics.jpg" alt="Graphics">
+                <div class="category-overlay"></div>
+                <div class="category-name">Graphics</div>
+            </a>
+            
+            <!-- Hoodies -->
+            <a href="shop.html" class="category-card">
+                <img src="assets/category/hoodies.jpg" alt="Hoodies">
+                <div class="category-overlay"></div>
+                <div class="category-name">Hoodies</div>
+            </a>
+        </div>
+    </section>
 
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="js/config.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/msg91-otp.js"></script>
-<script src="js/auth-unified.js"></script>
-<script src="js/analytics.js"></script>
-<script src="js/products.js"></script>
-<script src="js/toast.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/nav.js"></script>
-<script src="js/app.js"></script>
+    <!-- Best Sellers -->
+    <section class="best-sellers">
+        <div class="section-header">
+            <h2>Best Sellers</h2>
+            <a href="shop.html">View All</a>
+        </div>
+        
+        <div class="product-grid" id="productContainer">
+            <!-- Products will be loaded here via JS -->
+        </div>
+    </section>
+
+      <!-- The Lookbook Section -->
+    <section class="lookbook-section">
+        <div class="section-header" style="padding: 0 20px; margin-bottom: 15px;">
+            <h2>The Lookbook</h2>
+            <span style="font-size: 0.8rem; color: #666; font-weight: 600;">Swipe & Style</span>
+        </div>
+
+        <div class="lookbook-slider" id="lookbookSlider">
+            <div class="lookbook-card">
+                <img src="assets/lookbook/look1.jpg" alt="Heavy Soul Look 1">
+            </div>
+            <div class="lookbook-card">
+                <img src="assets/lookbook/look2.jpg" alt="Heavy Soul Look 2">
+            </div>
+            <div class="lookbook-card">
+                <img src="assets/lookbook/look3.jpg" alt="Heavy Soul Look 3">
+            </div>
+            <div class="lookbook-card">
+                <img src="assets/lookbook/look4.jpg" alt="Heavy Soul Look 4">
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section class="home-reviews">
+        <div class="section-header">
+            <h2>Why Shop With Us</h2>
+            <a href="review.html">Reviews</a>
+        </div>
+        <div class="review-box">
+            <div class="review-text" style="font-style: normal;">We're a new brand building our reputation one order at a time — 240 GSM heavyweight cotton, COD available, and easy returns if something's not right.</div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer style="background-color: #000000; color: #ffffff; padding: 40px 20px; margin-top: 0; text-align: center;">
+        <div style="font-weight: 900; font-size: 1.2rem; letter-spacing: 1px; margin-bottom: 10px;">HEAVY SOUL</div>
+        <div style="font-size: 0.75rem; color: #999; font-weight: 700; margin-bottom: 20px;">Oversized. Bold. Fearless.</div>
+        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 0.8rem;">
+            <a href="about.html" style="color: #aaa; text-decoration: none;">About</a>
+            <a href="shipping.html" style="color: #aaa; text-decoration: none;">Shipping</a>
+            <a href="returns.html" style="color: #aaa; text-decoration: none;">Returns</a>
+            <a href="cancellation.html" style="color: #aaa; text-decoration: none;">Cancellation</a>
+            <a href="privacy.html" style="color: #aaa; text-decoration: none;">Privacy</a>
+            <a href="policy.html" style="color: #aaa; text-decoration: none;">Policy</a>
+        </div>
+        <div style="font-size: 0.7rem; color: #666;">&copy; 2026 HEAVY SOUL. All Rights Reserved.</div>
+    </footer>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="shop.html" class="nav-item">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span>Shop</span>
+        </a>
+        <a href="wishlist.html" class="nav-item">
+            <i class="fa-regular fa-heart"></i>
+            <span>Wishlist</span>
+        </a>
+        <a href="account.html" class="nav-item">
+            <i class="fa-regular fa-user"></i>
+            <span>Account</span>
+        </a>
+        <a href="cart.html" class="nav-item">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Cart</span>
+        </a>
+    </nav>
+
+    <!-- JavaScript for Products & Slider -->
+    <script>
+        const products = [
+            { id: 1, name: "Dark Reflection", price: "₹799", image: "https://via.placeholder.com/400x500/000000/FFFFFF?text=Dark+Reflection" },
+            { id: 2, name: "Lost Reality", price: "₹799", image: "https://via.placeholder.com/400x500/000000/FFFFFF?text=Lost+Reality" }
+        ];
+
+        function loadProducts() {
+            const container = document.getElementById('productContainer');
+            let html = '';
+            
+            products.forEach(product => {
+                html += `
+                    <div class="product-card" onclick="window.location.href='product.html'">
+                        <div class="image-placeholder">
+                            <img src="${product.image}" alt="${product.name}">
+                        </div>
+                        <div class="product-title">${product.name}</div>
+                        <div class="product-price">${product.price}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Hero Slider Script
+        let currentIndex = 0;
+        const track = document.getElementById('sliderTrack');
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const totalSlides = slides.length;
+
+        function updateSlider() {
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        function currentSlide(index) {
+            currentIndex = index;
+            updateSlider();
+        }
+
+        function autoSlide() {
+            currentIndex = (currentIndex + 1) % totalSlides;
+            updateSlider();
+        }
+
+        let slideInterval = setInterval(autoSlide, 3500);
+
+        const sliderContainer = document.querySelector('.hero-slider-container');
+        sliderContainer.addEventListener('mouseenter', () => clearInterval(slideInterval));
+        sliderContainer.addEventListener('mouseleave', () => {
+            slideInterval = setInterval(autoSlide, 3500);
+        });
+
+        window.onload = function() {
+            loadProducts();
+        };
+    </script>
 </body>
 </html>
