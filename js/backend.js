@@ -64,8 +64,12 @@
     const msg=`🛍️ *NEW ORDER — HEAVY SOUL*\n\nOrder ID: ${payload.orderId}\n\nName: ${payload.customerName}\nPhone: ${payload.phone}\nEmail: ${payload.email||'-'}\n\nAddress:\n${payload.address}, ${payload.city}, ${payload.state} - ${payload.pincode}\n\n${lines}\n\nSubtotal: ₹${payload.subtotal}\nShipping: ₹${payload.shipping}\nCOD Handling: ₹${payload.handling}\nGrand Total: ₹${payload.grandTotal}\nPayment: ${payload.paymentType}\nPaid Now: ₹${payload.amount}\nBalance: ₹${payload.codAmount}\nPayment Ref: ${payload.paymentRef||'-'}`;
     window.open(`https://wa.me/${C.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,'_blank');
   }
-  async function finalize(payload){
-    await postSheet(payload); try{await saveFirestore(payload)}catch(e){console.warn(e)}
+  // For prepaid orders, the Apps Script backend writes the final order only
+  // after Razorpay's signed webhook is received. This prevents a browser from
+  // creating a paid order record before payment has been confirmed.
+  async function finalize(payload, options){
+    const persistRemote=!options || options.persistRemote!==false;
+    if(persistRemote) await postSheet(payload); try{await saveFirestore(payload)}catch(e){console.warn(e)}
     localStorage.setItem('hs_last_order',JSON.stringify(payload));
     localStorage.removeItem(CART_KEY); localStorage.removeItem(LEGACY_CART_KEY); localStorage.removeItem(SHIPPING_INFO_KEY);
     whatsapp(payload); location.href=`order-confirmation.html?order=${encodeURIComponent(payload.orderId)}`;
@@ -75,7 +79,7 @@
     const r=await fetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amounts.paid,...payload})});
     const data=await r.json(); if(!data.success) throw new Error(data.error||'Payment creation failed');
     if(typeof Razorpay==='undefined') throw new Error('Razorpay checkout is unavailable.');
-    const rz=new Razorpay({key:C.RAZORPAY_KEY_ID,amount:amounts.paid*100,currency:'INR',name:'HEAVY SOUL',description:`Order ${id}`,order_id:data.order_id,prefill:{name:info.name,contact:info.phone,email:info.emailOrPhone||''},theme:{color:'#000000'},handler:async res=>{payload.paymentRef=res.razorpay_payment_id; await finalize(payload)}});
+    const rz=new Razorpay({key:C.RAZORPAY_KEY_ID,amount:amounts.paid*100,currency:'INR',name:'HEAVY SOUL',description:`Order ${id}`,order_id:data.order_id,prefill:{name:info.name,contact:info.phone,email:info.emailOrPhone||''},theme:{color:'#000000'},handler:async res=>{payload.paymentRef=res.razorpay_payment_id; await finalize(payload,{persistRemote:false})}});
     rz.on('payment.failed',()=>alert('Payment failed. Please try again.')); rz.open();
   }
   window.HSBackend={readCart,saveCart,cartTotal,cartQty,checkoutAmounts,collectCheckout,validate,buildPayload,finalize,pay,money};

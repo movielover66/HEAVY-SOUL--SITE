@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Heavy Soul">
+  <rect width="64" height="64" fill="#000"/>
+  <path d="M14 16h9v12h18V16h9v32h-9V36H23v12h-9z" fill="#fff"/>
+</svg>
