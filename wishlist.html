@@ -68,36 +68,8 @@
         <div class="item-count"><span id="wishlistCount">2</span> Items</div>
     </div>
 
-    <!-- Wishlist Grid -->
-    <div class="wishlist-grid" id="wishlistGrid">
-        
-        <!-- Item 1 -->
-        <div class="product-card" id="wishlistItem1">
-            <div class="image-placeholder">
-                <div class="remove-btn" onclick="removeWishlistItem('wishlistItem1')">
-                    <i class="fa-solid fa-xmark"></i>
-                </div>
-                <img src="https://via.placeholder.com/400x500/000000/FFFFFF?text=Mind+Chaos" alt="Mind Chaos">
-            </div>
-            <div class="product-title">Mind Chaos</div>
-            <div class="product-price">₹799</div>
-            <button class="btn-add-cart" onclick="moveToCart('Mind Chaos')">Add to Cart</button>
-        </div>
-
-        <!-- Item 2 -->
-        <div class="product-card" id="wishlistItem2">
-            <div class="image-placeholder">
-                <div class="remove-btn" onclick="removeWishlistItem('wishlistItem2')">
-                    <i class="fa-solid fa-xmark"></i>
-                </div>
-                <img src="https://via.placeholder.com/400x500/000000/FFFFFF?text=Silent+World" alt="Silent World">
-            </div>
-            <div class="product-title">Silent World</div>
-            <div class="product-price">₹799</div>
-            <button class="btn-add-cart" onclick="moveToCart('Silent World')">Add to Cart</button>
-        </div>
-
-    </div>
+    <!-- Wishlist Grid (populated by renderWishlist() from real localStorage data) -->
+    <div class="wishlist-grid" id="wishlistGrid"></div>
 
     <!-- Empty State -->
     <div class="empty-state" id="emptyState">
@@ -131,32 +103,102 @@
         </a>
     </nav>
 
+    <!-- Real site config, for the escapeHtml() helper -->
+    <script src="js/config.js"></script>
+
     <!-- JavaScript for Wishlist Logic -->
     <script>
-        let itemsCount = 2;
+        function getWishlist() {
+            return JSON.parse(localStorage.getItem('heavySoulWishlist')) || [];
+        }
+        function saveWishlist(list) {
+            localStorage.setItem('heavySoulWishlist', JSON.stringify(list));
+            window.dispatchEvent(new Event('hs:wishlistUpdated'));
+        }
+        function getCart() {
+            return JSON.parse(localStorage.getItem('heavySoulCart')) || [];
+        }
+        function saveCart(cart) {
+            localStorage.setItem('heavySoulCart', JSON.stringify(cart));
+            window.dispatchEvent(new Event('hs:cartUpdated'));
+        }
+
+        function wishlistCardHTML(item) {
+            return `
+                <div class="product-card" id="wishlistItem${item.id}">
+                    <div class="image-placeholder">
+                        <div class="remove-btn" onclick="removeWishlistItem(${item.id})">
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                        <a href="product.html?id=${item.id}">
+                            <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
+                        </a>
+                    </div>
+                    <div class="product-title">${escapeHtml(item.name)}</div>
+                    <div class="product-price">₹${item.price}</div>
+                    <button class="btn-add-cart" onclick="moveToCart(${item.id})">Add to Cart</button>
+                </div>
+            `;
+        }
+
+        function renderWishlist() {
+            const wishlist = getWishlist();
+            document.getElementById('wishlistCount').innerText = wishlist.length;
+
+            const grid = document.getElementById('wishlistGrid');
+            const pageHeader = document.getElementById('pageHeader');
+            const emptyState = document.getElementById('emptyState');
+
+            if (wishlist.length === 0) {
+                grid.style.display = 'none';
+                pageHeader.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            pageHeader.style.display = 'flex';
+            emptyState.style.display = 'none';
+            grid.innerHTML = wishlist.map(wishlistCardHTML).join('');
+        }
 
         function removeWishlistItem(itemId) {
-            const item = document.getElementById(itemId);
-            if (item) {
-                item.style.display = 'none';
-                itemsCount--;
-                updateWishlistUI();
-            }
+            const wishlist = getWishlist().filter(item => item.id !== itemId);
+            saveWishlist(wishlist);
+            renderWishlist();
         }
 
-        function moveToCart(productName) {
-            alert(productName + " added to your cart!");
+        function moveToCart(itemId) {
+            const wishlist = getWishlist();
+            const item = wishlist.find(i => i.id === itemId);
+            if (!item) return;
+
+            const cart = getCart();
+            // No size chosen here — land it in cart with size unset so the
+            // customer picks a size on the cart/checkout step.
+            const existing = cart.find(c => c.id === item.id && !c.size);
+            if (existing) {
+                existing.quantity = (existing.quantity || 1) + 1;
+            } else {
+                cart.push({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    size: null,
+                    image: item.image,
+                    quantity: 1,
+                    orderType: "collection"
+                });
+            }
+            saveCart(cart);
+
+            removeWishlistItem(itemId);
+            alert(item.name + " added to your cart!");
         }
 
-        function updateWishlistUI() {
-            document.getElementById('wishlistCount').innerText = itemsCount;
-            
-            if (itemsCount === 0) {
-                document.getElementById('wishlistGrid').style.display = 'none';
-                document.getElementById('pageHeader').style.display = 'none';
-                document.getElementById('emptyState').style.display = 'block';
-            }
-        }
+        document.addEventListener('DOMContentLoaded', renderWishlist);
+        // Keep this page in sync if the wishlist changes in another tab/page.
+        window.addEventListener('hs:wishlistUpdated', renderWishlist);
     </script>
 </body>
 </html>
