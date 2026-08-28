@@ -393,38 +393,31 @@
         </a>
     </nav>
 
-    <!-- Real site config + live product catalog (Apps Script + fallback) -->
-    <script src="js/config.js"></script>
-    <script src="js/products.js"></script>
-    <script src="js/debugger.js"></script>
-    <script src="js/debugger.js"></script>
     <!-- JavaScript for Products & Slider -->
     <script>
-        function homeCardHTML(p) {
-            const price = p.compareAt
-                ? `<span style="text-decoration:line-through;color:#999;margin-right:6px;">₹${p.compareAt}</span>₹${p.price}`
-                : `₹${p.price}`;
-            return `
-                <a class="product-card" href="product.html?id=${p.id}">
-                    <div class="image-placeholder">
-                        <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}">
-                    </div>
-                    <div class="product-title">${escapeHtml(p.name)}</div>
-                    <div class="product-price">${price}</div>
-                </a>
-            `;
-        }
+        const products = [
+            { id: 1, name: "Dark Reflection", price: "₹799", image: "https://via.placeholder.com/400x500/000000/FFFFFF?text=Dark+Reflection" },
+            { id: 2, name: "Lost Reality", price: "₹799", image: "https://via.placeholder.com/400x500/000000/FFFFFF?text=Lost+Reality" }
+        ];
 
         function loadProducts() {
             const container = document.getElementById('productContainer');
-            const bestSellers = PRODUCTS.filter(p => p.badge === "Best Seller");
-            const toShow = bestSellers.length ? bestSellers : PRODUCTS.slice(0, 4);
-            container.innerHTML = toShow.map(homeCardHTML).join('') ||
-                '<p style="grid-column:1/-1;color:#999;">No products yet.</p>';
+            let html = '';
+            
+            products.forEach(product => {
+                html += `
+                    <div class="product-card" onclick="window.location.href='product.html'">
+                        <div class="image-placeholder">
+                            <img src="${product.image}" alt="${product.name}">
+                        </div>
+                        <div class="product-title">${product.name}</div>
+                        <div class="product-price">${product.price}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
         }
-
-        // Re-render once the live catalog (from Apps Script) finishes loading.
-        window.addEventListener("hs:productsUpdated", loadProducts);
 
         // Hero Slider Script
         let currentIndex = 0;

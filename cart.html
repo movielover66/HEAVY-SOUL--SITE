@@ -50,9 +50,6 @@
         
         .empty-cart { text-align: center; padding: 40px 20px; color: #666; font-weight: 600; font-size: 0.95rem; }
 
-        /* Inline size-fix dropdown for cart items missing a size */
-        .size-fix-select { margin-top: 3px; padding: 4px 6px; border: 1px solid #cccccc; border-radius: 3px; font-size: 0.8rem; font-weight: 700; color: #000; background: #fff; }
-
         /* 6. Bottom Navigation (Sticky) */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #eeeeee; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
         .nav-item { text-align: center; color: #999999; text-decoration: none; font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: 600; }
@@ -95,7 +92,7 @@
 
         <!-- Actions -->
         <div id="cartActions" style="display: none;">
-            <button type="button" class="btn btn-checkout" onclick="proceedToCheckout()">PROCEED TO CHECKOUT</button>
+            <a href="checkout.html" class="btn btn-checkout">PROCEED TO CHECKOUT</a>
         </div>
         <a href="shop.html" class="btn btn-continue"><i class="fa-solid fa-chevron-left"></i> CONTINUE SHOPPING</a>
     </div>
@@ -167,19 +164,7 @@
                         <div class="cart-item-details">
                             <div>
                                 <div class="item-title">${item.name}</div>
-                                <div class="item-variant">
-                                    ${item.size
-                                        ? `Size: ${item.size}`
-                                        : `<select class="size-fix-select" onchange="setItemSize(${index}, this.value)">
-                                             <option value="">Select size</option>
-                                             <option value="S">S</option>
-                                             <option value="M">M</option>
-                                             <option value="L">L</option>
-                                             <option value="XL">XL</option>
-                                             <option value="XXL">XXL</option>
-                                           </select>`
-                                    }
-                                </div>
+                                <div class="item-variant">Size: ${item.size}</div>
                                 <div class="item-price">₹${item.price}</div>
                             </div>
                             <div class="item-actions">
@@ -225,7 +210,6 @@
             }
 
             localStorage.setItem('heavySoulCart', JSON.stringify(cart));
-            window.dispatchEvent(new Event('hs:cartUpdated'));
             loadCart();
         }
 
@@ -234,26 +218,8 @@
             if (confirm("Are you sure you want to remove this item?")) {
                 cart.splice(index, 1);
                 localStorage.setItem('heavySoulCart', JSON.stringify(cart));
-                window.dispatchEvent(new Event('hs:cartUpdated'));
                 loadCart();
             }
-        }
-
-        function setItemSize(index, size) {
-            let cart = JSON.parse(localStorage.getItem('heavySoulCart')) || [];
-            cart[index].size = size || null;
-            localStorage.setItem('heavySoulCart', JSON.stringify(cart));
-            loadCart();
-        }
-
-        function proceedToCheckout() {
-            let cart = JSON.parse(localStorage.getItem('heavySoulCart')) || [];
-            const missingSize = cart.some(item => !item.size);
-            if (missingSize) {
-                alert("Please select a size for every item before checkout.");
-                return;
-            }
-            window.location.href = 'checkout.html';
         }
 
         window.onload = loadCart;

@@ -3,588 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dark Reflection | Heavy Soul</title>
+    <title>Customer Reviews | Heavy Soul</title>
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* CSS Reset & Global Styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #ffffff; color: #000000; padding-bottom: 110px; opacity: 1; transition: opacity 0.3s ease; }
-        body.fade-out { opacity: 0; }
-
-        /* Top Page Loading Progress Bar Animation */
-        #pageLoaderBar { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background-color: #000000; z-index: 9999; transition: width 0.4s ease-in-out; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        body { background-color: #ffffff; color: #000000; padding-bottom: 40px; }
         
         /* 1. Top Navigation */
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eeeeee; position: sticky; top: 0; background: #ffffff; z-index: 100; }
         .top-nav i { font-size: 1.2rem; cursor: pointer; color: #000; }
-        .top-nav .logo { font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; color: #000; }
-        .top-nav .nav-icons { display: flex; gap: 15px; }
+        .top-nav .logo { font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* 2. Product Image Carousel */
-        .product-image-section { position: relative; width: 100%; aspect-ratio: 4/5; background-color: #f8f8f8; display: flex; justify-content: center; align-items: center; overflow: hidden; touch-action: pan-y; }
-        .product-image-section img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.25s ease-in-out; }
-        .heart-icon { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; color: #000; background: #fff; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); z-index: 10; transition: transform 0.2s ease; }
-        .heart-icon:active { transform: scale(0.9); }
+        /* 2. Page Title & Overall Rating */
+        .page-header { text-align: center; padding: 25px 20px 20px; border-bottom: 1px solid #eeeeee; }
+        .page-header h1 { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; }
         
-        .carousel-dots { position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: center; gap: 6px; z-index: 10; }
-        .dot { width: 6px; height: 6px; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; transition: 0.3s; cursor: pointer; }
-        .dot.active { background-color: #ffffff; width: 18px; border-radius: 4px; }
-
-        /* 3. Product Info Layout */
-        .product-info { padding: 20px; }
+        .overall-rating { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .rating-number { font-size: 3.5rem; font-weight: 900; line-height: 1; }
+        .rating-stars { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+        .rating-stars .stars i { color: #FFD700; font-size: 1.2rem; }
+        .review-count { font-size: 0.85rem; color: #555555; font-weight: 700; }
         
-        /* Color Swatches Section */
-        .color-section { margin-bottom: 20px; }
-        .color-header { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; }
-        .color-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .color-grid::-webkit-scrollbar { display: none; }
-        .color-thumb { width: 55px; height: 65px; border-radius: 4px; border: 2px solid #dddddd; overflow: hidden; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
-        .color-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .color-thumb.active { border-color: #000000; box-shadow: 0 0 0 1px #000000; }
+        .trust-text { font-size: 0.8rem; color: #666666; font-weight: 600; margin-top: 10px; }
 
-        /* Size Selector */
-        .size-section { margin-bottom: 20px; }
-        .size-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .size-header h3 { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .size-guide-btn { color: #000000; font-size: 0.75rem; text-decoration: underline; cursor: pointer; font-weight: 800; text-transform: uppercase; background: none; border: none; padding: 0; }
+        /* 3. Review List */
+        .reviews-container { padding: 0 20px; }
+        .review-card { padding: 20px 0; border-bottom: 1px solid #eeeeee; }
         
-        .size-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .size-btn { padding: 12px 0; background: #ffffff; border: 1px solid #cccccc; font-weight: 800; cursor: pointer; border-radius: 4px; text-align: center; font-size: 0.85rem; transition: all 0.15s ease; }
-        .size-btn.active { background: #000000; color: #ffffff; border-color: #000000; }
+        /* Reviewer Header */
+        .reviewer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .reviewer-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; background-color: #dddddd; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .reviewer-name { font-weight: 800; font-size: 0.95rem; }
+        .review-stars i { color: #FFD700; font-size: 0.75rem; }
+        
+        /* Review Body */
+        .review-body { display: flex; gap: 15px; justify-content: space-between; }
+        .review-text { font-size: 0.85rem; color: #444444; line-height: 1.5; font-weight: 500; flex-grow: 1; }
+        .product-thumb { width: 50px; height: 60px; background-color: #000; border-radius: 3px; flex-shrink: 0; overflow: hidden; }
+        .product-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Brand & Title */
-        .brand-store { font-size: 0.75rem; font-weight: 800; color: #777; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .brand-store span { color: #000; text-decoration: underline; cursor: pointer; }
-        .product-title { font-size: 1.15rem; font-weight: 900; color: #000; line-height: 1.3; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+        /* 4. View All Button */
+        .btn-view-all { width: calc(100% - 40px); margin: 30px auto 0; padding: 15px; background-color: #ffffff; color: #000000; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; border: 2px solid #000000; border-radius: 3px; cursor: pointer; letter-spacing: 0.5px; display: block; text-align: center; text-decoration: none; transition: 0.2s; }
+        .btn-view-all:hover { background-color: #000000; color: #ffffff; }
 
-        /* Pricing & Deal Section */
-        .hot-deal-badge { display: inline-block; background: #000000; color: #ffffff; font-size: 0.65rem; font-weight: 900; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
-        .price-container { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-        .current-price { font-size: 1.4rem; font-weight: 900; color: #000000; }
-        .original-price { font-size: 0.95rem; font-weight: 700; color: #888888; text-decoration: line-through; }
-        .discount-pct { font-size: 1rem; font-weight: 900; color: #000000; }
-
-        /* Offer Applied Banner */
-        .coupon-box { display: flex; align-items: center; gap: 8px; background: #f8f8f8; border: 1px solid #dddddd; color: #000000; padding: 10px 14px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; margin-bottom: 20px; }
-        .coupon-box span { font-weight: 900; }
-
-        /* Rating */
-        .product-rating { font-size: 0.8rem; color: #666; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; font-weight: 700; }
-        .product-rating i { color: #000000; font-size: 0.8rem; } 
-        .product-rating span { font-weight: 800; color: #000; }
-
-        /* Product Details & Specifications */
-        .product-details-accordion { border-top: 1px solid #eeeeee; padding-top: 20px; margin-top: 20px; }
-        .details-title { font-size: 0.9rem; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; }
-        .features-list { list-style: none; background: #fafafa; padding: 15px; border-radius: 4px; border: 1px solid #eeeeee; margin-bottom: 15px; }
-        .features-list li { font-size: 0.8rem; color: #333; margin-bottom: 6px; position: relative; padding-left: 14px; font-weight: 700; letter-spacing: 0.2px; text-transform: uppercase; }
-        .features-list li:last-child { margin-bottom: 0; }
-        .features-list li::before { content: '■'; position: absolute; left: 0; color: #000; font-size: 0.5rem; top: 4px; }
-        .product-desc { font-size: 0.82rem; color: #666; line-height: 1.5; font-weight: 500; }
-
-        /* Customer Reviews Section */
-        .review-section { border-top: 1px solid #eeeeee; padding-top: 20px; margin-top: 20px; }
-        .review-cards-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; margin-top: 12px; }
-        .review-cards-scroll::-webkit-scrollbar { display: none; }
-        .review-media-card { min-width: 110px; height: 140px; border-radius: 4px; overflow: hidden; background: #000; position: relative; flex-shrink: 0; }
-        .review-media-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
-
-        /* Related Products Section */
-        .related-section { border-top: 1px solid #eeeeee; padding-top: 20px; margin-top: 20px; }
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 12px; }
-        .product-card { text-decoration: none; color: inherit; cursor: pointer; }
-        .image-placeholder { width: 100%; aspect-ratio: 4/5; background-color: #f5f5f5; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
-        .image-placeholder img { width: 100%; height: 100%; object-fit: cover; }
-        .product-title-sm { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; text-transform: uppercase; }
-        .product-price-sm { font-weight: 800; font-size: 0.9rem; color: #000; }
-
-        /* 4. Sticky Bottom Action Buttons */
-        .action-buttons { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; padding: 12px 20px; border-top: 1px solid #eeeeee; display: flex; gap: 10px; z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.04); }
-        .btn { flex: 1; padding: 14px 10px; font-weight: 900; font-size: 0.8rem; text-transform: uppercase; cursor: pointer; border-radius: 4px; text-align: center; letter-spacing: 0.5px; }
-        .btn-cart { background-color: #ffffff; color: #000000; border: 2px solid #000000; }
-        .btn-buy { background-color: #000000; color: #ffffff; border: 2px solid #000000; }
-
-        /* 5. Select Variant Bottom Sheet Modal */
-        .variant-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 3000; justify-content: flex-end; align-items: flex-end; }
-        .variant-modal-content { background-color: #ffffff; width: 100%; max-width: 600px; padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .variant-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .variant-modal-header h3 { font-size: 1rem; font-weight: 900; text-transform: uppercase; }
-        .close-variant-btn { font-size: 1.2rem; cursor: pointer; padding: 5px; }
-        .variant-product-info { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .variant-product-info img { width: 60px; height: 75px; object-fit: cover; border-radius: 4px; }
-        .modal-prod-title { font-size: 0.85rem; font-weight: 800; margin-bottom: 4px; text-transform: uppercase; }
-        .modal-prod-price { font-size: 0.9rem; font-weight: 700; color: #888; text-decoration: line-through; }
-        .modal-size-header { font-size: 0.85rem; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; }
-        .modal-size-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
-        .modal-size-btn { padding: 12px 0; background: #ffffff; border: 1px solid #cccccc; font-weight: 800; cursor: pointer; border-radius: 4px; text-align: center; font-size: 0.85rem; transition: all 0.15s ease; }
-        .modal-size-btn.active { background: #000000; color: #ffffff; border-color: #000000; }
-        .modal-continue-btn { width: 100%; background: #000000; color: #ffffff; padding: 15px; border: none; font-weight: 900; text-transform: uppercase; border-radius: 4px; cursor: pointer; font-size: 0.9rem; letter-spacing: 0.5px; }
-
-        /* Size Guide Modal Styles */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background-color: #ffffff; width: 100%; max-width: 400px; padding: 24px; border-radius: 6px; position: relative; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .modal-header h3 { font-size: 1rem; font-weight: 900; text-transform: uppercase; }
-        .close-btn { font-size: 1.2rem; cursor: pointer; padding: 5px; }
-        .modal-desc { font-size: 0.78rem; color: #666; margin-bottom: 20px; font-weight: 600; line-height: 1.4; }
-        .size-table { width: 100%; border-collapse: collapse; text-align: center; }
-        .size-table th, .size-table td { border: 1px solid #eeeeee; padding: 10px; }
-        .size-table th { background-color: #000000; color: #ffffff; font-size: 0.7rem; text-transform: uppercase; }
-        .size-table td { font-weight: 700; color: #333; font-size: 0.8rem; }
-
-        /* Floating WhatsApp Support Widget */
-        .whatsapp-float { position: fixed; bottom: 80px; right: 15px; background-color: #000000; color: #ffffff; width: 46px; height: 46px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); z-index: 1500; text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <!-- Top Loading Progress Bar Animation -->
-    <div id="pageLoaderBar"></div>
-
     <!-- Top Navigation -->
     <nav class="top-nav">
-        <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
-        <a href="index.html" class="logo">HEAVY SOUL</a>
-        <div class="nav-icons">
-            <i class="fa-solid fa-magnifying-glass" onclick="window.location.href='shop.html'"></i>
-            <i class="fa-solid fa-cart-shopping" onclick="window.location.href='cart.html'"></i>
-        </div>
+        <i class="fa-solid fa-bars"></i>
+        <div class="logo">HEAVY SOUL</div>
+        <i class="fa-solid fa-magnifying-glass"></i>
     </nav>
 
-    <!-- Main Product Image (Swipeable) -->
-    <section class="product-image-section" id="imageSliderSection">
-        <img id="mainProductImg" src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80" alt="Dark Reflection T-Shirt">
-        <i class="fa-regular fa-heart heart-icon" onclick="toggleWishlist(this)"></i>
-        <div class="carousel-dots" id="carouselDots">
-            <div class="dot active" onclick="goToImage(0)"></div>
-            <div class="dot" onclick="goToImage(1)"></div>
-            <div class="dot" onclick="goToImage(2)"></div>
-        </div>
-    </section>
-
-    <!-- Product Info Layout -->
-    <section class="product-info">
-        
-        <!-- Color variants removed: products.js has no per-color image data yet.
-             Add a `colors` array to a product in products.js and re-introduce
-             this section if/when you want real color variants. -->
-
-        <!-- 2. Size Selector -->
-        <div class="size-section">
-            <div class="size-header">
-                <h3>Select Size</h3>
-                <button class="size-guide-btn" onclick="openSizeGuide()">Size Chart</button>
-            </div>
-            <div class="size-grid" id="sizeSelector">
-                <button class="size-btn" onclick="selectPageSize('S', this)">S</button>
-                <button class="size-btn" onclick="selectPageSize('M', this)">M</button>
-                <button class="size-btn" onclick="selectPageSize('L', this)">L</button>
-                <button class="size-btn" onclick="selectPageSize('XL', this)">XL</button>
-                <button class="size-btn" onclick="selectPageSize('XXL', this)">XXL</button>
-            </div>
-        </div>
-
-        <!-- 3. Brand & Title -->
-        <div class="brand-store">HEAVY SOUL <span>Official Store</span></div>
-        <h1 class="product-title" id="productTitle">Loading...</h1>
-
-        <!-- Rating -->
-        <div class="product-rating">
-            <span>4.8</span>
-            <i class="fa-solid fa-star"></i>
-            <span>&nbsp;|&nbsp; 128 Reviews</span>
-        </div>
-
-        <!-- 4. Pricing & Deal Section -->
-        <div>
-            <div class="hot-deal-badge">Exclusive Drop</div>
-            <div class="price-container" id="priceContainer">
-                <!-- Filled by renderProduct() from real product data -->
-            </div>
-        </div>
-
-        <!-- Offer Applied Banner -->
-        <div class="coupon-box">
-            <i class="fa-solid fa-tag"></i> Use code <span>HEAVY10</span> for extra 10% off at checkout
-        </div>
-
-        <!-- Product Details & Specifications -->
-        <div class="product-details-accordion">
-            <div class="details-title">Product Details & Specifications</div>
-            <ul class="features-list">
-                <li>240 GSM Heavyweight Cotton</li>
-                <li>Authentic Oversized Fit</li>
-                <li>High Density Premium Print</li>
-                <li>Pre-Shrunk Bio-Washed Fabric</li>
-            </ul>
-            <p class="product-desc" id="productDesc">Loading...</p>
-        </div>
-
-        <!-- Customer Review Section -->
-        <div class="review-section">
-            <div class="details-title">Customer Reviews (Photo & Video)</div>
-            <div class="review-cards-scroll">
-                <div class="review-media-card">
-                    <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=300&q=80" alt="Review 1">
-                </div>
-                <div class="review-media-card">
-                    <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80" alt="Review 2">
-                </div>
-                <div class="review-media-card">
-                    <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=300&q=80" alt="Review 3">
-                </div>
-            </div>
-        </div>
-
-        <!-- Related Category T-Shirts Section -->
-        <div class="related-section">
-            <div class="details-title">You May Also Like</div>
-            <div class="product-grid" id="relatedProducts">
-                <!-- Filled by renderProduct() from real product data -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Sticky Action Buttons -->
-    <div class="action-buttons">
-        <button class="btn btn-cart" onclick="addToCart()">Add To Cart</button>
-        <button class="btn btn-buy" onclick="buyNow()">Buy Now</button>
+    <!-- Overall Rating Section — no fabricated rating/count until real reviews exist -->
+    <div class="page-header">
+        <h1>Customer Reviews</h1>
+        <div class="trust-text" style="margin-top: 10px;">We're a new brand — every review here will be from a real customer, never made up.</div>
     </div>
 
-    <!-- Select Variant Bottom Sheet Modal -->
-    <div id="variantModal" class="variant-modal-overlay">
-        <div class="variant-modal-content">
-            <div class="variant-modal-header">
-                <h3>Select variant</h3>
-                <i class="fa-solid fa-xmark close-variant-btn" onclick="closeVariantModal()"></i>
-            </div>
-            <div class="variant-product-info">
-                <img id="modalProductImg" src="" alt="Product">
-                <div>
-                    <div class="modal-prod-title" id="modalProdTitle">Loading...</div>
-                    <div class="modal-prod-price" id="modalProdPrice"></div>
-                </div>
-            </div>
-            <div class="modal-size-header">Select Size</div>
-            <div class="modal-size-grid" id="modalSizeSelector">
-                <button class="modal-size-btn" onclick="selectModalSize('S', this)">S</button>
-                <button class="modal-size-btn" onclick="selectModalSize('M', this)">M</button>
-                <button class="modal-size-btn" onclick="selectModalSize('L', this)">L</button>
-                <button class="modal-size-btn" onclick="selectModalSize('XL', this)">XL</button>
-                <button class="modal-size-btn" onclick="selectModalSize('XXL', this)">XXL</button>
-            </div>
-            <button class="modal-continue-btn" onclick="confirmVariantAction()">Continue</button>
-        </div>
+    <!-- Reviews List: empty until real customer reviews come in -->
+    <div class="reviews-container" style="text-align: center; padding: 40px 20px;">
+        <i class="fa-regular fa-comment-dots" style="font-size: 2.2rem; color: #ddd; margin-bottom: 14px;"></i>
+        <h2 style="font-size: 1rem; font-weight: 800; margin-bottom: 8px;">No reviews yet</h2>
+        <p style="font-size: 0.82rem; color: #888; line-height: 1.5;">Be one of our first customers to leave a review after your order arrives!</p>
     </div>
 
-    <!-- Size Guide Modal Popup -->
-    <div id="sizeGuideModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Oversized Fit Guide</h3>
-                <i class="fa-solid fa-xmark close-btn" onclick="closeSizeGuide()"></i>
-            </div>
-            <p class="modal-desc">All measurements are in inches. Crafted with a dropped-shoulder authentic streetwear oversized fit.</p>
-            
-            <table class="size-table">
-                <thead>
-                    <tr>
-                        <th>Size</th>
-                        <th>Chest</th>
-                        <th>Length</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><strong>S</strong></td><td>40"</td><td>27"</td></tr>
-                    <tr><td><strong>M</strong></td><td>42"</td><td>28"</td></tr>
-                    <tr><td><strong>L</strong></td><td>44"</td><td>29"</td></tr>
-                    <tr><td><strong>XL</strong></td><td>46"</td><td>30"</td></tr>
-                    <tr><td><strong>XXL</strong></td><td>48"</td><td>31"</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <a href="shop.html" class="btn-view-all">SHOP NOW</a>
 
-    <!-- Floating WhatsApp Support Widget -->
-    <a href="#" id="whatsappFloat" class="whatsapp-float" target="_blank">
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
-
-    <!-- Real site config + product catalog, loaded BEFORE the inline script
-         below so PRODUCTS is ready when renderProduct() runs. -->
-    <script src="js/config.js"></script>
-    <script src="js/products.js"></script>
-
-    <!-- JavaScript -->
-    <script>
-        // ---- Resolve which product this page is showing, from ?id= in the URL ----
-        const urlParams = new URLSearchParams(window.location.search);
-        const requestedId = Number(urlParams.get('id')) || 1;
-        const catalog = (typeof PRODUCTS !== "undefined" && PRODUCTS.length) ? PRODUCTS : FALLBACK_PRODUCTS;
-        const currentProduct = catalog.find(p => p.id === requestedId) || catalog[0];
-
-        let currentImages = (currentProduct.images && currentProduct.images.length)
-            ? currentProduct.images
-            : [currentProduct.image];
-        let currentImgIndex = 0;
-        let selectedSize = null;
-        let pendingAction = '';
-
-        function renderProduct() {
-            document.title = currentProduct.name + " | Heavy Soul";
-            document.getElementById('productTitle').innerText = currentProduct.name;
-
-            // Main image + carousel dots
-            document.getElementById('mainProductImg').src = currentImages[0];
-            document.getElementById('mainProductImg').alt = currentProduct.name;
-            document.getElementById('carouselDots').innerHTML = currentImages.map((img, idx) =>
-                `<div class="dot${idx === 0 ? ' active' : ''}" onclick="goToImage(${idx})"></div>`
-            ).join('');
-
-            // Price
-            const priceContainer = document.getElementById('priceContainer');
-            if (currentProduct.compareAt) {
-                const pct = Math.round((1 - currentProduct.price / currentProduct.compareAt) * 100);
-                priceContainer.innerHTML = `
-                    <span class="discount-pct">${pct}% OFF</span>
-                    <span class="original-price">₹${currentProduct.compareAt}</span>
-                    <span class="current-price">₹${currentProduct.price}</span>
-                `;
-            } else {
-                priceContainer.innerHTML = `<span class="current-price">₹${currentProduct.price}</span>`;
-            }
-
-            // Sizes (page + modal), driven by this product's real sizes
-            const sizeList = currentProduct.sizes && currentProduct.sizes.length
-                ? currentProduct.sizes
-                : ['S', 'M', 'L', 'XL', 'XXL'];
-            document.getElementById('sizeSelector').innerHTML = sizeList.map(s =>
-                `<button class="size-btn" onclick="selectPageSize('${s}', this)">${s}</button>`
-            ).join('');
-            document.getElementById('modalSizeSelector').innerHTML = sizeList.map(s =>
-                `<button class="modal-size-btn" onclick="selectModalSize('${s}', this)">${s}</button>`
-            ).join('');
-
-            // Description
-            document.getElementById('productDesc').innerText = currentProduct.description || '';
-
-            // Variant modal preview
-            document.getElementById('modalProdTitle').innerText = currentProduct.name;
-            document.getElementById('modalProdPrice').innerHTML = currentProduct.compareAt
-                ? `₹${currentProduct.compareAt} <span style="color:#000; font-weight:900; font-size:1rem;">₹${currentProduct.price}</span>`
-                : `₹${currentProduct.price}`;
-
-            // WhatsApp float — uses real WhatsApp number from SITE_CONFIG + this product's name
-            const waNumber = (typeof SITE_CONFIG !== "undefined" && SITE_CONFIG.WHATSAPP_NUMBER) || '919339909978';
-            document.getElementById('whatsappFloat').href =
-                `https://wa.me/${waNumber}?text=${encodeURIComponent('Hello Heavy Soul, I need help with ' + currentProduct.name + '.')}`;
-
-            // Related products — 2 other real products from the catalog
-            const related = catalog.filter(p => p.id !== currentProduct.id).slice(0, 2);
-            document.getElementById('relatedProducts').innerHTML = related.map(p => `
-                <a href="product.html?id=${p.id}" class="product-card">
-                    <div class="image-placeholder">
-                        <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}">
-                    </div>
-                    <div class="product-title-sm">${escapeHtml(p.name)}</div>
-                    <div class="product-price-sm">₹${p.price}</div>
-                </a>
-            `).join('');
-
-            // Reflect existing wishlist state on the heart icon
-            const wishlist = JSON.parse(localStorage.getItem('heavySoulWishlist')) || [];
-            const heartIcon = document.querySelector('.heart-icon');
-            const inWishlist = wishlist.some(item => item.id === currentProduct.id);
-            heartIcon.classList.toggle('fa-solid', inWishlist);
-            heartIcon.classList.toggle('fa-regular', !inWishlist);
-        }
-
-        renderProduct();
-        // Re-render if the live catalog (from Apps Script) finishes loading after us.
-        window.addEventListener("hs:productsUpdated", renderProduct);
-
-        function updateMainImage() {
-            const imgElement = document.getElementById('mainProductImg');
-            imgElement.style.opacity = '0.3';
-            setTimeout(() => {
-                imgElement.src = currentImages[currentImgIndex];
-                imgElement.style.opacity = '1';
-            }, 150);
-
-            const dots = document.querySelectorAll('.dot');
-            dots.forEach((dot, idx) => {
-                dot.classList.toggle('active', idx === currentImgIndex);
-            });
-        }
-
-        function goToImage(index) {
-            currentImgIndex = index;
-            updateMainImage();
-        }
-
-        let touchstartX = 0;
-        let touchendX = 0;
-        const sliderSection = document.getElementById('imageSliderSection');
-
-        sliderSection.addEventListener('touchstart', e => {
-            touchstartX = e.changedTouches[0].screenX;
-        }, {passive: true});
-
-        sliderSection.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            handleSwipeGesture();
-        }, {passive: true});
-
-        function handleSwipeGesture() {
-            const swipeThreshold = 40;
-            if (touchendX < touchstartX - swipeThreshold) {
-                currentImgIndex = (currentImgIndex + 1) % currentImages.length;
-                updateMainImage();
-            }
-            if (touchendX > touchstartX + swipeThreshold) {
-                currentImgIndex = (currentImgIndex - 1 + currentImages.length) % currentImages.length;
-                updateMainImage();
-            }
-        }
-
-        function selectPageSize(size, element) {
-            selectedSize = size;
-            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
-        }
-
-        function selectModalSize(size, element) {
-            selectedSize = size;
-            document.querySelectorAll('.modal-size-btn').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
-            
-            document.querySelectorAll('.size-btn').forEach(btn => {
-                if(btn.innerText === size) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        }
-
-        function openVariantModal(actionType) {
-            pendingAction = actionType;
-            document.getElementById('modalProductImg').src = currentImages[currentImgIndex];
-            document.getElementById('variantModal').style.display = 'flex';
-        }
-
-        function closeVariantModal() {
-            document.getElementById('variantModal').style.display = 'none';
-        }
-
-        // Smooth Page Transition Animation Function
-        function triggerPageTransition(targetUrl) {
-            const loaderBar = document.getElementById('pageLoaderBar');
-            loaderBar.style.width = '100%';
-            document.body.classList.add('fade-out');
-            setTimeout(() => {
-                window.location.href = targetUrl;
-            }, 350);
-        }
-
-        function confirmVariantAction() {
-            if (!selectedSize) {
-                alert('Please select a size first!');
-                return;
-            }
-            closeVariantModal();
-            if (pendingAction === 'cart') {
-                executeAddToCart();
-                alert(`Added "${currentProduct.name}" (Size: ${selectedSize}) to cart!`);
-            } else if (pendingAction === 'buy') {
-                executeAddToCart();
-                triggerPageTransition('checkout.html');
-            }
-        }
-
-        function addToCart() {
-            if (!selectedSize) {
-                openVariantModal('cart');
-                return;
-            }
-            executeAddToCart();
-            alert(`Added "${currentProduct.name}" (Size: ${selectedSize}) to cart!`);
-        }
-
-        function buyNow() {
-            if (!selectedSize) {
-                openVariantModal('buy');
-                return;
-            }
-            executeAddToCart();
-            triggerPageTransition('checkout.html');
-        }
-
-        function executeAddToCart() {
-            let cart = JSON.parse(localStorage.getItem('heavySoulCart')) || [];
-            let activeImg = currentImages[currentImgIndex];
-
-            let product = {
-                id: currentProduct.id,
-                name: currentProduct.name,
-                price: currentProduct.price,
-                size: selectedSize,
-                image: activeImg,
-                quantity: 1,
-                orderType: currentProduct.orderType || "collection"
-            };
-
-            let existingIndex = cart.findIndex(item => item.id === product.id && item.size === product.size);
-            if (existingIndex > -1) {
-                cart[existingIndex].quantity += 1;
-            } else {
-                cart.push(product);
-            }
-
-            localStorage.setItem('heavySoulCart', JSON.stringify(cart));
-            // Let nav.js / any listening page refresh its cart badge immediately.
-            window.dispatchEvent(new Event('hs:cartUpdated'));
-        }
-
-        function openSizeGuide() {
-            document.getElementById('sizeGuideModal').style.display = 'flex';
-        }
-        function closeSizeGuide() {
-            document.getElementById('sizeGuideModal').style.display = 'none';
-        }
-        window.onclick = function(event) {
-            let guideModal = document.getElementById('sizeGuideModal');
-            let variantModal = document.getElementById('variantModal');
-            if (event.target == guideModal) {
-                guideModal.style.display = 'none';
-            }
-            if (event.target == variantModal) {
-                variantModal.style.display = 'none';
-            }
-        }
-
-        function toggleWishlist(element) {
-            element.classList.toggle('fa-solid');
-            element.classList.toggle('fa-regular');
-
-            let wishlist = JSON.parse(localStorage.getItem('heavySoulWishlist')) || [];
-            let activeImg = currentImages[currentImgIndex];
-            let product = {
-                id: currentProduct.id,
-                name: currentProduct.name,
-                price: currentProduct.price,
-                image: activeImg
-            };
-
-            if (element.classList.contains('fa-solid')) {
-                if (!wishlist.some(item => item.id === product.id)) wishlist.push(product);
-                alert("Added to Wishlist!");
-            } else {
-                wishlist = wishlist.filter(item => item.id !== product.id);
-                alert("Removed from Wishlist!");
-            }
-            localStorage.setItem('heavySoulWishlist', JSON.stringify(wishlist));
-            window.dispatchEvent(new Event('hs:wishlistUpdated'));
-        }
-    </script>
-<script src="js/config.js"></script><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="js/commerce.js"></script></body>
+</body>
 </html>
