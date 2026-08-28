@@ -1,5 +1,5 @@
 function getCart(){
-  return JSON.parse(localStorage.getItem("cart")) || [];
+  return JSON.parse(localStorage.getItem("heavySoulCart")) || [];
 }
 
 function updateCartCount(){
@@ -16,3 +16,4 @@ function toggleMobileNav(){
 }
 
 document.addEventListener("DOMContentLoaded", updateCartCount);
+window.addEventListener("hs:cartUpdated", updateCartCount);
