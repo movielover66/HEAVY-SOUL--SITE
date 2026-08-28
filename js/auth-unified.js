@@ -205,13 +205,6 @@ async function uHandleContinue() {
       document.getElementById("uAuthOtpField").style.display = "none";
       document.getElementById("uAuthVerifyOtpBtn").style.display = "none";
       uShowStep_("signup");
-      // Preload the MSG91 widget in the background as soon as we know
-      // OTP will likely be needed — by the time the user actually taps
-      // "Send OTP" (after typing name/password), the script has usually
-      // already finished loading, avoiding the first-click timeout.
-      if (parsed.type === "phone" && typeof hsLoadOtpScript === "function") {
-        hsLoadOtpScript().catch(() => {});
-      }
     }
   } catch (err) {
     uShowMsg_("সমস্যা হয়েছে, আবার চেষ্টা করুন।", true);
@@ -247,9 +240,6 @@ async function uHandleForgot() {
     _authFlowContext = "reset";
     _authResendCount = 0;
     uShowStep_("reset");
-    if (typeof hsLoadOtpScript === "function") {
-      hsLoadOtpScript().catch(() => {});
-    }
     return;
   }
   try {

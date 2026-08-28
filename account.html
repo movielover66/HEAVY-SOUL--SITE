@@ -1,139 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Account | Heavy Soul</title>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* CSS Reset & Global Styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
-        body { background-color: #ffffff; color: #000000; padding-bottom: 80px; }
-        
-        /* 1. Top Navigation */
-        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eeeeee; position: sticky; top: 0; background: #ffffff; z-index: 100; }
-        .top-nav i { font-size: 1.2rem; cursor: pointer; color: #000; }
-        .top-nav .logo { font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-transform: uppercase; }
-
-        /* 2. User Profile Header */
-        .profile-header { padding: 30px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #eeeeee; background-color: #f9f9f9; }
-        .profile-avatar { width: 60px; height: 60px; background-color: #000000; color: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: 900; }
-        .profile-info { flex-grow: 1; }
-        .profile-name { font-size: 1.2rem; font-weight: 900; text-transform: uppercase; margin-bottom: 3px; }
-        .profile-email { font-size: 0.85rem; color: #666666; font-weight: 600; }
-        .edit-btn { color: #000000; font-size: 1.2rem; cursor: pointer; padding: 5px; }
-
-        /* 3. Account Menu Options */
-        .account-menu { padding: 0 20px; }
-        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid #eeeeee; text-decoration: none; color: #000000; cursor: pointer; transition: background-color 0.2s; }
-        .menu-item:last-child { border-bottom: none; }
-        
-        .menu-item-left { display: flex; align-items: center; gap: 15px; }
-        .menu-icon { width: 35px; height: 35px; background-color: #f5f5f5; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #000000; font-size: 1rem; }
-        .menu-text { font-size: 0.95rem; font-weight: 700; }
-        
-        .menu-arrow { color: #cccccc; font-size: 1rem; }
-        
-        /* WhatsApp Support Highlight */
-        .whatsapp-menu .menu-icon { background-color: #e8f5e9; color: #25D366; }
-
-        /* Logout Button */
-        .logout-container { padding: 30px 20px; }
-        .btn-logout { width: 100%; padding: 15px; background-color: #ffffff; color: #d32f2f; font-weight: 900; font-size: 0.9rem; text-transform: uppercase; border: 1px solid #d32f2f; border-radius: 3px; cursor: pointer; letter-spacing: 0.5px; transition: 0.2s; }
-        .btn-logout:hover { background-color: #ffebee; }
-
-        /* 4. Bottom Navigation (Sticky) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #eeeeee; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
-        .nav-item { text-align: center; color: #999999; text-decoration: none; font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: 600; }
-        .nav-item.active { color: #000000; }
-        .nav-item i { font-size: 1.2rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="Log in or create your Heavy Soul account.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heavy Soul">
+<meta property="og:title" content="Account — Heavy Soul">
+<meta property="og:description" content="Log in or create your Heavy Soul account.">
+<meta property="og:image" content="https://heavysoul.in/assets/og-image.jpg">
+<meta property="og:url" content="https://heavysoul.in/account.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Account — Heavy Soul">
+<meta name="twitter:description" content="Log in or create your Heavy Soul account.">
+<meta name="twitter:image" content="https://heavysoul.in/assets/og-image.jpg">
+<title>Account — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .auth-wrap{ max-width: 420px; margin: 48px auto 80px; padding: 0 24px; }
+  .auth-prompt{ border:1px solid var(--line); padding:32px 24px; text-align:center; display:flex; flex-direction:column; gap:16px; }
+  .auth-prompt h2{ font-size:20px; margin:0; }
+  .auth-prompt p{ font-size:14px; color:var(--ink-soft); margin:0; }
+  .account-card{ border:1px solid var(--line); padding:24px; display:flex; flex-direction:column; gap:16px; }
+  .account-card h2{ font-size:20px; }
+  .account-row{ display:flex; justify-content:space-between; font-size:14px; padding:8px 0; border-bottom:1px solid var(--line); }
+  .account-row span:first-child{ color:var(--ink-soft); }
+  .orders-section{ max-width: 640px; margin: 0 auto 80px; padding: 0 24px; }
+  .orders-section h2{ font-size:18px; margin-bottom:16px; }
+  .order-card{ border:1px solid var(--line); padding:18px; margin-bottom:14px; }
+  .order-card-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; flex-wrap:wrap; gap:6px; }
+  .order-card-id{ font-family:var(--mono); font-size:13px; color:var(--accent); }
+  .order-card-date{ font-size:12px; color:var(--ink-soft); }
+  .order-item-line{ display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--ink-soft); }
+  .order-card-total{ display:flex; justify-content:space-between; font-size:14px; font-weight:600; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .order-empty{ font-size:13px; color:var(--ink-soft); }
+</style>
 </head>
 <body>
 
-    <!-- Top Navigation -->
-    <nav class="top-nav">
-        <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
-        <div class="logo">HEAVY SOUL</div>
-        <i class="fa-solid fa-gear"></i>
-    </nav>
-
-    <!-- User Profile Header -->
-    <div class="profile-header">
-        <div class="profile-avatar">HS</div>
-        <div class="profile-info">
-            <div class="profile-name">Heavy Souler</div>
-            <div class="profile-email">customer@heavysoul.com</div>
-        </div>
-        <i class="fa-regular fa-pen-to-square edit-btn" title="Edit Profile"></i>
+<header class="site-header">
+  <div class="notice-bar">Free shipping over ₹1499 · Made-to-order pieces ship in 5–7 days</div>
+  <nav class="nav wrap">
+    <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="shop.html?category=Custom">Custom</a>
+      <a href="track.html">Track order</a>
+      <a href="policy.html">Policies</a>
+      <a href="account.html" id="navLoginLink">Login / Signup</a>
     </div>
-
-    <!-- Account Menu -->
-    <div class="account-menu">
-        
-        <a href="order-tracking.html" class="menu-item">
-            <div class="menu-item-left">
-                <div class="menu-icon"><i class="fa-solid fa-box"></i></div>
-                <div class="menu-text">My Orders</div>
-            </div>
-            <i class="fa-solid fa-chevron-right menu-arrow"></i>
-        </a>
-
-        <a href="wishlist.html" class="menu-item">
-            <div class="menu-item-left">
-                <div class="menu-icon"><i class="fa-regular fa-heart"></i></div>
-                <div class="menu-text">Wishlist</div>
-            </div>
-            <i class="fa-solid fa-chevron-right menu-arrow"></i>
-        </a>
-
-        <a href="checkout.html" class="menu-item">
-            <div class="menu-item-left">
-                <div class="menu-icon"><i class="fa-regular fa-map"></i></div>
-                <div class="menu-text">Saved Addresses</div>
-            </div>
-            <i class="fa-solid fa-chevron-right menu-arrow"></i>
-        </a>
-
-        <a href="https://wa.me/919339909978" target="_blank" class="menu-item whatsapp-menu">
-            <div class="menu-item-left">
-                <div class="menu-icon"><i class="fa-brands fa-whatsapp"></i></div>
-                <div class="menu-text">Need Help? (WhatsApp)</div>
-            </div>
-            <i class="fa-solid fa-chevron-right menu-arrow"></i>
-        </a>
-
+    <div class="nav-icons">
+      <a class="icon-btn" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
     </div>
+  </nav>
+  <div class="mobile-panel" id="mobilePanel">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="shop.html?category=Custom">Custom</a>
+    <a href="track.html">Track order</a>
+    <a href="policy.html">Policies</a>
+    <a href="account.html" id="navLoginLinkMobile">Login / Signup</a>
+  </div>
+</header>
 
-    <!-- Logout Button -->
-    <div class="logout-container">
-        <button class="btn-logout" onclick="window.location.href='login.html'">LOG OUT</button>
+<div class="auth-wrap">
+
+  <!-- Shown only when logged OUT -->
+  <div id="authBox">
+    <div class="auth-prompt">
+      <h2>আপনার account-এ ঢুকুন</h2>
+      <p>Google, mobile number, অথবা email দিয়ে — যেভাবে সুবিধা।</p>
+      <button class="btn accent block" onclick="openAuthModal()">Login / Signup</button>
     </div>
+  </div>
 
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="shop.html" class="nav-item">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <span>Shop</span>
-        </a>
-        <a href="wishlist.html" class="nav-item">
-            <i class="fa-regular fa-heart"></i>
-            <span>Wishlist</span>
-        </a>
-        <a href="account.html" class="nav-item active"> <!-- Account is Active -->
-            <i class="fa-regular fa-user"></i>
-            <span>Account</span>
-        </a>
-        <a href="cart.html" class="nav-item">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span>Cart</span>
-        </a>
-    </nav>
+  <!-- Shown only when logged IN -->
+  <div class="account-card" id="accountBox" style="display:none;">
+    <h2>My account</h2>
+    <div class="account-row"><span>Name</span><span id="accName">—</span></div>
+    <div class="account-row"><span>Email</span><span id="accEmail">—</span></div>
+    <a href="track.html" class="btn outline block">Track an order</a>
+    <button class="btn block" onclick="authLogOut()">Log out</button>
+  </div>
 
-<script src="js/config.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script><script src="js/auth.js"></script><script src="js/orders.js"></script><script src="js/backend-account.js"></script></body>
+</div>
+
+<!-- My Orders — shown only when logged IN -->
+<div class="orders-section" id="ordersSection" style="display:none;">
+  <h2>My orders</h2>
+  <div id="ordersList"><p class="order-empty">Loading your orders…</p></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/msg91-otp.js"></script>
+<script src="js/auth-unified.js"></script>
+<script src="js/orders.js"></script>
+<script src="js/nav.js"></script>
+<script>
+function renderOrderCard(order){
+  const date = order.createdAt && order.createdAt.toDate ? order.createdAt.toDate() : null;
+  const dateStr = date ? date.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
+  const itemsHtml = (order.items || []).map(item => `
+    <div class="order-item-line">
+      <span>${escapeHtml(item.name)}${item.size && item.size !== '-' ? ' (' + escapeHtml(item.size) + ')' : ''} × ${item.qty || 1}</span>
+      <span>₹${(item.price || 0) * (item.qty || 1)}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="order-card">
+      <div class="order-card-top">
+        <span class="order-card-id">${escapeHtml(order.orderId)}</span>
+        <span class="order-card-date">${dateStr}</span>
+      </div>
+      ${itemsHtml}
+      <div class="order-card-total">
+        <span>Total</span>
+        <span>₹${order.subtotal || order.amountPaid || 0}</span>
+      </div>
+      <a href="track.html?order=${encodeURIComponent(order.orderId)}" class="btn outline block" style="margin-top:14px;">Track now</a>
+    </div>
+  `;
+}
+
+async function loadAndRenderOrders(){
+  const listEl = document.getElementById('ordersList');
+  const orders = await loadUserOrders();
+  if (orders.length === 0) {
+    listEl.innerHTML = `<p class="order-empty">No orders yet. <a href="shop.html" style="color:var(--accent);">Start shopping →</a></p>`;
+    return;
+  }
+  listEl.innerHTML = orders.map(renderOrderCard).join('');
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  if (!authReady()) return;
+  firebase.auth().onAuthStateChanged(function(user){
+    document.getElementById('authBox').style.display = user ? 'none' : 'block';
+    document.getElementById('accountBox').style.display = user ? 'flex' : 'none';
+    document.getElementById('ordersSection').style.display = user ? 'block' : 'none';
+    if (user){
+      document.getElementById('accName').textContent = user.displayName || '—';
+      document.getElementById('accEmail').textContent = user.email || '—';
+      loadAndRenderOrders();
+    }
+  });
+});
+</script>
+
+</body>
 </html>

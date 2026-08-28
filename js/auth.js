@@ -83,10 +83,3 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!authReady()) return;
   firebase.auth().onAuthStateChanged(renderAccountState);
 });
-
-async function authGoogleSignIn(){
-  if(!authReady()) throw new Error('Auth not configured yet.');
-  const provider=new firebase.auth.GoogleAuthProvider();
-  const cred=await firebase.auth().signInWithPopup(provider);
-  return cred.user;
-}

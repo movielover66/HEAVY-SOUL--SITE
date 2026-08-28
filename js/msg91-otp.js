@@ -61,7 +61,7 @@ function hsLoadOtpScript() {
       s.onload = () => {
         if (typeof window.initSendOTP === "function") {
           window.initSendOTP(HS_OTP_CONFIG);
-          hsWaitForOtpMethods(15000)
+          hsWaitForOtpMethods(8000)
             .then(() => {
               hsOtpScriptLoaded = true;
               resolve();

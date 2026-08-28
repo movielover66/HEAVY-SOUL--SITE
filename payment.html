@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="Complete payment for your Heavy Soul order.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heavy Soul">
+<meta property="og:title" content="Payment — Heavy Soul">
+<meta property="og:description" content="Complete payment for your Heavy Soul order.">
+<meta property="og:image" content="https://heavysoul.in/assets/og-image.jpg">
+<meta property="og:url" content="https://heavysoul.in/payment.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Payment — Heavy Soul">
+<meta name="twitter:description" content="Complete payment for your Heavy Soul order.">
+<meta name="twitter:image" content="https://heavysoul.in/assets/og-image.jpg">
+<title>Payment — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav wrap">
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
+    <div></div>
+    <div></div>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="steps">
+    <div class="step done"><span class="dot">✓</span> Bag</div>
+    <div class="step done"><span class="dot">✓</span> Shipping</div>
+    <div class="step active"><span class="dot">3</span> Payment</div>
+  </div>
+
+  <div id="paymentMain">
+    <div class="timer-box" id="timerBox">
+      <div class="eyebrow">Complete payment within</div>
+      <div class="clock" id="clock">10:00</div>
+    </div>
+
+    <div class="checkout-layout">
+      <div>
+        <div class="method-toggle">
+          <button id="btnPrepaid" class="active" onclick="setMethod('prepaid')">Pay in full</button>
+          <button id="btnCod" onclick="setMethod('cod')">Cash on delivery</button>
+        </div>
+
+        <p class="hint" style="margin-bottom:16px;">You'll be redirected to a secure Razorpay checkout — cards, UPI apps, netbanking and wallets all supported.</p>
+        <p class="hint" id="codExplainer" style="margin-bottom:16px; display:none;">With Cash on delivery, you pay a small advance now to confirm the order, and the rest to the courier when it arrives.</p>
+
+        <p class="hint" style="margin-top:4px;">After payment succeeds, WhatsApp opens with your order details pre-filled — send the message to confirm.</p>
+      </div>
+
+      <div class="summary-card">
+        <h3>Order summary</h3>
+        <div id="checkoutItems"></div>
+
+        <div class="receipt-row"><span class="k">Item total</span><span class="v" id="subtotalVal">₹0</span></div>
+        <div class="receipt-row hidden" id="rowHandling"><span class="k">COD handling</span><span class="v" id="handlingVal">₹0</span></div>
+        <div class="receipt-row hidden" id="rowGrandTotal"><span class="k">Total payable</span><span class="v" id="grandTotalVal">₹0</span></div>
+
+        <div class="receipt-stamp">
+          <span class="k" id="dueLabel">Pay now</span>
+          <span class="v" id="dueVal">₹0</span>
+        </div>
+
+        <div class="receipt-row muted hidden" id="rowRemaining"><span class="k">Balance on delivery</span><span class="v" id="remainingVal">₹0</span></div>
+        <p class="receipt-note" id="codNote" style="display:none;">You'll pay the balance in cash (or UPI) directly to the delivery agent when your order arrives.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cancelled-view hidden" id="cancelledView">
+    <h2>Payment window expired</h2>
+    <p style="color:var(--ink-soft); margin:14px 0 26px;">Your order wasn't confirmed in time and has been cancelled. No amount was charged — you can check out again whenever you're ready.</p>
+    <a href="shop.html" class="btn">Back to shop</a>
+  </div>
+</div>
+
+<div class="pay-bar-spacer" id="payBarSpacer"></div>
+<div class="pay-bar" id="payBar">
+  <div class="pay-bar-inner">
+    <div class="pay-bar-amount">
+      <span class="label" id="barDueLabel">Pay now</span>
+      <span class="value" id="barDueVal">₹0</span>
+      <span class="sub hidden" id="barRemainingSub"></span>
+    </div>
+    <button class="btn accent" onclick="placeOrder()" id="payBtn">Proceed to pay</button>
+  </div>
+</div>
+
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/orders.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/payment.js"></script>
+</body>
+</html>

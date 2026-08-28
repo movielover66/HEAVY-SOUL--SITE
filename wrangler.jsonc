@@ -1,0 +1,43 @@
+{
+  "name": "heavy-soul-site",
+  "compatibility_date": "2024-09-23",
+  "main": "src/index.js",
+  "vars": {
+    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzHbUao38sh9dP6AiAu1p6cxeZl6KkZX56KPZaSi7t_1fwA6sBQgcudlT1tfgcqYSmR/exec"
+  },
+  // FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY is NOT declared here on purpose —
+  // it's ~1700 characters, over the Cloudflare Secrets Store's 1024-char
+  // limit. It must be added by hand as a classic Worker secret instead:
+  //   Workers & Pages → heavy-soul-site → Settings → Variables and secrets
+  //   → Add variable → Type: Secret → Name: FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY
+  // Everything below this line fits the Secrets Store's limit fine and is
+  // managed centrally there.
+  "secrets_store_secrets": [
+    {
+      "binding": "RAZORPAY_KEY_ID",
+      "store_id": "70b0de51e63841d78d9a2f5817beb776",
+      "secret_name": "RAZORPAY_KEY_ID"
+    },
+    {
+      "binding": "RAZORPAY_KEY_SECRET",
+      "store_id": "70b0de51e63841d78d9a2f5817beb776",
+      "secret_name": "RAZORPAY_KEY_SECRET"
+    },
+    {
+      "binding": "MSG91_AUTHKEY",
+      "store_id": "70b0de51e63841d78d9a2f5817beb776",
+      "secret_name": "MSG91_AUTHKEY"
+    },
+    {
+      "binding": "FIREBASE_SERVICE_ACCOUNT_EMAIL",
+      "store_id": "70b0de51e63841d78d9a2f5817beb776",
+      "secret_name": "FIREBASE_SERVICE_ACCOUNT_EMAIL"
+    }
+  ],
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  }
+}

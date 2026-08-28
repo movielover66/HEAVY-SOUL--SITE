@@ -1,168 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | Heavy Soul</title>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* CSS Reset & Global Styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
-        body { background-color: #ffffff; color: #000000; padding-bottom: 20px; }
-        
-        /* 1. Top Navigation */
-        .top-nav { display: flex; align-items: center; justify-content: center; padding: 15px 20px; border-bottom: 1px solid #eeeeee; position: sticky; top: 0; background: #ffffff; z-index: 100; }
-        .top-nav .back-btn { position: absolute; left: 20px; font-size: 1.2rem; cursor: pointer; color: #000; }
-        .top-nav .logo { font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-transform: uppercase; }
-
-        /* 2. Page Title */
-        .page-title { text-align: left; padding: 20px 20px 10px; font-size: 1.1rem; font-weight: 900; text-transform: uppercase; }
-
-        /* 3. Form Sections */
-        .checkout-form { padding: 0 20px; }
-        .section-title { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; margin-top: 20px; color: #333; }
-        
-        .input-group { margin-bottom: 12px; }
-        .input-group input { width: 100%; padding: 14px; border: 1px solid #cccccc; border-radius: 3px; font-size: 0.9rem; outline: none; transition: border 0.2s; }
-        .input-group input:focus { border-color: #000000; }
-        
-        .row { display: flex; gap: 10px; }
-        .row .input-group { flex: 1; }
-
-        /* 4. Radio Options (Shipping & Payment) */
-        .radio-group { border: 1px solid #cccccc; border-radius: 3px; margin-bottom: 20px; }
-        .radio-option { display: flex; justify-content: space-between; align-items: center; padding: 15px; cursor: pointer; border-bottom: 1px solid #eeeeee; }
-        .radio-option:last-child { border-bottom: none; }
-        .radio-label { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; }
-        .radio-price { font-weight: 800; font-size: 0.9rem; }
-        
-        /* Custom Radio Button */
-        input[type="radio"] { accent-color: #000000; width: 16px; height: 16px; cursor: pointer; }
-
-        /* 5. Place Order Action */
-        .place-order-section { margin-top: 30px; }
-        .btn-place-order { width: 100%; padding: 16px; background-color: #000000; color: #ffffff; font-weight: 900; font-size: 0.9rem; text-transform: uppercase; border: none; border-radius: 3px; cursor: pointer; letter-spacing: 0.5px; }
-        .secure-checkout { text-align: center; font-size: 0.75rem; color: #555555; margin-top: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .secure-checkout i { color: #000000; font-size: 0.9rem; }
-
-        /* 6. Loading Overlay (shown on "Place Order" tap, before redirecting) */
-        body.is-placing-order .checkout-form { opacity: 0.35; pointer-events: none; transition: opacity 0.2s ease; }
-        .btn-place-order:disabled { cursor: default; opacity: 0.7; }
-        .btn-place-order .btn-spinner {
-            display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.35);
-            border-top-color: #ffffff; border-radius: 50%; margin: 0 auto;
-            animation: hs-spin 0.7s linear infinite;
-        }
-        .btn-place-order:disabled .btn-spinner { display: inline-block; }
-        .btn-place-order:disabled .btn-label { display: none; }
-
-        .order-loading-overlay {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.55);
-            display: none; align-items: center; justify-content: center; z-index: 1000;
-        }
-        body.is-placing-order .order-loading-overlay { display: flex; }
-        .order-loading-overlay .spinner {
-            width: 34px; height: 34px; border: 3px solid rgba(0,0,0,0.15);
-            border-top-color: #000000; border-radius: 50%;
-            animation: hs-spin 0.7s linear infinite;
-        }
-        @keyframes hs-spin { to { transform: rotate(360deg); } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="Secure checkout for your Heavy Soul order — Prepaid or COD, shipped across India.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heavy Soul">
+<meta property="og:title" content="Checkout — Heavy Soul">
+<meta property="og:description" content="Secure checkout for your Heavy Soul order — Prepaid or COD, shipped across India.">
+<meta property="og:image" content="https://heavysoul.in/assets/og-image.jpg">
+<meta property="og:url" content="https://heavysoul.in/checkout.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Checkout — Heavy Soul">
+<meta name="twitter:description" content="Secure checkout for your Heavy Soul order — Prepaid or COD, shipped across India.">
+<meta name="twitter:image" content="https://heavysoul.in/assets/og-image.jpg">
+<title>Checkout — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <!-- Top Navigation -->
-    <nav class="top-nav">
-        <i class="fa-solid fa-arrow-left back-btn" onclick="window.history.back()"></i>
-        <div class="logo">HEAVY SOUL</div>
-    </nav>
+<header class="site-header">
+  <nav class="nav wrap">
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
+    <div></div>
+    <div class="nav-icons">
+      <a class="icon-btn" id="accountBtn" href="account.html" aria-label="Login / Signup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.7-3.6 5-5.5 7.5-5.5s5.8 1.9 7.5 5.5"/></svg>
+      </a>
+      <a class="icon-btn" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+    </div>
+  </nav>
+</header>
 
-    <div class="page-title">Checkout</div>
+<div class="wrap">
+  <div class="steps">
+    <div class="step done"><span class="dot">✓</span> Bag</div>
+    <div class="step active"><span class="dot">2</span> Shipping</div>
+    <div class="step"><span class="dot">3</span> Payment</div>
+  </div>
 
-    <form class="checkout-form">
-        
-        <!-- Contact Information -->
-        <div class="section-title">Contact Information</div>
-        <div class="input-group">
-            <input type="text" placeholder="Email / Phone Number" required>
+  <div class="checkout-layout">
+    <div>
+      <h1 style="font-size:28px; margin-bottom:6px;">Shipping details</h1>
+      <p class="hint" style="margin-bottom:22px;">Fill this in once — we'll remember it for next time.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" autocomplete="name" placeholder="Your full name">
+          <span class="field-err" id="err-name">Please enter your name</span>
         </div>
-
-        <!-- Shipping Address -->
-        <div class="section-title">Shipping Address</div>
-        <div class="input-group">
-            <input type="text" placeholder="Full Name" required>
+        <div class="field">
+          <label for="phone">Phone number</label>
+          <input id="phone" name="tel" type="tel" autocomplete="tel" placeholder="10-digit mobile number" inputmode="numeric">
+          <span class="field-err" id="err-phone">Enter a valid 10-digit mobile number</span>
         </div>
-        <div class="input-group">
-            <input type="text" placeholder="Address" required>
+        <div class="field full">
+          <label for="email">Email (optional)</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@email.com">
         </div>
-        <div class="row">
-            <div class="input-group">
-                <input type="text" placeholder="Town / City" required>
-            </div>
-            <div class="input-group">
-                <input type="text" placeholder="State" required>
-            </div>
+        <div class="field full">
+          <label for="address">Full address</label>
+          <textarea id="address" name="street-address" autocomplete="street-address" rows="3" placeholder="House / street / landmark"></textarea>
+          <span class="field-err" id="err-address">Please enter your full address</span>
         </div>
-        <div class="row">
-            <div class="input-group">
-                <input type="text" placeholder="PIN Code" required>
-            </div>
-            <div class="input-group">
-                <input type="tel" placeholder="Phone Number" required>
-            </div>
+        <div class="field">
+          <label for="pin">PIN code</label>
+          <input id="pin" name="postal-code" type="text" autocomplete="postal-code" placeholder="6-digit PIN" inputmode="numeric">
+          <span class="field-err" id="err-pin">Enter a valid 6-digit PIN code</span>
+          <span class="hint" id="pinChecking"></span>
         </div>
-
-        <!-- Shipping Method -->
-        <div class="section-title">Shipping Method</div>
-        <div class="radio-group">
-            <label class="radio-option">
-                <div class="radio-label">
-                    <input type="radio" name="shipping" checked> Standard Shipping (3-5 Days)
-                </div>
-                <div class="radio-price">₹0</div>
-            </label>
-            <label class="radio-option">
-                <div class="radio-label">
-                    <input type="radio" name="shipping"> Express Shipping (1-2 Days)
-                </div>
-                <div class="radio-price">₹99</div>
-            </label>
+        <div class="field">
+          <label for="city">City / District</label>
+          <input id="city" name="address-level2" type="text" autocomplete="address-level2" placeholder="Auto-filled from PIN code">
         </div>
-
-        <!-- Payment Method -->
-        <div class="section-title">Payment Method</div>
-        <div class="radio-group">
-            <label class="radio-option">
-                <div class="radio-label">
-                    <input type="radio" name="payment" checked> COD (Cash on Delivery)
-                </div>
-            </label>
-            <label class="radio-option">
-                <div class="radio-label">
-                    <input type="radio" name="payment"> Online Payment (UPI / Card / NetBanking)
-                </div>
-            </label>
+        <div class="field full">
+          <label for="state">State</label>
+          <input id="state" name="address-level1" type="text" autocomplete="address-level1" placeholder="Auto-filled from PIN code">
         </div>
-
-        <!-- Submit Button -->
-        <div class="place-order-section">
-            <button type="submit" class="btn-place-order" id="placeOrderBtn">
-                <span class="btn-label">PLACE ORDER</span>
-                <span class="btn-spinner"></span>
-            </button>
-            <div class="secure-checkout">
-                <i class="fa-solid fa-lock"></i> 100% Secure Checkout
-            </div>
-        </div>
-    </form>
-
-    <!-- Full-page dim + spinner overlay, shown while the order "processes" -->
-    <div class="order-loading-overlay" id="orderLoadingOverlay">
-        <div class="spinner"></div>
+      </div>
     </div>
 
-    <!-- JavaScript to handle submission -->
+    <div class="summary-card">
+      <h3>Your bag</h3>
+      <div id="checkoutItems"></div>
+      <div class="sum-row total"><span>Total</span><span id="checkoutTotal">₹0</span></div>
+    </div>
+  </div>
+</div>
 
-<script src="js/config.js"></script><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="js/commerce.js"></script></body>
+<div class="pay-bar-spacer"></div>
+<div class="pay-bar">
+  <div class="pay-bar-inner">
+    <div class="pay-bar-amount">
+      <span class="label">Total</span>
+      <span class="value" id="barTotal">₹0</span>
+    </div>
+    <button class="btn accent" onclick="goToPayment()">Continue to payment</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/orders.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/checkout.js"></script>
+<script>
+  // Guard: if someone opens checkout.html directly without logging in
+  // (skipping the cart page), send them back to the cart to log in first.
+  document.addEventListener("DOMContentLoaded", function () {
+    if (!authReady()) return;
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (!user) window.location.href = "cart.html";
+    });
+  });
+</script>
+</body>
 </html>

@@ -29,20 +29,12 @@ function renderProductPage_(){
 
   // Gallery
   const mainImg = document.getElementById("pdMainImg");
-  const thumbsWrap = document.getElementById("pdThumbs");
-  
-  const productImages = product.images && product.images.length ? product.images : [product.image];
-  mainImg.src = productImages[0];
+  mainImg.src = product.image;
   mainImg.alt = product.name;
-
-  thumbsWrap.innerHTML = productImages.map((src, i) => `
+  document.getElementById("pdThumbs").innerHTML = product.images.map((src, i) => `
     <img src="${escapeHtml(src)}" class="${i === 0 ? "active" : ""}" data-src="${escapeHtml(src)}" alt="${escapeHtml(product.name)} view ${i+1}">
   `).join("");
-
-  thumbsWrap.replaceWith(thumbsWrap.cloneNode(true));
-  const newThumbsWrap = document.getElementById("pdThumbs");
-  
-  newThumbsWrap.addEventListener("click", (e) => {
+  document.getElementById("pdThumbs").addEventListener("click", (e) => {
     const img = e.target.closest("img");
     if (!img) return;
     mainImg.src = img.dataset.src;
@@ -98,7 +90,7 @@ function renderProductPage_(){
     document.getElementById("pdNote").classList.remove("hidden");
   }
 
-  // Size guide
+  // Size guide — show the numeric (bottoms) table if sizes look like waist numbers
   const sizeGuideBtn = document.getElementById("sizeGuideBtn");
   const sizeGuideModal = document.getElementById("sizeGuideModal");
   const sizeGuideClose = document.getElementById("sizeGuideClose");
@@ -118,7 +110,7 @@ function renderProductPage_(){
     });
   }
 
-  // Related products
+  // Related products — same category, excluding self
   const related = PRODUCTS.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
   const relatedWrap = document.getElementById("relatedGrid");
   if (related.length) {
@@ -127,7 +119,7 @@ function renderProductPage_(){
     document.getElementById("relatedSection").classList.add("hidden");
   }
 
-  // Structured data
+  // Structured data — lets Google show price/availability in search results
   const siteUrl = ((typeof SITE_CONFIG !== "undefined") && SITE_CONFIG.SITE_URL) || "https://heavysoul.in";
   const productSchema = {
     "@context": "https://schema.org/",
@@ -153,6 +145,9 @@ function renderProductPage_(){
   return true;
 }
 
+// If the product isn't in the cached/fallback catalog yet (e.g. it was
+// just added in the admin panel), retry once the live catalog arrives
+// instead of leaving the visitor stuck on "Product not found".
 if (!renderProductPage_()) {
   window.addEventListener("hs:productsUpdated", function retryRender_(){
     window.removeEventListener("hs:productsUpdated", retryRender_);

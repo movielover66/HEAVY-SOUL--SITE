@@ -1,228 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart | Heavy Soul</title>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* CSS Reset & Global Styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
-        body { background-color: #ffffff; color: #000000; padding-bottom: 90px; }
-        
-        /* 1. Top Navigation */
-        .top-nav { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eeeeee; position: sticky; top: 0; background: #ffffff; z-index: 100; gap: 15px; }
-        .top-nav i { font-size: 1.2rem; cursor: pointer; color: #000; }
-        .top-nav h1 { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
-
-        /* 2. Cart Item */
-        .cart-container { padding: 20px; }
-        .cart-item { display: flex; gap: 15px; margin-bottom: 25px; position: relative; border-bottom: 1px solid #f0f0f0; padding-bottom: 20px; }
-        .cart-item-image { width: 85px; height: 105px; background-color: #000; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
-        .cart-item-image img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .cart-item-details { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .item-title { font-size: 0.95rem; font-weight: 800; }
-        .item-variant { font-size: 0.8rem; color: #666; margin-top: 3px; }
-        .item-price { font-size: 0.95rem; font-weight: 700; margin-top: 5px; }
-        
-        /* Quantity & Delete */
-        .item-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .qty-selector { display: flex; align-items: center; border: 1px solid #dddddd; border-radius: 3px; width: fit-content; }
-        .qty-btn { padding: 5px 12px; cursor: pointer; font-weight: 800; background: #ffffff; border: none; font-size: 1rem; }
-        .qty-val { padding: 5px 12px; font-weight: 700; font-size: 0.9rem; border-left: 1px solid #dddddd; border-right: 1px solid #dddddd; }
-        .delete-btn { color: #555555; cursor: pointer; font-size: 1.1rem; padding: 5px; background: none; border: none; }
-
-        /* 3. Price Details */
-        .price-details { border-top: 1px solid #eeeeee; padding-top: 20px; margin-bottom: 20px; }
-        .price-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 12px; font-weight: 600; color: #555; }
-        .price-row.total { font-size: 1.1rem; font-weight: 900; color: #000; border-top: 1px solid #eeeeee; padding-top: 12px; margin-top: 5px; }
-
-        /* 4. Free Shipping Banner */
-        .free-shipping-banner { background-color: #f8f8f8; border: 1px dashed #cccccc; padding: 15px; text-align: center; border-radius: 4px; margin-bottom: 25px; font-size: 0.85rem; font-weight: 700; }
-        .free-shipping-banner span { color: #d97706; }
-
-        /* 5. Action Buttons */
-        .btn { width: 100%; padding: 16px; font-weight: 900; font-size: 0.9rem; text-transform: uppercase; cursor: pointer; border-radius: 3px; text-align: center; letter-spacing: 0.5px; display: block; text-decoration: none; }
-        .btn-checkout { background-color: #000000; color: #ffffff; border: 2px solid #000000; margin-bottom: 15px; }
-        .btn-continue { background-color: #ffffff; color: #555555; border: none; font-size: 0.8rem; text-align: center; }
-        
-        .empty-cart { text-align: center; padding: 40px 20px; color: #666; font-weight: 600; font-size: 0.95rem; }
-
-        /* 6. Bottom Navigation (Sticky) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #eeeeee; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
-        .nav-item { text-align: center; color: #999999; text-decoration: none; font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: 600; }
-        .nav-item.active { color: #000000; }
-        .nav-item i { font-size: 1.2rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="Review your bag before checkout — Heavy Soul heavyweight streetwear, ships across India.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heavy Soul">
+<meta property="og:title" content="Your Bag — Heavy Soul">
+<meta property="og:description" content="Review your bag before checkout — Heavy Soul heavyweight streetwear, ships across India.">
+<meta property="og:image" content="https://heavysoul.in/assets/og-image.jpg">
+<meta property="og:url" content="https://heavysoul.in/cart.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Your Bag — Heavy Soul">
+<meta name="twitter:description" content="Review your bag before checkout — Heavy Soul heavyweight streetwear, ships across India.">
+<meta name="twitter:image" content="https://heavysoul.in/assets/og-image.jpg">
+<title>Your Bag — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <!-- Top Navigation -->
-    <nav class="top-nav">
-        <i class="fa-solid fa-arrow-left" onclick="window.location.href='index.html'"></i>
-        <h1 id="cartHeading">Your Cart (0)</h1>
-    </nav>
+<!-- ---------- Login / Signup bottom sheet (shown on Checkout) ---------- -->
+<div id="authModalOverlay">
+  <div class="auth-sheet">
+    <div class="auth-sheet-close" onclick="closeAuthModal()">&times;</div>
+    <h2>Login / Signup</h2>
+    <span class="auth-modal-msg" id="authModalMsg"></span>
 
-    <div class="cart-container" id="cartMainContainer">
-        <!-- Dynamic Cart Items Container -->
-        <div id="cartItemsList"></div>
-
-        <!-- Price Details -->
-        <div class="price-details" id="priceDetailsSection" style="display: none;">
-            <div class="price-row">
-                <span>Subtotal</span>
-                <span>₹<span id="subtotalDisplay">0</span></span>
-            </div>
-            <div class="price-row">
-                <span>Shipping</span>
-                <span>₹<span id="shippingDisplay">0</span></span>
-            </div>
-            <div class="price-row total">
-                <span>Total</span>
-                <span>₹<span id="totalDisplay">0</span></span>
-            </div>
-        </div>
-
-        <!-- Free Shipping Banner -->
-        <div class="free-shipping-banner" id="shippingBanner" style="display: none;">
-            <!-- Will be updated dynamically -->
-        </div>
-
-        <!-- Actions -->
-        <div id="cartActions" style="display: none;">
-            <a href="checkout.html" class="btn btn-checkout">PROCEED TO CHECKOUT</a>
-        </div>
-        <a href="shop.html" class="btn btn-continue"><i class="fa-solid fa-chevron-left"></i> CONTINUE SHOPPING</a>
+    <div class="auth-modal-step active" id="authStep-start">
+      <div class="field">
+        <input id="authEmailInput" type="email" placeholder="Enter email">
+      </div>
+      <button class="btn accent block" id="authEmailBtn" onclick="handleEmailContinue()">Continue</button>
+      <div class="auth-or">OR</div>
+      <button class="auth-google-btn" onclick="signInWithGoogle()">
+        <svg viewBox="0 0 48 48" width="18" height="18"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.3 1 7.3 2.7l6-6C33.9 6.5 29.2 4.5 24 4.5 12.9 4.5 4 13.4 4 24.5S12.9 44.5 24 44.5 44 35.6 44 24.5c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.9 18.9 13 24 13c2.8 0 5.3 1 7.3 2.7l6-6C33.9 6.5 29.2 4.5 24 4.5c-7.7 0-14.4 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 44.5c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9.5 39.9 16.2 44.5 24 44.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C40.5 36.3 44 31 44 24.5c0-1.4-.1-2.7-.4-4z"/></svg>
+        Continue with Google
+      </button>
     </div>
 
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="shop.html" class="nav-item">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <span>Shop</span>
-        </a>
-        <a href="wishlist.html" class="nav-item">
-            <i class="fa-regular fa-heart"></i>
-            <span>Wishlist</span>
-        </a>
-        <a href="account.html" class="nav-item">
-            <i class="fa-regular fa-user"></i>
-            <span>Account</span>
-        </a>
-        <a href="cart.html" class="nav-item active">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span>Cart</span>
-        </a>
-    </nav>
+    <!-- Existing account: password only -->
+    <div class="auth-modal-step" id="authStep-login">
+      <p style="font-size:13px; color:var(--ink-soft);">
+        <strong id="loginEmailDisplay"></strong>
+        <span class="auth-otp-edit" onclick="backToEmailStep()" style="margin-left:8px;">change</span>
+      </p>
+      <div class="field">
+        <input id="authLoginPassword" type="password" placeholder="Password">
+      </div>
+      <span class="auth-otp-edit" onclick="handleModalForgotPassword()">Forgot password?</span>
+      <button class="btn accent block" id="modalLoginBtn" onclick="handleModalLogin()">Log in</button>
+    </div>
 
-    <!-- JavaScript for Dynamic Cart Logic -->
-    <script>
-        const freeShippingThreshold = 1000;
+    <!-- New email: name + password -->
+    <div class="auth-modal-step" id="authStep-signup">
+      <p style="font-size:13px; color:var(--ink-soft);">
+        <strong id="signupEmailDisplay"></strong>
+        <span class="auth-otp-edit" onclick="backToEmailStep()" style="margin-left:8px;">change</span>
+      </p>
+      <div class="field">
+        <input id="authSignupName" type="text" placeholder="Full name">
+      </div>
+      <div class="field">
+        <input id="authSignupPassword" type="password" placeholder="Password (min 6 characters)">
+      </div>
+      <button class="btn accent block" id="modalSignupBtn" onclick="handleModalSignup()">Sign up</button>
+    </div>
 
-        function loadCart() {
-            let cart = JSON.parse(localStorage.getItem('heavySoulCart')) || [];
-            let listContainer = document.getElementById('cartItemsList');
-            let priceDetails = document.getElementById('priceDetailsSection');
-            let shippingBanner = document.getElementById('shippingBanner');
-            let cartActions = document.getElementById('cartActions');
-            let cartHeading = document.getElementById('cartHeading');
+    <div class="auth-modal-step" id="authStep-details">
+      <p style="font-size:13px; color:var(--ink-soft);">আপনার প্রথমবার — শিপিং-এর জন্য এই তথ্যগুলো দিন</p>
+      <div class="field">
+        <input id="authDetailsName" type="text" placeholder="Full name">
+      </div>
+      <div class="field">
+        <input id="authDetailsPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="Mobile number">
+      </div>
+      <button class="btn ghost block" id="authSendOtpBtn" onclick="sendPhoneOtp()" style="margin-bottom:8px;">Send OTP</button>
 
-            // Update top header count
-            let totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartHeading.innerText = `Your Cart (${totalCount})`;
+      <div class="field" id="authOtpField" style="display:none;">
+        <input id="authOtpInput" type="tel" inputmode="numeric" maxlength="6" placeholder="Enter OTP">
+      </div>
+      <button class="btn ghost block" id="authVerifyOtpBtn" onclick="verifyPhoneOtp()" style="display:none; margin-bottom:8px;">Verify OTP</button>
 
-            if (cart.length === 0) {
-                listContainer.innerHTML = `<div class="empty-cart">Your cart is empty!<br><br></div>`;
-                priceDetails.style.display = 'none';
-                shippingBanner.style.display = 'none';
-                cartActions.style.display = 'none';
-                return;
-            }
+      <button class="btn accent block" id="authDetailsBtn" onclick="completeSignupDetails()" style="display:none;">Continue</button>
+    </div>
+  </div>
+</div>
 
-            priceDetails.style.display = 'block';
-            shippingBanner.style.display = 'block';
-            cartActions.style.display = 'block';
+<header class="site-header">
+  <nav class="nav wrap">
+    <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="shop.html?category=Custom">Custom</a>
+      <a href="track.html">Track order</a>
+      <a href="policy.html">Policies</a>
+      <a href="account.html" id="navLoginLink">Login / Signup</a>
+    </div>
+    <div class="nav-icons">
+      <a class="icon-btn" id="accountBtn" href="account.html" aria-label="Login / Signup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.7-3.6 5-5.5 7.5-5.5s5.8 1.9 7.5 5.5"/></svg>
+      </a>
+      <a class="icon-btn" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+    </div>
+  </nav>
+  <div class="mobile-panel" id="mobilePanel">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="shop.html?category=Custom">Custom</a>
+    <a href="track.html">Track order</a>
+    <a href="policy.html">Policies</a>
+    <a href="account.html" id="navLoginLinkMobile">Login / Signup</a>
+  </div>
+</header>
 
-            let html = '';
-            let subtotal = 0;
+<div class="wrap">
+  <p class="crumb"><a href="index.html">Home</a> / Your bag</p>
+  <h1 style="font-size:32px; margin-bottom:20px;">Your bag</h1>
 
-            cart.forEach((item, index) => {
-                let itemTotal = item.price * item.quantity;
-                subtotal += itemTotal;
+  <div class="cart-layout" id="cartLayout">
+    <div id="cartItems"></div>
+    <div class="summary-card">
+      <h3>Order summary</h3>
+      <div class="sum-row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+      <div class="sum-row"><span>Shipping</span><span>Calculated at checkout</span></div>
+      <div class="sum-row total"><span>Total</span><span id="cartTotal">₹0</span></div>
+      <button onclick="requireAuthThenGo('checkout.html')" class="btn block" style="margin-top:18px;">Checkout</button>
+      <a href="shop.html" class="btn outline block" style="margin-top:10px;">Continue shopping</a>
+    </div>
+  </div>
 
-                html += `
-                    <div class="cart-item">
-                        <div class="cart-item-image">
-                            <img src="${item.image}" alt="${item.name}">
-                        </div>
-                        <div class="cart-item-details">
-                            <div>
-                                <div class="item-title">${item.name}</div>
-                                <div class="item-variant">Size: ${item.size}</div>
-                                <div class="item-price">₹${item.price}</div>
-                            </div>
-                            <div class="item-actions">
-                                <div class="qty-selector">
-                                    <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
-                                    <div class="qty-val">${item.quantity}</div>
-                                    <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
-                                </div>
-                                <button class="delete-btn" onclick="removeItem(${index})"><i class="fa-regular fa-trash-can"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
+  <div class="empty-state hidden" id="cartEmpty">
+    <h2>Your bag is empty</h2>
+    <p>Looks like you haven't added anything yet.</p>
+    <a href="shop.html" class="btn">Shop the edit</a>
+  </div>
+</div>
 
-            listContainer.innerHTML = html;
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2026 Heavy Soul. All rights reserved.</span>
+      <span>Prices in INR · Ships across India</span>
+      <span>Trade Reg. No. 3549 (Saptagram GP, Hooghly)</span>
+    </div>
+  </div>
+</footer>
 
-            // Update Subtotal & Total
-            document.getElementById('subtotalDisplay').innerText = subtotal;
-            let shipping = 0; // Free or flat rate logic if needed
-            let total = subtotal + shipping;
-            document.getElementById('totalDisplay').innerText = total;
-
-            // Update Free Shipping Banner
-            let difference = freeShippingThreshold - subtotal;
-            if (difference > 0) {
-                shippingBanner.innerHTML = `🎉 You are <span>₹${difference}</span> away from <br> <strong>FREE SHIPPING</strong>`;
-                shippingBanner.style.backgroundColor = '#f8f8f8';
-                shippingBanner.style.borderColor = '#cccccc';
-            } else {
-                shippingBanner.innerHTML = `✨ Congratulations! You get <br> <strong>FREE SHIPPING</strong>`;
-                shippingBanner.style.backgroundColor = '#e8f5e9';
-                shippingBanner.style.borderColor = '#4caf50';
-            }
-        }
-
-        function changeQty(index, change) {
-            let cart = JSON.parse(localStorage.getItem('heavySoulCart')) || [];
-            cart[index].quantity += change;
-            
-            if (cart[index].quantity < 1) {
-                cart[index].quantity = 1;
-            }
-
-            localStorage.setItem('heavySoulCart', JSON.stringify(cart));
-            loadCart();
-        }
-
-        function removeItem(index) {
-            let cart = JSON.parse(localStorage.getItem('heavySoulCart')) || [];
-            if (confirm("Are you sure you want to remove this item?")) {
-                cart.splice(index, 1);
-                localStorage.setItem('heavySoulCart', JSON.stringify(cart));
-                loadCart();
-            }
-        }
-
-        window.onload = loadCart;
-    </script>
-<script src="js/config.js"></script><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="js/commerce.js"></script></body>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/msg91-otp.js"></script>
+<script src="js/auth-unified.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/products.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/app.js"></script>
+</body>
 </html>
