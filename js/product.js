@@ -1,3 +1,4 @@
+
 const productId = new URLSearchParams(window.location.search).get("id");
 
 function renderProductPage_(){
