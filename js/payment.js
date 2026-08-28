@@ -79,7 +79,6 @@ function renderAmounts(){
   const payBtn = document.getElementById("payBtn");
   if (payBtn) payBtn.textContent = "Pay ₹" + amountDue;
 
-  // Mirror into the sticky pay bar so the amount + action stay visible while scrolling.
   const barDueLabel = document.getElementById("barDueLabel");
   const barDueVal = document.getElementById("barDueVal");
   const barRemainingSub = document.getElementById("barRemainingSub");
@@ -169,6 +168,7 @@ function buildOrderPayload_(orderId, amountDue){
     city: shippingInfo.city || "",
     state: shippingInfo.state,
     pincode: shippingInfo.pin,
+    pin: shippingInfo.pin,
     fullAddress: fullAddress,
     amount: amountDue,
     codAmount: remaining,
@@ -200,15 +200,11 @@ function generateOrderId(){
   return `HS-${y}${m}${d}-${rand}`;
 }
 
-// ---------------- RAZORPAY INTEGRATION LOGIC ----------------
-
 async function placeOrder(){
   if (deadline - Date.now() <= 0) {
     showToast("Payment window has expired — please check out again");
     return;
   }
-  // Prepaid = full amount via Razorpay. COD = advance amount via Razorpay,
-  // balance stays payable on delivery.
   await startRazorpayPayment();
 }
 
@@ -218,14 +214,10 @@ async function startRazorpayPayment() {
   const payBtn = document.getElementById("payBtn");
   if (payBtn) { payBtn.disabled = true; payBtn.textContent = "Please wait…"; }
 
-  // Order ID banano hocche payment-er AGE, jate webhook eta diye order match korte pare
   const orderId = generateOrderId();
   const orderPayload = buildOrderPayload_(orderId, amountDue);
 
   try {
-    // 1. Razorpay order fast-e create koro — eta Cloudflare Worker route
-    //    (/api/create-order), Google Apps Script na. Eta shudhu Razorpay-r
-    //    sathe kotha bole, tai milliseconds-e ferot ase.
     const response = await fetch("/api/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -240,16 +232,14 @@ async function startRazorpayPayment() {
       return;
     }
 
-    // 2. Open Razorpay Checkout Pop-up
     var options = {
-      "key": "rzp_live_TLJ04Y2T7hnl5m", // TODO: Put your Razorpay Key here!
+      "key": "rzp_live_TLJ04Y2T7hnl5m",
       "amount": amountDue * 100, 
       "currency": "INR",
       "name": "Heavy Soul",
       "description": "Order Payment",
       "order_id": rzpOrderData.order_id,
       "handler": function (response) {
-        // 3. Complete order on success (webhook will also write it — duplicate-safe)
         finalizeOrder(response.razorpay_payment_id, orderId, orderPayload);
       },
       "prefill": {
@@ -326,14 +316,8 @@ Track your order anytime: ${window.location.origin}${window.location.pathname.re
 
 Please verify payment and confirm the order.`;
 
-  // Backup write in case the webhook hasn't landed yet — Apps Script skips
-  // this as a duplicate if the webhook already created the row. Fire-and-forget
-  // is fine here since it's a best-effort backup, not shown anywhere in the UI.
   sendOrderToSheet(orderPayload);
 
-  // If the customer is logged in, save this order under their account too,
-  // so it shows up in "My Orders" on account.html. MUST be awaited — the
-  // redirect right below can otherwise cancel this write mid-flight.
   if (window.firebase && typeof saveOrderRecord === "function") {
     await saveOrderRecord(orderPayload);
   }
