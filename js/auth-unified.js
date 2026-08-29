@@ -4,10 +4,12 @@
 // once via MSG91 OTP at signup only), or Email. All three land in
 // the same Firestore `users` collection. Include this ONE script
 // (after config.js, auth.js, msg91-otp.js, and the Firebase
-// app/auth/firestore compat SDKs) on any page that needs login —
-// it injects its own modal markup, no HTML needed on the page.
+// app/auth/firestore compat SDKs) on account.html, where the
+// step markup lives directly in the page HTML.
 //
-// Usage: call openAuthModal() from an account icon's onclick.
+// Usage: the step markup below lives directly on account.html —
+// there is no popup. requireAuthThenGo(url) redirects to
+// account.html?redirect=url when a login is needed first.
 // ============================================================
 
 const AUTH_RESEND_LIMIT = 3;
@@ -36,87 +38,25 @@ function normalizeIdentifier_(raw) {
   return null;
 }
 
-function injectAuthModal_() {
-  if (document.getElementById("uAuthOverlay")) return;
-  const wrap = document.createElement("div");
-  wrap.innerHTML = `
-  <div id="uAuthOverlay" class="u-auth-overlay" style="display:none;">
-    <div class="u-auth-box">
-      <button type="button" class="u-auth-close" onclick="closeAuthModal()">&times;</button>
+// NOTE: This is now an INLINE PAGE auth form, not a popup modal.
+// The step markup (#uAuthStep-entry / -login / -signup / -reset,
+// plus #uAuthMsg) lives directly in account.html's HTML. This file
+// only wires up the behaviour. On DOMContentLoaded, if that markup
+// is present on the page, we reset it to the "entry" step.
+document.addEventListener("DOMContentLoaded", function () {
+  if (document.getElementById("uAuthStep-entry")) {
+    uBackToEntry();
+  }
+});
 
-      <div id="uAuthMsg" class="u-auth-msg"></div>
-
-      <!-- STEP: entry -->
-      <div id="uAuthStep-entry" class="u-auth-step">
-        <h2>Login / Signup</h2>
-        <button type="button" class="btn block u-auth-google" onclick="uHandleGoogle()">
-          <svg width="18" height="18" viewBox="0 0 18 18" style="vertical-align:-3px;margin-right:8px;">
-            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62z"/>
-            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18z"/>
-            <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.03l2.99-2.33z"/>
-            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.97l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>
-          </svg>
-          Continue with Google
-        </button>
-        <div class="u-auth-divider"><span>or</span></div>
-        <div class="field">
-          <input id="uAuthIdentifier" type="text" placeholder="Email or mobile number">
-        </div>
-        <button type="button" class="btn accent block" onclick="uHandleContinue()">Continue</button>
-      </div>
-
-      <!-- STEP: login (password only) -->
-      <div id="uAuthStep-login" class="u-auth-step" style="display:none;">
-        <h2>Welcome back</h2>
-        <p class="u-auth-sub" id="uAuthLoginLabel"></p>
-        <div class="field">
-          <input id="uAuthLoginPassword" type="password" placeholder="Password">
-        </div>
-        <button type="button" class="btn accent block" onclick="uHandleLogin()">Log in</button>
-        <p class="u-auth-link" id="uAuthForgotWrap"><a href="#" onclick="uHandleForgot();return false;">Forgot password?</a></p>
-        <p class="u-auth-link"><a href="#" onclick="uBackToEntry();return false;">&larr; Back</a></p>
-      </div>
-
-      <!-- STEP: signup -->
-      <div id="uAuthStep-signup" class="u-auth-step" style="display:none;">
-        <h2>Create your account</h2>
-        <p class="u-auth-sub" id="uAuthSignupLabel"></p>
-        <div class="field">
-          <input id="uAuthSignupName" type="text" placeholder="Full name">
-        </div>
-        <div class="field">
-          <input id="uAuthSignupPassword" type="password" placeholder="Create a password (min 6 characters)">
-        </div>
-
-        <div id="uAuthOtpBlock" style="display:none;">
-          <button type="button" class="btn ghost block" id="uAuthSendOtpBtn" onclick="uHandleSendOtp()">Send OTP</button>
-          <div class="field" id="uAuthOtpField" style="display:none;">
-            <input id="uAuthOtpInput" type="tel" inputmode="numeric" maxlength="6" placeholder="Enter OTP">
-          </div>
-          <button type="button" class="btn ghost block" id="uAuthVerifyOtpBtn" style="display:none;" onclick="uHandleVerifyOtp()">Verify OTP</button>
-        </div>
-
-        <button type="button" class="btn accent block" id="uAuthCreateBtn" onclick="uHandleSignup()">Create account</button>
-        <p class="u-auth-link"><a href="#" onclick="uBackToEntry();return false;">&larr; Back</a></p>
-      </div>
-      <!-- STEP: phone password reset -->
-      <div id="uAuthStep-reset" class="u-auth-step" style="display:none;">
-        <h2>Password reset করুন</h2>
-        <p class="u-auth-sub">আপনার নম্বর যাচাই করে নতুন পাসওয়ার্ড সেট করুন।</p>
-        <button type="button" class="btn ghost block" id="uResetSendOtpBtn" onclick="uHandleResetSendOtp()">Send OTP</button>
-        <div class="field" id="uResetOtpField" style="display:none;">
-          <input id="uResetOtpInput" type="tel" inputmode="numeric" maxlength="6" placeholder="Enter OTP">
-        </div>
-        <button type="button" class="btn ghost block" id="uResetVerifyOtpBtn" style="display:none;" onclick="uHandleResetVerifyOtp()">Verify OTP</button>
-        <div class="field" id="uResetPasswordField" style="display:none;">
-          <input id="uResetNewPassword" type="password" placeholder="নতুন পাসওয়ার্ড (min 6 characters)">
-        </div>
-        <button type="button" class="btn accent block" id="uResetSubmitBtn" style="display:none;" onclick="uHandleResetSubmit()">Set new password</button>
-        <p class="u-auth-link"><a href="#" onclick="uBackToEntry();return false;">&larr; Back</a></p>
-      </div>
-    </div>
-  </div>`;
-  document.body.appendChild(wrap.firstElementChild);
+// After a successful login/signup, if the user arrived via
+// account.html?redirect=checkout.html (e.g. from the cart's
+// "Checkout" button), send them straight there. Otherwise, do
+// nothing further here — account.html's own onAuthStateChanged
+// listener swaps the login form out for the account view.
+function uAuthSuccess_() {
+  const redirect = new URLSearchParams(window.location.search).get("redirect");
+  if (redirect) window.location.href = redirect;
 }
 
 function uShowMsg_(text, isError) {
@@ -130,17 +70,6 @@ function uShowStep_(step) {
     document.getElementById("uAuthStep-" + s).style.display = (s === step) ? "block" : "none";
   });
   uShowMsg_("");
-}
-
-function openAuthModal() {
-  injectAuthModal_();
-  uBackToEntry();
-  document.getElementById("uAuthOverlay").style.display = "flex";
-}
-
-function closeAuthModal() {
-  const el = document.getElementById("uAuthOverlay");
-  if (el) el.style.display = "none";
 }
 
 function uBackToEntry() {
@@ -168,8 +97,8 @@ async function uHandleGoogle() {
       provider: "google"
     });
     uShowMsg_("");
-    closeAuthModal();
     if (typeof renderAccountState === "function") renderAccountState(user);
+    uAuthSuccess_();
   } catch (err) {
     uShowMsg_(authErrorMessage ? authErrorMessage(err) : String(err), true);
   }
@@ -219,8 +148,8 @@ async function uHandleLogin() {
     uShowMsg_("Logging in…");
     const user = await authLogIn(email, password);
     uShowMsg_("");
-    closeAuthModal();
     if (typeof renderAccountState === "function") renderAccountState(user);
+    uAuthSuccess_();
   } catch (err) {
     uShowMsg_(authErrorMessage ? authErrorMessage(err) : String(err), true);
   }
@@ -437,21 +366,17 @@ async function uHandleSignup() {
       provider: _authIdentifierType
     });
     await firebase.firestore().collection("accountIndex").doc(_authIdentifierKey).set({ uid: user.uid });
-    
-    uShowMsg_("Account সফলভাবে তৈরি হয়েছে!");
+
+    uShowMsg_("Account সফলভাবে তৈরি হয়েছে!");
     setTimeout(function() {
-      closeAuthModal();
-      if (typeof renderAccountState === "function") {
-        renderAccountState(user);
-      } else {
-        window.location.reload();
-      }
+      if (typeof renderAccountState === "function") renderAccountState(user);
+      uAuthSuccess_();
     }, 1000);
 
   } catch (err) {
-    // যদি এই ইমেইল বা অ্যাকাউন্ট আগে থেকেই থাকে, তবে ইউজারকে সরাসরি Login পেজে নিয়ে যাবে
+    // যদি এই ইমেইল বা অ্যাকাউন্ট আগে থেকেই থাকে, তবে ইউজারকে সরাসরি Login পেজে নিয়ে যাবে
     if (err && (err.code === 'auth/email-already-in-use' || err.message?.includes('already in use') || err.code === 'auth/account-exists-with-different-credential')) {
-      uShowMsg_("এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে। Log in করুন।", true);
+      uShowMsg_("এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে। Log in করুন।", true);
       document.getElementById("uAuthLoginLabel").textContent = _authIdentifierKey;
       document.getElementById("uAuthForgotWrap").style.display = "block";
       uShowStep_("login");
@@ -481,13 +406,8 @@ window.requireAuthThenGo = function(destinationUrl) {
   if (currentUser) {
     window.location.href = destinationUrl;
   } else {
-    if (typeof openAuthModal === "function") {
-      openAuthModal();
-      if (typeof uShowMsg_ === "function") {
-        uShowMsg_("চেকআউট করার আগে অনুগ্রহ করে লগইন বা সাইন-আপ করুন।");
-      }
-    } else {
-      window.location.href = '/login?redirect=' + encodeURIComponent(destinationUrl);
-    }
+    // No more popup — send the user to the real login page,
+    // which will forward them to destinationUrl after login.
+    window.location.href = 'account.html?redirect=' + encodeURIComponent(destinationUrl);
   }
 };
