@@ -3,7 +3,10 @@
   "compatibility_date": "2024-09-23",
   "main": "src/index.js",
   "vars": {
-    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzHbUao38sh9dP6AiAu1p6cxeZl6KkZX56KPZaSi7t_1fwA6sBQgcudlT1tfgcqYSmR/exec"
+    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzHbUao38sh9dP6AiAu1p6cxeZl6KkZX56KPZaSi7t_1fwA6sBQgcudlT1tfgcqYSmR/exec",
+    // Must exactly match the 'API_SHARED_SECRET' Script Property in the
+    // Apps Script backend, same value as js/config.js's API_TOKEN.
+    "APPS_SCRIPT_API_TOKEN": "jsjshjeushe73uhebsi3u3h3882u2b382"
   },
   // FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY is NOT declared here on purpose —
   // it's ~1700 characters, over the Cloudflare Secrets Store's 1024-char
