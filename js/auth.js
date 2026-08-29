@@ -28,6 +28,14 @@ async function authLogIn(email, password) {
   return cred.user;
 }
 
+// ---- google sign-in (popup) ----
+async function authGoogleSignIn() {
+  if (!authReady()) throw new Error("Auth not configured yet.");
+  const provider = new firebase.auth.GoogleAuthProvider();
+  const cred = await firebase.auth().signInWithPopup(provider);
+  return cred.user;
+}
+
 // ---- logout ----
 async function authLogOut() {
   if (!authReady()) return;
