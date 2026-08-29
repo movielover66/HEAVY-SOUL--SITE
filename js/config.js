@@ -26,7 +26,7 @@ const SITE_CONFIG = {
   // every order/abandoned-cart POST is silently rejected as "Unauthorized"
   // and never reaches the Sheet or iThink Logistics.
   // This lives in public JS, so it's a spam filter, not real security.
-  API_TOKEN: "jsjshjeushe73uhebsi3u3h3882u2b382"
+  API_TOKEN: "jsjshjeushe73uhebsi3u3h3882u2b382",
 
   // COD terms
   COD_FLAT_ADVANCE: 150,        // flat advance per unit for ready stock items
