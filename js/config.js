@@ -20,6 +20,14 @@ const SITE_CONFIG = {
   // Leave as-is to skip this — everything else still works.
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzHbUao38sh9dP6AiAu1p6cxeZl6KkZX56KPZaSi7t_1fwA6sBQgcudlT1tfgcqYSmR/exec",
 
+  // Must exactly match the 'API_SHARED_SECRET' Script Property set in the
+  // Apps Script backend (Project Settings -> Script Properties). If the
+  // backend has that property set and this doesn't match it exactly,
+  // every order/abandoned-cart POST is silently rejected as "Unauthorized"
+  // and never reaches the Sheet or iThink Logistics.
+  // This lives in public JS, so it's a spam filter, not real security.
+  API_TOKEN: "jsjshjeushe73uhebsi3u3h3882u2b382"
+
   // COD terms
   COD_FLAT_ADVANCE: 150,        // flat advance per unit for ready stock items
   CUSTOM_ADVANCE_PERCENT: 0.5,  // 50% advance for made-to-order / custom items

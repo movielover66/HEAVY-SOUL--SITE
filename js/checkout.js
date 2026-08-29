@@ -182,6 +182,7 @@ function logAbandonedCart(shippingInfo){
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({
       type: "abandoned_cart",
+      apiToken: SITE_CONFIG.API_TOKEN || "",
       customerName: shippingInfo.name,
       phone: shippingInfo.phone,
       cartSummary: cartSummary

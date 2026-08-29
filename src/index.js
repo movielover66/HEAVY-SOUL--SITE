@@ -71,7 +71,7 @@ async function handleCreateOrder(request, env, ctx) {
         fetch(env.APPS_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(Object.assign({ type: "store_pending_order" }, body))
+          body: JSON.stringify(Object.assign({ type: "store_pending_order", apiToken: env.APPS_SCRIPT_API_TOKEN || "" }, body))
         }).catch(() => {})
       );
     }

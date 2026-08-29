@@ -161,6 +161,7 @@ function buildOrderPayload_(orderId, amountDue){
 
   return {
     orderId: orderId,
+    apiToken: SITE_CONFIG.API_TOKEN || "",
     customerName: shippingInfo.name,
     phone: shippingInfo.phone,
     email: shippingInfo.email || "",
