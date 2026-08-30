@@ -165,6 +165,15 @@ async function uHandleForgot() {
     document.getElementById("uResetVerifyOtpBtn").style.display = "none";
     document.getElementById("uResetPasswordField").style.display = "none";
     document.getElementById("uResetSubmitBtn").style.display = "none";
+    // Clear stale values/state left over from a previous reset attempt
+    document.getElementById("uResetOtpInput").value = "";
+    document.getElementById("uResetOtpInput").disabled = false;
+    document.getElementById("uResetVerifyOtpBtn").disabled = false;
+    document.getElementById("uResetVerifyOtpBtn").textContent = "Verify OTP";
+    document.getElementById("uResetNewPassword").value = "";
+    document.getElementById("uResetSubmitBtn").disabled = false;
+    document.getElementById("uResetSubmitBtn").textContent = "Set new password";
+    clearInterval(_authResendTimer);
     _authOtpAccessToken = null;
     _authFlowContext = "reset";
     _authResendCount = 0;
