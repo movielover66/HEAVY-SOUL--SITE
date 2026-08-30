@@ -84,6 +84,24 @@ function hsLoadOtpScript() {
   return hsOtpScriptLoading;
 }
 
+// MSG91's widget sometimes fails the very FIRST sendOtp() call right after
+// initializing on a page load (its own internal handshake with MSG91's
+// server hasn't settled yet), even though window.sendOtp already exists.
+// The second call on the same page always works. Rather than surface that
+// first failure to the user as an error, we retry once, silently, before
+// giving up — this only kicks in for the first send of the page load.
+let hsOtpWarmedUp = false;
+
+function hsAttemptSendOtp_(identifier) {
+  return new Promise((resolve, reject) => {
+    window.sendOtp(
+      identifier,
+      () => { console.log("OTP sent to", identifier); resolve(); },
+      (err) => { console.warn("Failed to send OTP", err); reject(err); }
+    );
+  });
+}
+
 // Call this when the user taps "Send OTP" after typing their phone number.
 // identifier should be in the format the widget expects, e.g. "91XXXXXXXXXX".
 async function hsSendOtp(identifier) {
@@ -98,13 +116,17 @@ async function hsSendOtp(identifier) {
       throw new Error("OTP widget not ready (sendOtp unavailable)");
     }
   }
-  return new Promise((resolve, reject) => {
-    window.sendOtp(
-      identifier,
-      () => { console.log("OTP sent to", identifier); resolve(); },
-      (err) => { console.warn("Failed to send OTP", err); reject(err); }
-    );
-  });
+
+  try {
+    await hsAttemptSendOtp_(identifier);
+    hsOtpWarmedUp = true;
+  } catch (err) {
+    if (hsOtpWarmedUp) throw err; // a real failure after warm-up — surface it
+    // First-ever send on this page load — wait a beat and retry silently.
+    await new Promise((r) => setTimeout(r, 1200));
+    await hsAttemptSendOtp_(identifier);
+    hsOtpWarmedUp = true;
+  }
 }
 
 // Call this when the user submits the 4/6-digit code they received.
