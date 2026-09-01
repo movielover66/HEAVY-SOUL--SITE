@@ -37,7 +37,10 @@ async function handleCreateOrder(request, env, ctx) {
     if (!amount || amount <= 0) {
       return jsonResponse({ success: false, error: "Invalid amount" }, 400);
     }
-
+    const priceCheck = await validateCartPricing_(body, env);
+    if (!priceCheck.ok) {
+      return jsonResponse({ success: false, error: priceCheck.error }, 400);
+    }
     if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
       return jsonResponse({ success: false, error: "Razorpay keys not configured on server" }, 500);
     }
@@ -179,6 +182,77 @@ async function handlePhoneForgotPassword(request, env, ctx) {
     return jsonResponse({ success: false, error: String(err) }, 500);
   }
 }
+
+/* ========================================================= PRICE VALIDATION ========================================================= */
+// A tiny in-memory cache so we don't hit the Apps Script products
+// endpoint on every single checkout — the sheet doesn't change that
+// often. Workers reuse this across requests within the same isolate.
+let _productsCache = null;
+let _productsCacheAt = 0;
+const PRODUCTS_CACHE_MS = 5 * 60 * 1000; // 5 minutes
+
+async function fetchAuthoritativeProducts_(env) {
+  const now = Date.now();
+  if (_productsCache && (now - _productsCacheAt) < PRODUCTS_CACHE_MS) {
+    return _productsCache;
+  }
+  if (!env.APPS_SCRIPT_URL) return null;
+  try {
+    const res = await fetch(`${env.APPS_SCRIPT_URL}?type=products`);
+    const data = await res.json();
+    if (!data || !data.success || !Array.isArray(data.products)) return null;
+    _productsCache = data.products;
+    _productsCacheAt = now;
+    return _productsCache;
+  } catch (err) {
+    return null;
+  }
+}
+// A hard floor no legitimate order should ever fall below — even a
+// single COD advance (₹150 by default) or a fully custom item is well
+// above this. Catches tampering even if the catalog fetch itself fails.
+const MIN_ORDER_AMOUNT = 99;
+
+async function validateCartPricing_(body, env) {
+  const amount = Number(body.amount);
+
+  if (amount < MIN_ORDER_AMOUNT) {
+    return { ok: false, error: `Order amount too low. Please refresh the page and try again.` };
+  }
+
+  const items = Array.isArray(body.items) ? body.items : null;
+  if (!items || !items.length) {
+    // No item breakdown to check against — the floor check above is
+    // all the protection we can offer, so let it through.
+    return { ok: true };
+  }
+
+  const catalog = await fetchAuthoritativeProducts_(env);
+  if (!catalog) {
+    // Catalog unreachable — don't hard-block checkout over a network
+    // hiccup, but the MIN_ORDER_AMOUNT floor above still applies.
+    return { ok: true };
+  }
+
+  const catalogById = new Map(catalog.map(p => [String(p.id), Number(p.price) || 0]));
+
+  for (const item of items) {
+    const realPrice = catalogById.get(String(item.id));
+    if (realPrice === undefined) continue; // unknown id — skip, don't block on catalog drift
+    const claimedPrice = Number(item.price) || 0;
+    // Allow ₹1 slack for rounding; anything claiming a lower price than
+    // the real catalog is tampering (stale fallback data or DevTools edit).
+    if (claimedPrice < realPrice - 1) {
+      return {
+        ok: false,
+        error: "Product prices have updated — please refresh your cart and try again."
+      };
+    }
+  }
+
+  return { ok: true };
+}
+/* ========================================================= HELPERS ========================================================= */
 
 /* ========================================================= HELPERS ========================================================= */
 
