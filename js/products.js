@@ -6,7 +6,7 @@ const FALLBACK_PRODUCTS = [
     id: 1,
     name: "KTM WHITE 390",
     category: "T-Shirts",
-    price: 1,
+    price: 549,
     compareAt: 899,
     badge: "Best Seller",
     orderType: "collection",
