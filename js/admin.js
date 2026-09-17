@@ -195,6 +195,7 @@ function openForm(id){
     document.getElementById("fName").value = p.name || "";
     document.getElementById("fCategory").value = p.category || "";
     document.getElementById("fPrice").value = p.price || "";
+    document.getElementById("fSku").value = p.sku || "";
     document.getElementById("fCompareAt").value = p.compareAt || "";
     document.getElementById("fBadge").value = p.badge || "";
     document.getElementById("fOrderType").value = p.orderType === "custom" ? "custom" : "collection";
@@ -315,6 +316,7 @@ productForm.addEventListener("submit", async (e) => {
     name: document.getElementById("fName").value.trim(),
     category: document.getElementById("fCategory").value.trim(),
     price: Number(document.getElementById("fPrice").value),
+    sku: document.getElementById("fSku").value.trim(),
     compareAt: document.getElementById("fCompareAt").value ? Number(document.getElementById("fCompareAt").value) : "",
     badge: document.getElementById("fBadge").value.trim(),
     orderType: document.getElementById("fOrderType").value,
