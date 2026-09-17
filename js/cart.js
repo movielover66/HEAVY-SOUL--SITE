@@ -19,6 +19,7 @@ function addToCart(product, size, qty){
       image: product.image,
       category: product.category,
       orderType: product.orderType || "collection",
+      sku: product.sku || "",
       size: size || "-",
       qty: qty
     });
