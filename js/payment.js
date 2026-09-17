@@ -145,6 +145,12 @@ const tickInterval = setInterval(() => {
   if (remainingMs <= 2 * 60 * 1000) timerBox.classList.add("danger");
 }, 1000);
 
+// NOTE: API_SHARED_SECRET must match the Apps Script "API_SHARED_SECRET"
+// Script Property exactly, or every order silently fails to save to the
+// Orders sheet (the sendOrderToSheet call uses no-cors, so a rejected
+// apiToken never shows up as a visible error in the browser).
+const API_SHARED_SECRET = "jsjshjeushe73uhebsi3u3h3882u2b382";
+
 function buildOrderPayload_(orderId, amountDue){
   const fullAddress = `${shippingInfo.address}, ${shippingInfo.state} - ${shippingInfo.pin}`;
   const estWeight = totalQty * (SITE_CONFIG.WEIGHT_PER_ITEM_G || 300);
@@ -162,6 +168,7 @@ function buildOrderPayload_(orderId, amountDue){
 
   return {
     orderId: orderId,
+    apiToken: API_SHARED_SECRET,
     customerName: shippingInfo.name,
     phone: shippingInfo.phone,
     email: shippingInfo.email || "",
