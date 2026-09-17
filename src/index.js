@@ -211,7 +211,7 @@ async function fetchAuthoritativeProducts_(env) {
 // A hard floor no legitimate order should ever fall below — even a
 // single COD advance (₹150 by default) or a fully custom item is well
 // above this. Catches tampering even if the catalog fetch itself fails.
-const MIN_ORDER_AMOUNT = 99;
+const MIN_ORDER_AMOUNT = 1;
 
 async function validateCartPricing_(body, env) {
   const amount = Number(body.amount);
