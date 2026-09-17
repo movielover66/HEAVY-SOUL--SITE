@@ -156,12 +156,12 @@ function buildOrderPayload_(orderId, amountDue){
     name: item.name,
     size: item.size || "-",
     qty: item.qty || 1,
-    price: item.price
+    price: item.price,
+    sku: item.sku || ""
   }));
 
   return {
     orderId: orderId,
-    apiToken: SITE_CONFIG.API_TOKEN || "",
     customerName: shippingInfo.name,
     phone: shippingInfo.phone,
     email: shippingInfo.email || "",
