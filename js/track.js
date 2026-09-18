@@ -7,6 +7,7 @@ const resultBox = document.getElementById("trackResult");
 
 let currentOrderId = null;
 let refreshTimer = null;
+let cancelCountdownTimer = null;
 
 const urlOrder = new URLSearchParams(window.location.search).get("order");
 const autoFillNote = document.getElementById("autoFillNote");
@@ -21,6 +22,13 @@ form.addEventListener("submit", (e) => {
   if (!id) return;
   if (autoFillNote) autoFillNote.classList.remove("show");
   lookupOrder(id, true);
+});
+
+// Event delegation — resultBox.innerHTML gets replaced on every render/refresh,
+// so we attach one listener here instead of re-binding a button listener each time.
+resultBox.addEventListener("click", (e) => {
+  const btn = e.target.closest(".cancel-order-btn");
+  if (btn) handleCancelClick(btn);
 });
 
 async function lookupOrder(orderId, showLoading){
@@ -48,6 +56,7 @@ async function lookupOrder(orderId, showLoading){
     const data = await res.json();
     if (!data.found) {
       stopAutoRefresh();
+      stopCancelCountdown();
       resultBox.innerHTML = `<p class="hint pin-error">No order found with ID "${escapeHtml(orderId)}". Please double-check, or contact us on WhatsApp.</p>`;
       return;
     }
@@ -72,6 +81,103 @@ function stopAutoRefresh(){
   if (refreshTimer) {
     clearInterval(refreshTimer);
     refreshTimer = null;
+  }
+}
+
+/* =========================================================
+   24HR SELF-SERVICE CANCEL
+   ========================================================= */
+
+function stopCancelCountdown(){
+  if (cancelCountdownTimer) {
+    clearInterval(cancelCountdownTimer);
+    cancelCountdownTimer = null;
+  }
+}
+
+function buildCancelSectionHtml(data){
+  if (String(data.status || "").toLowerCase() === "cancelled") {
+    return `
+      <div class="hint" style="margin-top:16px;">
+        This order has been cancelled.
+      </div>
+    `;
+  }
+
+  if (!data.cancelEligible) {
+    return data.cancelIneligibleReason ? `
+      <div class="hint" style="margin-top:16px;">
+        ${escapeHtml(data.cancelIneligibleReason)}
+      </div>
+    ` : "";
+  }
+
+  return `
+    <div class="cancel-card" style="margin-top:16px;">
+      <button type="button" class="btn outline cancel-order-btn">Cancel Order</button>
+      <p class="hint cancel-countdown" style="margin-top:8px; font-size:12px; opacity:0.7;"></p>
+    </div>
+  `;
+}
+
+function startCancelCountdown(deadlineIso){
+  stopCancelCountdown();
+  const countdownEl = resultBox.querySelector(".cancel-countdown");
+  if (!countdownEl || !deadlineIso) return;
+
+  const deadline = new Date(deadlineIso).getTime();
+
+  const tick = () => {
+    const msLeft = deadline - Date.now();
+    if (msLeft <= 0) {
+      countdownEl.textContent = "Cancellation window has closed.";
+      const btn = resultBox.querySelector(".cancel-order-btn");
+      if (btn) btn.remove();
+      stopCancelCountdown();
+      return;
+    }
+    const hrs = Math.floor(msLeft / 3600000);
+    const mins = Math.floor((msLeft % 3600000) / 60000);
+    countdownEl.textContent = `Cancellable for ${hrs}h ${mins}m more`;
+  };
+
+  tick();
+  cancelCountdownTimer = setInterval(tick, 60000);
+}
+
+async function handleCancelClick(btn){
+  if (!currentOrderId) return;
+  if (!confirm("Cancel this order? This cannot be undone.")) return;
+
+  const url = SITE_CONFIG.APPS_SCRIPT_URL;
+  btn.disabled = true;
+  btn.textContent = "Cancelling...";
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight on Apps Script
+      body: JSON.stringify({
+        type: "cancel_order",
+        orderId: currentOrderId
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      stopCancelCountdown();
+      alert(data.message || "Your order has been cancelled.");
+      lookupOrder(currentOrderId, true);
+    } else {
+      alert(data.error || "Could not cancel this order. Please try again or contact us on WhatsApp.");
+      btn.disabled = false;
+      btn.textContent = "Cancel Order";
+    }
+  } catch (err) {
+    alert("Something went wrong. Please try again or contact us on WhatsApp.");
+    btn.disabled = false;
+    btn.textContent = "Cancel Order";
   }
 }
 
@@ -173,6 +279,8 @@ function renderStatus(data){
     </div>
   ` : "";
 
+  const cancelHtml = buildCancelSectionHtml(data);
+
   resultBox.innerHTML = `
     <div class="track-card">
       <p class="eyebrow">Order ${data.orderId}</p>
@@ -188,6 +296,7 @@ function renderStatus(data){
       ${courierHtml}
       ${customerHtml}
       ${historyHtml}
+      ${cancelHtml}
 
       ${data.trackingLink ? `<a href="${data.trackingLink}" target="_blank" rel="noopener" class="btn outline" style="margin-top:20px;">View courier tracking</a>` : ""}
       <p class="hint" style="margin-top:16px; font-size:12px; opacity:0.6;">
@@ -195,4 +304,10 @@ function renderStatus(data){
       </p>
     </div>
   `;
+
+  if (data.cancelEligible && data.cancelDeadline) {
+    startCancelCountdown(data.cancelDeadline);
+  } else {
+    stopCancelCountdown();
+  }
 }
