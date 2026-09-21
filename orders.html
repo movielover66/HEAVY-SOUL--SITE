@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="View your Heavy Soul order history.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heavy Soul">
+<meta property="og:title" content="My Orders — Heavy Soul">
+<meta property="og:description" content="View your Heavy Soul order history.">
+<meta property="og:image" content="https://heavysoul.in/assets/og-image.jpg">
+<meta property="og:url" content="https://heavysoul.in/orders.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="My Orders — Heavy Soul">
+<meta name="twitter:description" content="View your Heavy Soul order history.">
+<meta name="twitter:image" content="https://heavysoul.in/assets/og-image.jpg">
+<title>My Orders — Heavy Soul</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .orders-hero{
+    background: var(--ink);
+    color: var(--paper);
+    padding: 56px 24px 46px;
+    text-align: center;
+  }
+  .orders-hero .eyebrow{ color: var(--ink-faint); }
+  .orders-hero h1{
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 500;
+    margin: 12px 0 10px;
+  }
+  .orders-hero p{
+    color: var(--paper-soft);
+    opacity: .8;
+    font-size: 14px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .orders-section{ max-width: 640px; margin: 40px auto 90px; padding: 0 24px; }
+  .order-card{ border:1px solid var(--line); padding:18px; margin-bottom:14px; }
+  .order-card-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; flex-wrap:wrap; gap:6px; }
+  .order-card-id{ font-family:var(--mono); font-size:13px; color:var(--accent); }
+  .order-card-date{ font-size:12px; color:var(--ink-soft); }
+  .order-item-line{ display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--ink-soft); }
+  .order-card-total{ display:flex; justify-content:space-between; font-size:14px; font-weight:600; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .order-empty{ font-size:13px; color:var(--ink-soft); text-align:center; padding: 30px 0; }
+
+  .orders-login-prompt{
+    text-align: center;
+    padding: 50px 20px;
+    border: 1px solid var(--line);
+    background: var(--paper-soft);
+  }
+  .orders-login-prompt svg{ width: 34px; height: 34px; color: var(--ink-faint); margin-bottom: 14px; }
+  .orders-login-prompt p{ font-size: 13.5px; color: var(--ink-soft); max-width: 320px; margin: 0 auto 18px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav wrap">
+    <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="track.html">Track order</a>
+      <a href="orders.html" class="active">Orders</a>
+      <a href="policy.html">Policies</a>
+      <a href="account.html" id="navLoginLink">Login / Signup</a>
+    </div>
+    <div class="nav-icons">
+      <a class="icon-btn" id="accountBtn" href="account.html" aria-label="Login / Signup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.7-3.6 5-5.5 7.5-5.5s5.8 1.9 7.5 5.5"/></svg>
+      </a>
+      <a class="icon-btn" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+    </div>
+  </nav>
+  <div class="mobile-panel" id="mobilePanel">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="track.html">Track order</a>
+    <a href="orders.html">Orders</a>
+    <a href="policy.html">Policies</a>
+    <a href="account.html" id="navLoginLinkMobile">Login / Signup</a>
+  </div>
+</header>
+
+<div class="orders-hero">
+  <p class="eyebrow">Order history</p>
+  <h1>My orders</h1>
+  <p>Every Heavy Soul order you've placed while logged in, in one place.</p>
+</div>
+
+<div class="orders-section">
+
+  <!-- Shown while logged OUT -->
+  <div id="ordersLoginPrompt" class="orders-login-prompt" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h13l3 4v6h-3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M3 7v7h4"/></svg>
+    <p>Log in to see your order history. Placed an order as a guest? Use Track Order with your Order ID instead.</p>
+    <a href="account.html" class="btn accent">Login / Signup</a>
+    <a href="track.html" class="btn outline" style="margin-left:8px;">Track an order</a>
+  </div>
+
+  <!-- Shown while logged IN -->
+  <div id="ordersList" style="display:none;"><p class="order-empty">Loading your orders…</p></div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2026 Heavy Soul. All rights reserved.</span>
+      <span>Prices in INR · Ships across India</span>
+      <span>Trade Reg. No. 3549 (Saptagram GP, Hooghly)</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/msg91-otp.js"></script>
+<script src="js/auth-unified.js"></script>
+<script src="js/orders.js"></script>
+<script src="js/nav.js"></script>
+<script>
+function renderOrderCard(order){
+  const date = order.createdAt && order.createdAt.toDate ? order.createdAt.toDate() : null;
+  const dateStr = date ? date.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
+  const itemsHtml = (order.items || []).map(item => `
+    <div class="order-item-line">
+      <span>${escapeHtml(item.name)}${item.size && item.size !== '-' ? ' (' + escapeHtml(item.size) + ')' : ''} × ${item.qty || 1}</span>
+      <span>₹${(item.price || 0) * (item.qty || 1)}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="order-card">
+      <div class="order-card-top">
+        <span class="order-card-id">${escapeHtml(order.orderId)}</span>
+        <span class="order-card-date">${dateStr}</span>
+      </div>
+      ${itemsHtml}
+      <div class="order-card-total">
+        <span>Total</span>
+        <span>₹${order.subtotal || order.amountPaid || 0}</span>
+      </div>
+      <a href="track.html?order=${encodeURIComponent(order.orderId)}" class="btn outline block" style="margin-top:14px;">Track now</a>
+    </div>
+  `;
+}
+
+async function loadAndRenderOrders(){
+  const listEl = document.getElementById('ordersList');
+  const orders = await loadUserOrders();
+  if (orders.length === 0) {
+    listEl.innerHTML = `<p class="order-empty">No orders yet. <a href="shop.html" style="color:var(--accent);">Start shopping →</a></p>`;
+    return;
+  }
+  listEl.innerHTML = orders.map(renderOrderCard).join('');
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  if (!authReady()) return;
+  firebase.auth().onAuthStateChanged(function(user){
+    document.getElementById('ordersLoginPrompt').style.display = user ? 'none' : 'block';
+    document.getElementById('ordersList').style.display = user ? 'block' : 'none';
+    if (user){
+      loadAndRenderOrders();
+    }
+  });
+});
+</script>
+
+</body>
+</html>
