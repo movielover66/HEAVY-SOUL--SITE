@@ -167,6 +167,7 @@ function buildOrderPayload_(orderId, amountDue){
   }));
 
   return {
+    type: "order",
     orderId: orderId,
     apiToken: API_SHARED_SECRET,
     customerName: shippingInfo.name,
