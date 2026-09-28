@@ -46,6 +46,8 @@
   .order-card-date{ font-size:12px; color:var(--ink-soft); }
   .order-item-line{ display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--ink-soft); }
   .order-card-total{ display:flex; justify-content:space-between; font-size:14px; font-weight:600; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .order-card-status{ font-size:12.5px; color:var(--ink-soft); margin-bottom:8px; min-height:16px; }
+  .order-card-status b{ color:var(--ink); }
   .order-empty{ font-size:13px; color:var(--ink-soft); text-align:center; padding: 30px 0; }
 
   .orders-login-prompt{
@@ -150,6 +152,7 @@ function renderOrderCard(order){
         <span class="order-card-id">${escapeHtml(order.orderId)}</span>
         <span class="order-card-date">${dateStr}</span>
       </div>
+      <div class="order-card-status" data-order-id="${escapeHtml(order.orderId)}"></div>
       ${itemsHtml}
       <div class="order-card-total">
         <span>Total</span>
@@ -160,6 +163,29 @@ function renderOrderCard(order){
   `;
 }
 
+async function hydrateOrderStatuses(orders){
+  const url = SITE_CONFIG.APPS_SCRIPT_URL;
+  if (!url || url.includes('PASTE-YOUR')) return;
+  // shudhu newest 8 — protyek lookup courier API hit kore
+  await Promise.all(orders.slice(0, 8).map(async (o) => {
+    const el = document.querySelector('.order-card-status[data-order-id="' + CSS.escape(o.orderId) + '"]');
+    if (!el) return;
+    try {
+      const res = await fetch(url + '?orderId=' + encodeURIComponent(o.orderId));
+      const d = await res.json();
+      if (!d.found) return;
+      const s = String(d.status || '');
+      const sl = s.toLowerCase();
+      let html = 'Status: <b>' + escapeHtml(s) + '</b>';
+      if (d.estimatedDelivery && sl !== 'delivered' && sl !== 'cancelled') {
+        html += ' · ' + (d.eddIsEstimate ? 'Est. delivery (approx.): ' : 'Est. delivery: ') +
+                '<b>' + escapeHtml(formatEddDate(d.estimatedDelivery)) + '</b>';
+      }
+      el.innerHTML = html;
+    } catch (e) { /* silent — card still works without status */ }
+  }));
+}
+
 async function loadAndRenderOrders(){
   const listEl = document.getElementById('ordersList');
   const orders = await loadUserOrders();
@@ -168,6 +194,7 @@ async function loadAndRenderOrders(){
     return;
   }
   listEl.innerHTML = orders.map(renderOrderCard).join('');
+  hydrateOrderStatuses(orders);
 }
 
 document.addEventListener('DOMContentLoaded', function(){
