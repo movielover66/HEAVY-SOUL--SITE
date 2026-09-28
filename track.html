@@ -17,541 +17,278 @@
 <meta name="twitter:image" content="https://heavysoul.in/assets/og-image.jpg">
 <title>Track Order — Heavy Soul</title>
 <link rel="stylesheet" href="css/style.css">
-
 <style>
-/* =========================================================
-   HEAVY SOUL — TRACK ORDER / NEW MOBILE-FIRST EXPERIENCE
-   Existing track.js hooks are intentionally preserved:
-   #trackForm, #orderIdInput, #trackResult, #autoFillNote
-   ========================================================= */
+  /* ================= TRACK PAGE — brand-matched redesign ================= */
 
-:root{
-  --hs-black:#0b0c0c;
-  --hs-black-2:#111313;
-  --hs-panel:#151717;
-  --hs-panel-2:#1b1d1d;
-  --hs-white:#f4f3ee;
-  --hs-muted:#9a9d99;
-  --hs-line:rgba(244,243,238,.11);
-  --hs-accent:#d7ff3f;
-  --hs-accent-dark:#aeca22;
-  --hs-max:1180px;
-}
-
-body{
-  background:var(--hs-black);
-  color:var(--hs-white);
-}
-
-/* Header */
-.site-header{
-  background:rgba(11,12,12,.92)!important;
-  color:var(--hs-white)!important;
-  border-bottom:1px solid var(--hs-line);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  position:relative;
-  z-index:20;
-}
-.site-header .nav{min-height:72px}
-.site-header .brand{color:var(--hs-white)!important}
-.site-header .brand small{color:#777b77!important}
-.site-header .nav-links a{color:#aeb1ac!important}
-.site-header .nav-links a:hover,
-.site-header .nav-links a.active{color:var(--hs-accent)!important}
-.site-header .icon-btn{color:var(--hs-white)!important;border-color:var(--hs-line)!important}
-
-/* Hero */
-.track-page{
-  overflow:hidden;
-  background:
-    radial-gradient(circle at 80% 15%,rgba(215,255,63,.08),transparent 27%),
-    radial-gradient(circle at 10% 45%,rgba(255,255,255,.035),transparent 30%),
-    var(--hs-black);
-}
-.track-hero{
-  position:relative;
-  min-height:470px;
-  display:flex;
-  align-items:flex-end;
-  padding:70px 20px 116px;
-  background:
-    linear-gradient(180deg,rgba(11,12,12,.18),rgba(11,12,12,.72) 65%,var(--hs-black) 100%),
-    radial-gradient(circle at 75% 38%,rgba(215,255,63,.10),transparent 30%),
-    linear-gradient(125deg,#101212 0%,#0c0e0e 50%,#171a18 100%);
-  isolation:isolate;
-}
-.track-hero:before{
-  content:"";
-  position:absolute;
-  inset:0;
-  opacity:.25;
-  background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
-  background-size:42px 42px;
-  mask-image:linear-gradient(to bottom,black,transparent 90%);
-  pointer-events:none;
-}
-.hero-grid{
-  width:min(var(--hs-max),100%);
-  margin:auto;
-  display:grid;
-  grid-template-columns:1fr;
-  position:relative;
-  z-index:1;
-}
-.hero-copy{max-width:760px}
-.track-hero .eyebrow{
-  color:var(--hs-accent)!important;
-  font-family:var(--mono);
-  letter-spacing:.22em;
-  font-size:10px;
-  text-transform:uppercase;
-  margin:0 0 18px;
-}
-.track-hero h1{
-  margin:0;
-  color:var(--hs-white);
-  font-family:var(--serif);
-  font-size:clamp(52px,11vw,104px);
-  line-height:.86;
-  font-weight:500;
-  letter-spacing:-.055em;
-  max-width:850px;
-}
-.track-hero h1 span{
-  display:block;
-  font-family:var(--sans);
-  font-weight:800;
-  letter-spacing:-.075em;
-  text-transform:uppercase;
-  font-size:.78em;
-  margin-left:clamp(20px,7vw,92px);
-  color:transparent;
-  -webkit-text-stroke:1px rgba(244,243,238,.72);
-}
-.track-hero p.hero-sub{
-  margin:28px 0 0;
-  color:#aeb1ad;
-  font-size:14px;
-  line-height:1.7;
-  max-width:500px;
-}
-.hero-meta{
-  margin-top:34px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-.hero-meta span{
-  border:1px solid var(--hs-line);
-  background:rgba(255,255,255,.025);
-  padding:8px 11px;
-  color:#888c88;
-  font:10px var(--mono);
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-
-/* Search */
-.track-wrap{
-  width:min(var(--hs-max),calc(100% - 32px));
-  margin:-58px auto 0;
-  padding:0 0 90px;
-  position:relative;
-  z-index:4;
-}
-.track-search{
-  margin:0;
-  display:grid;
-  grid-template-columns:1fr;
-  gap:0;
-  background:#111313;
-  border:1px solid rgba(244,243,238,.16);
-  box-shadow:0 30px 80px rgba(0,0,0,.42);
-}
-.track-search:focus-within{
-  border-color:rgba(215,255,63,.48);
-  box-shadow:0 30px 90px rgba(0,0,0,.5),0 0 0 1px rgba(215,255,63,.08);
-}
-.track-search input{
-  min-width:0;
-  width:100%;
-  height:64px;
-  border:0!important;
-  outline:0;
-  background:#171919!important;
-  color:var(--hs-white)!important;
-  padding:0 20px!important;
-  font:12px var(--mono)!important;
-  letter-spacing:.08em!important;
-}
-.track-search input::placeholder{color:#666b66}
-.track-search button{
-  height:58px;
-  margin:3px;
-  border:0!important;
-  background:var(--hs-accent)!important;
-  color:#090a09!important;
-  font:700 11px var(--mono)!important;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  cursor:pointer;
-  transition:transform .2s,background .2s;
-}
-.track-search button:hover{background:#ecff9b!important;transform:translateY(-1px)}
-.search-caption{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  padding:12px 2px 0;
-  color:#656965;
-  font:10px var(--mono);
-  letter-spacing:.04em;
-}
-.search-caption a{color:var(--hs-accent);text-decoration:none}
-
-/* Auto fill */
-.autofill-note{
-  display:none;
-  margin:12px 0 0;
-  padding:12px 14px;
-  background:#171919;
-  border:1px solid var(--hs-line);
-  border-left:2px solid var(--hs-accent);
-  color:#aaa;
-  font-size:12px;
-}
-.autofill-note.show{display:flex;align-items:center;gap:9px}
-.autofill-note svg{width:15px;color:var(--hs-accent)}
-
-/* Empty state */
-.track-placeholder{
-  min-height:330px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  border:1px solid var(--hs-line);
-  background:
-    radial-gradient(circle at center,rgba(215,255,63,.045),transparent 36%),
-    var(--hs-panel);
-  padding:40px 20px;
-  position:relative;
-}
-.track-placeholder:before{
-  content:"01";
-  position:absolute;
-  top:22px;
-  right:24px;
-  color:rgba(255,255,255,.08);
-  font:700 64px/1 var(--sans);
-  letter-spacing:-.08em;
-}
-.track-placeholder svg{
-  width:44px!important;
-  height:44px!important;
-  color:var(--hs-accent)!important;
-  margin-bottom:18px!important;
-  opacity:.85;
-}
-.track-placeholder p{
-  color:#8f938e!important;
-  max-width:370px!important;
-  font-size:13px!important;
-  line-height:1.7!important;
-}
-
-/* Skeleton */
-.track-skeleton{
-  border:1px solid var(--hs-line)!important;
-  background:var(--hs-panel)!important;
-  padding:28px!important;
-}
-.sk-line,.sk-dot{
-  background:linear-gradient(90deg,#191b1b 25%,#272a28 37%,#191b1b 63%)!important;
-}
-
-/* Result layout */
-.track-card{
-  position:relative;
-  overflow:hidden;
-  background:var(--hs-panel)!important;
-  border:1px solid var(--hs-line)!important;
-  padding:0!important;
-  box-shadow:0 30px 90px rgba(0,0,0,.28);
-}
-.track-card:after{
-  content:"HEAVY SOUL";
-  position:absolute;
-  right:-34px;
-  top:72px;
-  color:rgba(255,255,255,.018);
-  font:800 90px/1 var(--sans);
-  letter-spacing:-.08em;
-  transform:rotate(90deg);
-  pointer-events:none;
-}
-.track-card > .eyebrow{
-  margin:0!important;
-  padding:25px 22px 16px;
-  color:var(--hs-accent)!important;
-  font:10px var(--mono)!important;
-  letter-spacing:.14em;
-  border-bottom:1px solid var(--hs-line);
-}
-
-/* Main progress */
-.status-track{
-  padding:28px 22px 34px;
-  margin:0!important;
-  background:linear-gradient(180deg,#171919,#151717);
-  border-bottom:1px solid var(--hs-line);
-}
-.status-track-line{
-  top:41px!important;
-  left:9%!important;
-  right:9%!important;
-  background:#292c2a!important;
-}
-.status-track-line-fill{background:var(--hs-accent)!important}
-.status-track-steps{gap:4px}
-.step-dot{
-  width:28px!important;
-  height:28px!important;
-  background:#171919!important;
-  border:1px solid #363a36!important;
-  color:#0b0c0c;
-}
-.step-dot.done{background:var(--hs-accent)!important;border-color:var(--hs-accent)!important}
-.step-dot.pulse{
-  box-shadow:0 0 0 6px rgba(215,255,63,.10)!important;
-}
-.step-dot.pulse:after{border-color:var(--hs-accent)!important}
-.step-label{
-  color:#656a65!important;
-  font-size:9px!important;
-}
-.step-label.done{color:#e1e2dd!important}
-
-/* Result data sections */
-.edd-banner{
-  margin:0!important;
-  border:0!important;
-  border-bottom:1px solid var(--hs-line);
-  border-left:2px solid var(--hs-accent)!important;
-  background:#191c19!important;
-  padding:17px 20px!important;
-  color:#a5a9a4!important;
-}
-.edd-banner b{color:var(--hs-white)!important}
-.live-dot{background:var(--hs-accent)!important}
-
-.rider-card,
-.info-card{
-  margin:0!important;
-  border:0!important;
-  border-bottom:1px solid var(--hs-line)!important;
-  border-radius:0!important;
-  background:#151717!important;
-  padding:18px 20px!important;
-}
-.info-card-title{
-  color:#666b66!important;
-  margin-bottom:10px!important;
-}
-.info-card p{color:#a7aaa6!important}
-.info-card b{color:#e5e6e1}
-.rider-icon{
-  background:#1d201e!important;
-  border-color:var(--hs-line)!important;
-  color:var(--hs-accent)!important;
-}
-.rider-service{color:var(--hs-accent)!important}
-.rider-name{color:#e8e9e5!important}
-.rider-sub{color:#70756f!important}
-.rider-call{
-  background:var(--hs-white)!important;
-  color:#101111!important;
-}
-.rider-call:hover{background:var(--hs-accent)!important}
-
-/* Shipment activity */
-.checkpoint-timeline{
-  margin:0!important;
-  padding:25px 20px 26px;
-  border-bottom:1px solid var(--hs-line);
-}
-.checkpoint-timeline .eyebrow{
-  margin:0 0 18px!important;
-  color:#666b66!important;
-  font:10px var(--mono)!important;
-  letter-spacing:.16em;
-}
-.checkpoint-item{
-  border-left:1px solid #333733!important;
-  padding:12px 0 12px 22px!important;
-  margin-left:11px!important;
-  gap:12px!important;
-}
-.checkpoint-icon{
-  margin-left:-34px!important;
-  width:24px!important;
-  height:24px!important;
-  background:#1a1d1b!important;
-  color:#777c76!important;
-  border-color:#343834!important;
-}
-.checkpoint-icon.latest{
-  background:var(--hs-accent)!important;
-  color:#0b0c0c!important;
-  border-color:var(--hs-accent)!important;
-}
-.checkpoint-item.latest .checkpoint-status{color:var(--hs-accent)!important}
-.checkpoint-status{color:#dfe0db!important}
-.checkpoint-meta{color:#666b66!important}
-
-/* Buttons injected by JS */
-.track-card .btn.outline,
-.cancel-card .btn.outline{
-  margin-left:20px!important;
-  margin-right:20px!important;
-  border:1px solid var(--hs-line)!important;
-  background:transparent!important;
-  color:#ddd!important;
-  transition:.2s;
-}
-.track-card .btn.outline:hover,
-.cancel-card .btn.outline:hover{
-  border-color:var(--hs-accent)!important;
-  color:var(--hs-accent)!important;
-}
-.cancel-card{
-  border:0!important;
-  border-bottom:1px solid var(--hs-line)!important;
-  background:#151717!important;
-  padding:20px 0!important;
-}
-.cancel-card .hint{
-  margin-left:20px!important;
-  color:#6f746e!important;
-}
-
-/* Live footer note */
-.track-card > .hint{
-  padding:18px 20px 22px!important;
-  margin:0!important;
-  color:#656a65!important;
-}
-.track-card > .hint .live-dot{margin-right:7px}
-
-/* Error */
-.pin-error{
-  border:1px solid rgba(255,255,255,.1)!important;
-  background:#171919!important;
-  color:#aaa!important;
-  padding:22px!important;
-  line-height:1.6;
-}
-
-/* Section label above results */
-.result-label{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin:46px 0 12px;
-}
-.result-label span{
-  color:#656a65;
-  font:10px var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
-}
-.result-label strong{
-  color:var(--hs-accent);
-  font:10px var(--mono);
-  letter-spacing:.08em;
-}
-
-/* Bottom service row */
-.service-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:1px;
-  background:var(--hs-line);
-  margin-top:1px;
-}
-.service-item{
-  background:#111313;
-  padding:22px 18px;
-}
-.service-item b{
-  display:block;
-  color:#dedfd9;
-  font:700 10px var(--mono);
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  margin-bottom:6px;
-}
-.service-item span{color:#666b66;font-size:11px;line-height:1.5}
-
-/* Footer */
-.site-footer{
-  background:#080909!important;
-  color:#666!important;
-  border-top:1px solid var(--hs-line);
-}
-.site-footer .footer-bottom{color:#5e625e!important}
-
-/* Responsive */
-@media (min-width:700px){
-  .track-hero{min-height:560px;padding:100px 30px 150px}
-  .track-wrap{width:min(var(--hs-max),calc(100% - 60px));margin-top:-82px}
-  .track-search{
-    grid-template-columns:1fr 170px;
+  .track-hero{
+    background: var(--ink);
+    color: var(--paper);
+    padding: 56px 24px 46px;
+    text-align: center;
   }
-  .track-search input{height:76px;padding-left:25px!important}
-  .track-search button{height:70px;margin:3px}
-  .track-placeholder{min-height:380px}
-  .track-card > .eyebrow{padding:28px 32px 18px}
-  .status-track{padding:34px 34px 40px}
-  .edd-banner,.rider-card,.info-card{padding-left:32px!important;padding-right:32px!important}
-  .checkpoint-timeline{padding-left:32px;padding-right:32px}
-  .track-card > .hint{padding-left:32px!important;padding-right:32px!important}
-  .service-grid{grid-template-columns:repeat(4,1fr)}
-}
+  .track-hero .eyebrow{ color: var(--ink-faint); }
+  .track-hero h1{
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 500;
+    margin: 12px 0 10px;
+  }
+  .track-hero p{
+    color: var(--paper-soft);
+    opacity: .8;
+    font-size: 14px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
 
-@media (max-width:520px){
-  .track-hero{min-height:430px;padding-top:64px}
-  .track-hero h1{font-size:56px}
-  .track-hero h1 span{margin-left:18px}
-  .hero-meta{display:grid;grid-template-columns:1fr 1fr}
-  .search-caption{display:block;line-height:1.7}
-  .search-caption span{display:block}
-  .search-caption a{display:block;margin-top:2px}
-  .status-track{overflow:hidden}
-  .step-label{font-size:8px!important}
-  .step-dot{width:25px!important;height:25px!important}
-  .status-track-line{top:40px!important}
-  .rider-call{padding:9px 11px}
-}
+  .track-wrap{ max-width: 640px; margin: 0 auto; padding: 0 24px 90px; }
 
-@media (prefers-reduced-motion:reduce){
-  *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}
-}
+  /* ---- search box ---- */
+  .track-search{
+    display: flex;
+    gap: 0;
+    margin-top: -26px;
+    margin-bottom: 10px;
+    box-shadow: 0 10px 30px rgba(20,18,15,0.12);
+  }
+  .track-search input{
+    flex: 1;
+    min-width: 0;
+    padding: 18px 18px;
+    border: 1px solid var(--line);
+    border-right: none;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: .02em;
+  }
+  .track-search input:focus{ outline: none; border-color: var(--ink); }
+  .track-search input::placeholder{ color: var(--ink-faint); }
+  .track-search button{
+    padding: 0 26px;
+    border: 1px solid var(--ink);
+  }
+
+  .autofill-note{
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 30px;
+    padding: 10px 14px;
+    background: var(--paper-soft);
+    border-left: 2px solid var(--accent);
+  }
+  .autofill-note.show{ display: flex; }
+  .autofill-note svg{ width: 15px; height: 15px; min-width: 15px; color: var(--accent); }
+
+  .track-help{
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .track-help a{ color: var(--accent); }
+
+  /* ---- pre-search placeholder state ---- */
+  .track-placeholder{
+    text-align: center;
+    padding: 50px 20px;
+    border: 1px solid var(--line);
+    background: var(--paper-soft);
+  }
+  .track-placeholder svg{ width: 34px; height: 34px; color: var(--ink-faint); margin-bottom: 14px; }
+  .track-placeholder p{ font-size: 13.5px; color: var(--ink-soft); max-width: 320px; margin: 0 auto; }
+
+  /* ---- skeleton loader ---- */
+  .track-skeleton{
+    border: 1px solid var(--line);
+    padding: 28px 22px;
+    background: var(--paper);
+  }
+  .sk-line{
+    height: 10px;
+    background: linear-gradient(90deg, var(--paper-soft) 25%, var(--line) 37%, var(--paper-soft) 63%);
+    background-size: 400% 100%;
+    animation: skShimmer 1.4s ease infinite;
+  }
+  .sk-w40{ width: 40%; margin-bottom: 22px; }
+  .sk-w60{ width: 60%; margin-bottom: 26px; }
+  .sk-w80{ width: 80%; margin-top: 10px; }
+  .sk-steps{ display:flex; justify-content:space-between; margin-bottom: 22px; }
+  .sk-dot{
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(90deg, var(--paper-soft) 25%, var(--line) 37%, var(--paper-soft) 63%);
+    background-size: 400% 100%;
+    animation: skShimmer 1.4s ease infinite;
+  }
+  @keyframes skShimmer{
+    0%{ background-position: 100% 0; }
+    100%{ background-position: 0 0; }
+  }
+
+  /* ---- live pulse dot (kept, recoloured to brand accent) ---- */
+  .live-dot{
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: var(--accent);
+    margin-right: 6px;
+    animation: liveBlink 1.4s ease-in-out infinite;
+  }
+  .live-dot.small{ width: 5px; height: 5px; }
+  @keyframes liveBlink{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+
+  .edd-banner{
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--paper-soft);
+    border-left: 2px solid var(--accent);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .edd-banner b{ color: var(--ink); }
+
+  .checkpoint-timeline{ margin-top: 6px; }
+  .checkpoint-item{
+    display: flex; gap: 12px; padding: 11px 0;
+    border-left: 1px solid var(--line);
+    margin-left: 4px; padding-left: 16px;
+    opacity: 0; animation: fadeSlideIn .4s ease forwards;
+  }
+  .checkpoint-item:last-child{ border-left-color: transparent; }
+  @keyframes fadeSlideIn{ from{ opacity:0; transform: translateX(-8px);} to{ opacity:1; transform:translateX(0);} }
+  .checkpoint-status{ font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .checkpoint-meta{ font-size: 12px; color: var(--ink-faint); display:flex; gap:10px; margin-top:2px; font-family: var(--mono); }
+
+  /* ---- track card shell ---- */
+  .track-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 30px 24px 32px;
+  }
+
+  /* ---- horizontal progress stepper ---- */
+  .status-track{ margin-top: 22px; position: relative; }
+  .status-track-line{
+    position: absolute; top: 13px; left: 5%; right: 5%;
+    height: 2px; background: var(--line); z-index: 0;
+  }
+  .status-track-line-fill{ height: 100%; background: var(--accent); transition: width .5s ease; }
+  .status-track-steps{ display:flex; justify-content:space-between; position:relative; z-index:1; }
+  .step-col{ display:flex; flex-direction:column; align-items:center; width:20%; }
+  .step-dot{
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--paper); border: 2px solid var(--line);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .step-dot svg{ width: 13px; height: 13px; }
+  .step-dot.done{ background: var(--accent); border-color: var(--accent); }
+  .step-dot.pulse{ box-shadow: 0 0 0 5px rgba(110,20,32,0.14); }
+  .step-dot.pulse::after{
+    content:''; position:absolute; inset:-6px; border-radius:50%;
+    border: 2px solid var(--accent); animation: pulseRing 1.6s ease-out infinite;
+  }
+  @keyframes pulseRing{ 0%{ transform: scale(.6); opacity:.8; } 100%{ transform: scale(1.8); opacity:0; } }
+  .step-label{ margin-top: 9px; font-family: var(--mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase; text-align:center; color: var(--ink-faint); line-height:1.3; }
+  .step-label.done{ color: var(--ink); font-weight: 600; }
+
+  /* ---- delivery details card ---- */
+  .info-card{
+    margin-top: 22px; background: var(--paper-soft); border: 1px solid var(--line);
+    padding: 16px 18px; font-size: 13px; color: var(--ink-soft);
+  }
+  .info-card p{ margin: 3px 0; }
+  .info-card-title{ font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing:.08em; color: var(--ink-faint); margin-bottom: 7px !important; }
+
+  /* ---- rider / delivery partner card ---- */
+  .rider-card{
+    margin-top: 20px; display:flex; align-items:center; gap:12px;
+    background: var(--paper-soft); border: 1px solid var(--line); padding: 14px 16px;
+  }
+  .rider-card.muted{ background: var(--paper-soft); }
+  .rider-icon{ width: 36px; height:36px; min-width:36px; border-radius:50%; background: var(--paper); display:flex; align-items:center; justify-content:center; color: var(--accent); border: 1px solid var(--line); }
+  .rider-icon svg{ width:18px; height:18px; }
+  .rider-info{ flex:1; min-width:0; }
+  .rider-service{ font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing:.06em; color: var(--accent); font-weight:600; }
+  .rider-name{ font-size: 14px; font-weight:600; color: var(--ink); margin-top: 2px; }
+  .rider-sub{ font-size: 12px; color: var(--ink-faint); margin-top:2px; }
+  .rider-call{
+    display:flex; align-items:center; gap:6px; background: var(--ink); color: var(--paper);
+    padding: 9px 16px; font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing:.04em;
+    text-decoration:none; white-space:nowrap;
+  }
+  .rider-call:hover{ background: var(--accent); }
+  .rider-call svg{ width:13px; height:13px; }
+
+  /* ---- checkpoint icons ---- */
+  .checkpoint-icon{
+    width: 24px; height:24px; min-width:24px; border-radius:50%;
+    background: var(--paper-soft); color: var(--ink-faint);
+    display:flex; align-items:center; justify-content:center;
+    margin-left:-24px; margin-top:0; border: 1px solid var(--line);
+  }
+  .checkpoint-icon svg{ width:12px; height:12px; }
+  .checkpoint-icon.latest{ background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  .checkpoint-item.latest .checkpoint-status{ color: var(--accent); }
+
+  /* ===== DARK / LIME THEME (scoped — redefines the site variables on this page only) ===== */
+  body.track-dark{
+    --paper:#0b0d0a; --paper-soft:#12160f; --ink:#f3f4ef; --ink-soft:#b9bdb0; --ink-faint:#7c8273;
+    --line:#242b20; --accent:#b6f23a;
+    background:#0b0d0a; color:var(--ink);
+  }
+  body.track-dark .btn{ background:var(--accent); color:#0b0d0a; border-color:var(--accent); font-weight:700; }
+  body.track-dark .btn.outline{ background:transparent; color:var(--ink); border-color:var(--line); }
+  body.track-dark .step-dot svg{ stroke:#0b0d0a; }
+  body.track-dark .step-dot.pulse{ box-shadow:0 0 0 5px rgba(182,242,58,.16); }
+  body.track-dark .rider-call{ background:var(--accent); color:#0b0d0a; }
+  body.track-dark .track-search input{ background:#12160f; }
+  .track-hero{ background:radial-gradient(1200px 400px at 80% -10%, rgba(182,242,58,.10), transparent), #0b0d0a; text-align:left; padding:60px 24px 70px; }
+  .track-hero > *{ max-width:1080px; margin-left:auto; margin-right:auto; }
+  .track-hero h1{ font-size:44px; text-transform:uppercase; letter-spacing:.01em; }
+  .track-hero h1 em{ color:var(--accent); font-style:italic; text-transform:uppercase; }
+  .track-hero p{ margin-left:auto; margin-right:auto; max-width:1080px; }
+  .track-wrap{ max-width:1080px; }
+  .tk-grid{ display:grid; grid-template-columns:1.6fr 1fr; gap:20px; align-items:start; }
+  @media(max-width:820px){ .tk-grid{ grid-template-columns:1fr; } .track-hero h1{ font-size:32px; } }
+  .track-card, .tk-side{ background:var(--paper-soft); border:1px solid var(--line); border-radius:14px; padding:24px; }
+  .tk-pill{ display:inline-block; font-family:var(--mono); font-size:11.5px; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:5px 12px; margin-bottom:14px; }
+  .tk-head{ display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+  .tk-title{ font-family:var(--serif); font-size:28px; font-weight:600; margin:0 0 6px; }
+  .tk-sub{ font-size:13.5px; color:var(--ink-soft); max-width:340px; margin:0; }
+  .tk-edd{ background:#0b0d0a; border:1px solid var(--line); border-radius:10px; padding:12px 16px; min-width:150px; }
+  .tk-edd small{ display:block; font-size:11.5px; color:var(--ink-faint); }
+  .tk-edd b{ font-size:16px; }
+  .step-label small{ display:block; font-size:9.5px; color:var(--ink-faint); text-transform:none; letter-spacing:0; margin-top:3px; font-weight:400; }
+  .tk-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:18px; background:#0b0d0a; border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .tk-row small{ display:block; font-size:11.5px; color:var(--ink-faint); }
+  .tk-row b{ font-family:var(--mono); font-size:14px; }
+  .tk-loc b{ font-family:inherit; font-size:15px; }
+  .tk-copy{ background:none; border:0; color:var(--ink-faint); cursor:pointer; font-size:12px; margin-left:6px; }
+  .tk-side h3{ font-family:var(--serif); font-size:18px; margin:18px 0 8px; }
+  .tk-item{ display:flex; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .tk-item-ico{ width:44px; height:44px; border-radius:8px; background:#0b0d0a; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--accent); font-size:20px; }
+  .tk-kv{ padding:10px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .tk-kv small{ display:block; color:var(--ink-faint); font-size:11.5px; margin-bottom:2px; }
+  .tk-help{ display:block; margin-top:16px; padding:14px 16px; border:1px solid var(--line); border-radius:12px; font-size:13px; color:var(--ink-soft); text-decoration:none; }
+  .tk-help b{ color:var(--accent); }
+  .tk-trust{ max-width:1080px; margin:0 auto 50px; padding:0 24px; display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  @media(max-width:820px){ .tk-trust{ grid-template-columns:1fr 1fr; } }
+  .tk-trust div{ border:1px solid var(--line); background:var(--paper-soft); border-radius:12px; padding:16px; font-size:12px; color:var(--ink-faint); }
+  .tk-trust b{ display:block; color:var(--ink); font-size:13.5px; margin-bottom:3px; }
+  .tk-cta{ text-align:center; padding:50px 24px; border-top:1px solid var(--line); }
+  .tk-cta h2{ font-family:var(--serif); font-style:italic; text-transform:uppercase; margin:0 0 8px; }
+  .tk-cta p{ color:var(--ink-soft); font-size:14px; margin:0 0 18px; }
 </style>
 </head>
-
-<body>
-<div class="track-page">
+<body class="track-dark">
 
 <header class="site-header">
   <nav class="nav wrap">
     <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
     <a href="index.html" class="brand">Heavy Soul<small>Est. 2026</small></a>
-
     <div class="nav-links">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
@@ -560,7 +297,6 @@ body{
       <a href="policy.html">Policies</a>
       <a href="account.html" id="navLoginLink">Login / Signup</a>
     </div>
-
     <div class="nav-icons">
       <a class="icon-btn" id="accountBtn" href="account.html" aria-label="Login / Signup">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.7-3.6 5-5.5 7.5-5.5s5.8 1.9 7.5 5.5"/></svg>
@@ -571,7 +307,6 @@ body{
       </a>
     </div>
   </nav>
-
   <div class="mobile-panel" id="mobilePanel">
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
@@ -582,89 +317,51 @@ body{
   </div>
 </header>
 
-<main>
-<section class="track-hero">
-  <div class="hero-grid">
-    <div class="hero-copy">
-      <p class="eyebrow">HEAVY SOUL / DELIVERY SYSTEM</p>
-      <h1>Track <span>your order.</span></h1>
-      <p class="hero-sub">
-        Enter your Order ID and follow your package from confirmation to doorstep —
-        live status, shipment activity, courier details and estimated delivery.
-      </p>
-
-      <div class="hero-meta" aria-label="Tracking features">
-        <span>Live updates</span>
-        <span>Shipment activity</span>
-        <span>Courier details</span>
-        <span>Delivery estimate</span>
-      </div>
-    </div>
-  </div>
-</section>
+<div class="track-hero">
+  <p class="eyebrow">Track your order</p>
+  <h1>Where's your <em>order?</em></h1>
+  <p>Enter your Order ID to see live status, courier details and estimated delivery.</p>
+</div>
 
 <div class="track-wrap">
-
   <form id="trackForm" class="track-search">
     <input
       type="text"
       id="orderIdInput"
-      placeholder="ENTER ORDER ID  /  HS-20260724-448"
+      placeholder="e.g. HS-20260724-448"
       required
       autocomplete="off"
-      aria-label="Order ID"
     >
-    <button type="submit" class="btn">Track Order →</button>
+    <button type="submit" class="btn">Track</button>
   </form>
-
-  <div class="search-caption">
-    <span>Your Order ID was sent to you on WhatsApp after checkout.</span>
-    <a href="https://wa.me/919339909978" target="_blank" rel="noopener">Need help? Message us →</a>
-  </div>
 
   <div class="autofill-note" id="autoFillNote">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>
-    Order ID filled from your tracking link — tap Track Order to see the latest status.
+    Order ID filled in from your link — tap Track to see the latest status.
   </div>
 
-  <div class="result-label">
-    <span>Shipment intelligence</span>
-    <strong>Live system</strong>
-  </div>
+  <p class="track-help">Order ID sent to you on WhatsApp when you checked out. Can't find it? <a href="https://wa.me/919339909978" target="_blank" rel="noopener">Message us</a>.</p>
 
   <div id="trackResult">
     <div class="track-placeholder">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-        <path d="M3 7h13l3 4v6h-3"/>
-        <circle cx="7" cy="17" r="2"/>
-        <circle cx="17" cy="17" r="2"/>
-        <path d="M3 7v7h4"/>
-      </svg>
-      <p>Enter your Order ID above. Your current status, shipment activity, courier information and delivery estimate will appear here.</p>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h13l3 4v6h-3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M3 7v7h4"/></svg>
+      <p>Your order status, courier and delivery timeline will appear here once you track an order.</p>
     </div>
   </div>
-
-  <div class="service-grid" aria-label="Service information">
-    <div class="service-item">
-      <b>01 / Live</b>
-      <span>Status refreshes automatically while your order is being tracked.</span>
-    </div>
-    <div class="service-item">
-      <b>02 / Courier</b>
-      <span>Courier and delivery-partner details appear when available.</span>
-    </div>
-    <div class="service-item">
-      <b>03 / Timeline</b>
-      <span>Follow the shipment activity recorded for your order.</span>
-    </div>
-    <div class="service-item">
-      <b>04 / Support</b>
-      <span>Need assistance? Contact HEAVY SOUL directly on WhatsApp.</span>
-    </div>
-  </div>
-
 </div>
-</main>
+
+<div class="tk-trust">
+  <div><b>Secure Payments</b>100% secure &amp; encrypted</div>
+  <div><b>Fast Shipping</b>Track your order in real-time</div>
+  <div><b>24/7 Support</b>We're here to help on WhatsApp</div>
+  <div><b>Premium Quality</b>Streetwear you can trust</div>
+</div>
+
+<section class="tk-cta">
+  <h2>Still have questions?</h2>
+  <p>We're just a message away. Get in touch with our support team.</p>
+  <a class="btn" href="https://wa.me/919339909978" target="_blank" rel="noopener">Contact us →</a>
+</section>
 
 <footer class="site-footer">
   <div class="wrap">
@@ -675,8 +372,6 @@ body{
     </div>
   </div>
 </footer>
-
-</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
