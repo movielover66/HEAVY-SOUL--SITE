@@ -159,12 +159,6 @@ async function handleCancelClick(btn){
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight on Apps Script
       body: JSON.stringify({
         type: "cancel_order",
-        // FIX: backend's doPost() checks verifyApiToken_() BEFORE it ever
-        // looks at "type": "cancel_order" — without apiToken here, every
-        // cancel request was silently rejected as "Unauthorized" and never
-        // reached the actual cancel logic. Must match config.js's API_TOKEN,
-        // same as checkout.js's logAbandonedCart() already does.
-        apiToken: SITE_CONFIG.API_TOKEN || "",
         orderId: currentOrderId
       })
     });
@@ -225,14 +219,13 @@ function renderStatus(data){
     `;
   }).join("");
 
-  const hasCustomerInfo = data.customerName || data.phone || data.address || data.amount;
+  const hasCustomerInfo = data.customerName || data.phone || data.address;
   const customerHtml = hasCustomerInfo ? `
     <div class="info-card">
       <p class="info-card-title">Delivery details</p>
       ${data.customerName ? `<p><b>Name:</b> ${data.customerName}</p>` : ""}
       ${data.phone ? `<p><b>Phone:</b> ${data.phone}</p>` : ""}
       ${data.address ? `<p><b>Address:</b> ${data.address}</p>` : ""}
-      ${data.amount ? `<p><b>Order Amount:</b> ₹${data.amount}${data.paymentType ? ` (${data.paymentType})` : ""}</p>` : ""}
     </div>
   ` : "";
 
@@ -261,10 +254,11 @@ function renderStatus(data){
     </div>
   ` : "");
 
-  const eddHtml = (data.estimatedDelivery && !isDelivered) ? `
+  const isCancelled = String(data.status || "").toLowerCase() === "cancelled";
+  const eddHtml = (data.estimatedDelivery && !isDelivered && !isCancelled) ? `
     <div class="edd-banner">
       <span class="live-dot"></span>
-      Estimated delivery: <b>${data.estimatedDelivery}</b>
+      ${data.eddIsEstimate ? "Estimated delivery (approx.)" : "Estimated delivery"}: <b>${escapeHtml(formatEddDate(data.estimatedDelivery))}</b>
     </div>
   ` : "";
 
