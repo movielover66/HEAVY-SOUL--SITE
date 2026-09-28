@@ -200,67 +200,65 @@ function iconForStatus(statusText){
   return CHECKPOINT_ICONS.default;
 }
 
+const STEP_LABELS = ["Order Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
+const STATUS_COPY = {
+  "Confirmed":        ["Order Confirmed", "We've received your order and are getting it ready."],
+  "Packed":           ["Packed", "Your order is packed and waiting for courier pickup."],
+  "Shipped":          ["Shipped", "Your order is on its way to you."],
+  "Out for Delivery": ["Out for Delivery", "Your order is out for delivery and will reach you soon. Please keep an eye on your phone."],
+  "Delivered":        ["Delivered", "Your order has been delivered. Thank you for choosing Heavy Soul!"],
+  "Cancelled":        ["Cancelled", "This order has been cancelled."]
+};
+
 function renderStatus(data){
-  const currentIndex = STATUS_STEPS.findIndex(s => s.toLowerCase() === String(data.status || "").toLowerCase());
+  const status = String(data.status || "");
+  const currentIndex = STATUS_STEPS.findIndex(s => s.toLowerCase() === status.toLowerCase());
   const isDelivered = currentIndex === STATUS_STEPS.length - 1;
+  const isCancelled = status.toLowerCase() === "cancelled";
   const isOutForDelivery = STATUS_STEPS[currentIndex] === "Out for Delivery";
   const progressPct = currentIndex >= 0 ? (currentIndex / (STATUS_STEPS.length - 1)) * 100 : 0;
+  const copy = STATUS_COPY[status] || [status || "Processing", ""];
+  const latest = (data.history && data.history.length > 0) ? data.history[0] : null;
+  const e = escapeHtml;
 
   const stepsHtml = STATUS_STEPS.map((step, i) => {
     const done = currentIndex >= 0 && i <= currentIndex;
     const isCurrent = i === currentIndex && !isDelivered;
+    const stamp = (i === currentIndex && latest && latest.time) ? `<small>${e(latest.time)}</small>` : "";
     return `
       <div class="step-col">
         <span class="step-dot ${done ? "done" : ""} ${isCurrent ? "pulse" : ""}">
-          ${done && !isCurrent ? `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>` : ""}
+          ${done && !isCurrent ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>` : ""}
         </span>
-        <span class="step-label ${done ? "done" : ""}">${step}</span>
-      </div>
-    `;
+        <span class="step-label ${done ? "done" : ""}">${STEP_LABELS[i]}${stamp}</span>
+      </div>`;
   }).join("");
 
-  const hasCustomerInfo = data.customerName || data.phone || data.address;
-  const customerHtml = hasCustomerInfo ? `
-    <div class="info-card">
-      <p class="info-card-title">Delivery details</p>
-      ${data.customerName ? `<p><b>Name:</b> ${data.customerName}</p>` : ""}
-      ${data.phone ? `<p><b>Phone:</b> ${data.phone}</p>` : ""}
-      ${data.address ? `<p><b>Address:</b> ${data.address}</p>` : ""}
-    </div>
-  ` : "";
+  const eddHtml = (data.estimatedDelivery && !isDelivered && !isCancelled) ? `
+    <div class="tk-edd"><small>${data.eddIsEstimate ? "Estimated Delivery (approx.)" : "Estimated Delivery"}</small><b>${e(formatEddDate(data.estimatedDelivery))}</b></div>` : "";
 
-  const hasRiderInfo = data.riderName || data.riderPhone || data.courierServiceName;
+  const awbHtml = data.awb ? `
+    <div class="tk-row">
+      <div><small>Tracking Number</small><b>${e(data.awb)}</b>
+        <button type="button" class="tk-copy" onclick="navigator.clipboard&&navigator.clipboard.writeText('${e(data.awb)}');typeof showToast==='function'&&showToast('Tracking number copied')">Copy</button></div>
+      ${data.trackingLink ? `<a href="${e(data.trackingLink)}" target="_blank" rel="noopener" class="btn outline">Track on courier site →</a>` : ""}
+    </div>` : "";
+
+  const locHtml = (latest && !isCancelled) ? `
+    <div class="tk-row tk-loc"><div><small>Current location</small><b>${e(latest.location || "In transit")}</b>
+      <small style="margin-top:4px;">${e(latest.status)}${latest.time ? " · " + e(latest.time) : ""}</small></div></div>` : "";
+
+  const hasRiderInfo = data.riderName || data.riderPhone;
   const courierHtml = (hasRiderInfo && !isDelivered) ? `
     <div class="rider-card">
-      <div class="rider-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h13l3 4v6h-3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M3 7v7h4"/></svg>
-      </div>
       <div class="rider-info">
-        ${data.courierServiceName ? `<div class="rider-service">${data.courierServiceName}</div>` : ""}
-        ${data.riderName ? `<div class="rider-name">${data.riderName}</div>` : `<div class="rider-name">Delivery partner</div>`}
+        ${data.courierServiceName ? `<div class="rider-service">${e(data.courierServiceName)}</div>` : ""}
+        <div class="rider-name">${e(data.riderName || "Delivery partner")}</div>
       </div>
-      ${data.riderPhone ? `<a href="tel:${data.riderPhone}" class="rider-call">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2Z"/></svg>
-          Call
-        </a>` : ""}
-    </div>
-  ` : (isOutForDelivery ? `
-    <div class="rider-card muted">
-      <div class="rider-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h13l3 4v6h-3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M3 7v7h4"/></svg></div>
-      <div class="rider-info">
-        <div class="rider-name">Your parcel is out for delivery</div>
-        <div class="rider-sub">Courier partner hasn't shared rider contact for this shipment</div>
-      </div>
-    </div>
-  ` : "");
-
-  const isCancelled = String(data.status || "").toLowerCase() === "cancelled";
-  const eddHtml = (data.estimatedDelivery && !isDelivered && !isCancelled) ? `
-    <div class="edd-banner">
-      <span class="live-dot"></span>
-      ${data.eddIsEstimate ? "Estimated delivery (approx.)" : "Estimated delivery"}: <b>${escapeHtml(formatEddDate(data.estimatedDelivery))}</b>
-    </div>
-  ` : "";
+      ${data.riderPhone ? `<a href="tel:${e(data.riderPhone)}" class="rider-call">Call</a>` : ""}
+    </div>` : (isOutForDelivery ? `
+    <div class="rider-card muted"><div class="rider-info"><div class="rider-name">Your parcel is out for delivery</div>
+      <div class="rider-sub">Courier partner hasn't shared rider contact for this shipment</div></div></div>` : "");
 
   const historyHtml = (data.history && data.history.length > 0) ? `
     <div class="checkpoint-timeline">
@@ -269,42 +267,56 @@ function renderStatus(data){
         <div class="checkpoint-item ${i === 0 ? "latest" : ""}" style="animation-delay:${i * 60}ms;">
           <span class="checkpoint-icon ${i === 0 ? "latest" : ""}">${iconForStatus(entry.status)}</span>
           <div class="checkpoint-content">
-            <div class="checkpoint-status">${entry.status}</div>
+            <div class="checkpoint-status">${e(entry.status)}</div>
             <div class="checkpoint-meta">
-              ${entry.location ? `<span>${entry.location}</span>` : ""}
-              ${entry.time ? `<span>${entry.time}</span>` : ""}
+              ${entry.location ? `<span>${e(entry.location)}</span>` : ""}
+              ${entry.time ? `<span>${e(entry.time)}</span>` : ""}
             </div>
           </div>
-        </div>
-      `).join("")}
-    </div>
-  ` : "";
+        </div>`).join("")}
+    </div>` : "";
 
-  const cancelHtml = buildCancelSectionHtml(data);
+  const items = Array.isArray(data.items) ? data.items : [];
+  const itemsHtml = items.map(it => `
+    <div class="tk-item">
+      <div class="tk-item-ico">👕</div>
+      <div style="flex:1;"><b>${e(it.name)}</b><br><span style="color:var(--ink-faint);">${it.size && it.size !== "-" ? "Size " + e(it.size) + " · " : ""}Qty ${Number(it.qty) || 1}</span></div>
+      <b>₹${(Number(it.price) || 0) * (Number(it.qty) || 1)}</b>
+    </div>`).join("");
+
+  const payLabel = String(data.paymentType || "").toLowerCase() === "cod" ? "Cash on Delivery" : "Prepaid (Online)";
+  const wa = "https://wa.me/" + (SITE_CONFIG.WHATSAPP_NUMBER || "919339909978");
+
+  const sideHtml = `
+    <aside class="tk-side">
+      ${itemsHtml}
+      <h3>Order details</h3>
+      <div class="tk-kv"><small>Order ID</small>${e(data.orderId)}</div>
+      ${(data.estimatedDelivery && !isDelivered && !isCancelled) ? `<div class="tk-kv"><small>Estimated delivery</small>${e(formatEddDate(data.estimatedDelivery))}</div>` : ""}
+      ${data.address ? `<div class="tk-kv"><small>Shipping address</small>${e(data.address)}</div>` : ""}
+      ${data.customerName ? `<div class="tk-kv"><small>Name</small>${e(data.customerName)}</div>` : ""}
+      <div class="tk-kv"><small>Payment method</small>${payLabel}${data.amount ? " · ₹" + e(data.amount) : ""}</div>
+      <a class="tk-help" href="${wa}" target="_blank" rel="noopener"><b>Need help?</b><br>Contact us on WhatsApp →</a>
+    </aside>`;
 
   resultBox.innerHTML = `
-    <div class="track-card">
-      <p class="eyebrow">Order ${data.orderId}</p>
-
-      <div class="status-track">
-        <div class="status-track-line">
-          <div class="status-track-line-fill" style="width:${progressPct}%;"></div>
+    <div class="tk-grid">
+      <div class="track-card">
+        <span class="tk-pill">ORDER #${e(data.orderId)}</span>
+        <div class="tk-head">
+          <div><h2 class="tk-title">${e(copy[0])}</h2><p class="tk-sub">${e(copy[1])}</p></div>
+          ${eddHtml}
         </div>
-        <div class="status-track-steps">${stepsHtml}</div>
+        ${isCancelled ? "" : `<div class="status-track"><div class="status-track-line"><div class="status-track-line-fill" style="width:${progressPct}%;"></div></div><div class="status-track-steps">${stepsHtml}</div></div>`}
+        ${awbHtml}
+        ${locHtml}
+        ${courierHtml}
+        ${historyHtml}
+        ${buildCancelSectionHtml(data)}
+        <p class="hint" style="margin-top:16px; font-size:12px; opacity:0.6;"><span class="live-dot small"></span> Live status — updates automatically</p>
       </div>
-
-      ${eddHtml}
-      ${courierHtml}
-      ${customerHtml}
-      ${historyHtml}
-      ${cancelHtml}
-
-      ${data.trackingLink ? `<a href="${data.trackingLink}" target="_blank" rel="noopener" class="btn outline" style="margin-top:20px;">View courier tracking</a>` : ""}
-      <p class="hint" style="margin-top:16px; font-size:12px; opacity:0.6;">
-        <span class="live-dot small"></span> Live status — updates automatically
-      </p>
-    </div>
-  `;
+      ${sideHtml}
+    </div>`;
 
   if (data.cancelEligible && data.cancelDeadline) {
     startCancelCountdown(data.cancelDeadline);
