@@ -76,3 +76,11 @@ function escapeHtml(str){
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+
+// Shared EDD date formatter — "2026-10-05" -> "Mon, 5 Oct"
+function formatEddDate(raw){
+  if (!raw) return "";
+  const d = new Date(raw);
+  if (isNaN(d)) return String(raw);
+  return d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+}
