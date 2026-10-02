@@ -19,13 +19,18 @@
 <link rel="stylesheet" href="css/style.css">
 <style>
   /* ===== DARK / LIME THEME (scoped to this page, matches track.html) ===== */
-  body.orders-dark{
+  /* Scoped to .dark-shell only (NOT body) so the site-wide header/footer
+     keep their normal light theme — applying these vars at body level
+     made header nav text nearly invisible (light text on the header's
+     light background), since --ink cascades to every descendant. */
+  body.orders-dark{ background:#0b0d0a; }
+  .dark-shell{
     --paper:#0b0d0a; --paper-soft:#12160f; --ink:#f3f4ef; --ink-soft:#b9bdb0; --ink-faint:#7c8273;
     --line:#242b20; --accent:#b6f23a;
     background:#0b0d0a; color:var(--ink);
   }
-  body.orders-dark .btn{ background:var(--accent); color:#0b0d0a; border-color:var(--accent); font-weight:700; }
-  body.orders-dark .btn.outline{ background:transparent; color:var(--ink); border-color:var(--line); }
+  .dark-shell .btn{ background:var(--accent); color:#0b0d0a; border-color:var(--accent); font-weight:700; }
+  .dark-shell .btn.outline{ background:transparent; color:var(--ink); border-color:var(--line); }
 
   .orders-hero{
     background:radial-gradient(1200px 400px at 80% -10%, rgba(182,242,58,.10), transparent), #0b0d0a;
@@ -159,6 +164,7 @@
   </div>
 </header>
 
+<div class="dark-shell">
 <div class="orders-hero">
   <p class="eyebrow">Order history</p>
   <h1>My orders</h1>
@@ -197,6 +203,7 @@
   </div>
 
 </div>
+</div><!-- /.dark-shell -->
 
 <footer class="site-footer">
   <div class="wrap">
