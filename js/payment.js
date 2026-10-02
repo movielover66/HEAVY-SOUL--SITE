@@ -188,17 +188,27 @@ function buildOrderPayload_(orderId, amountDue){
   };
 }
 
-function sendOrderToSheet(orderPayload){
-  const url = SITE_CONFIG.APPS_SCRIPT_URL;
-  if (!url || url.includes("PASTE-YOUR")) return;
-
-  fetch(url, {
+// Verifies the payment signature SERVER-SIDE and, only if genuine, asks
+// the server to write the order to the Orders sheet. This replaces the
+// old direct-to-Apps-Script write — the client is never trusted to save
+// an order on its own anymore. Throws on failure so the caller can stop
+// and show an error instead of treating the order as placed.
+async function verifyAndSaveOrder_(razorpayResponse, orderPayload){
+  const res = await fetch("/api/verify-payment", {
     method: "POST",
-    mode: "no-cors",
-    keepalive: true,
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(orderPayload)
-  }).catch(() => {});
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      razorpay_order_id: razorpayResponse.razorpay_order_id,
+      razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+      razorpay_signature: razorpayResponse.razorpay_signature,
+      orderPayload: orderPayload
+    })
+  });
+  const data = await res.json().catch(() => ({ success: false, error: "Invalid server response." }));
+  if (!data.success) {
+    throw new Error(data.error || "Payment could not be verified.");
+  }
+  return data;
 }
 
 function generateOrderId(){
@@ -249,8 +259,17 @@ async function startRazorpayPayment() {
       "name": "Heavy Soul",
       "description": "Order Payment",
       "order_id": rzpOrderData.order_id,
-      "handler": function (response) {
-        finalizeOrder(response.razorpay_payment_id, orderId, orderPayload);
+      "handler": async function (response) {
+        // IMPORTANT: do not treat the order as placed just because this
+        // callback fired — it only means the checkout widget reported
+        // success. finalizeOrder() now verifies with the server first,
+        // and bails out (without saving anything) if that check fails.
+        try {
+          await finalizeOrder(response, orderId, orderPayload);
+        } catch (err) {
+          showToast("We couldn't confirm your payment: " + err.message + ". If money was deducted, please contact us on WhatsApp before retrying.");
+          resetPayButton_();
+        }
       },
       "prefill": {
         "name": shippingInfo.name,
@@ -288,7 +307,8 @@ function resetPayButton_(){
   payBtn.textContent = "Pay ₹" + amountDue;
 }
 
-async function finalizeOrder(paymentRef, orderId, orderPayload) {
+async function finalizeOrder(razorpayResponse, orderId, orderPayload) {
+  const paymentRef = razorpayResponse.razorpay_payment_id;
   const amountDue = orderPayload.amount;
   const handling = paymentMethod === "cod" ? (SITE_CONFIG.COD_HANDLING_PER_ITEM * totalQty) : 0;
   const grandTotal = orderPayload.grandTotal;
@@ -326,7 +346,10 @@ Track your order anytime: ${window.location.origin}${window.location.pathname.re
 
 Please verify payment and confirm the order.`;
 
-  sendOrderToSheet(orderPayload);
+  // Throws if verification fails — propagates up to the handler's
+  // try/catch above, which shows an error and does NOT proceed to
+  // open WhatsApp / redirect to success.html / clear the cart.
+  await verifyAndSaveOrder_(razorpayResponse, orderPayload);
 
   if (window.firebase && typeof saveOrderRecord === "function") {
     await saveOrderRecord(orderPayload);
