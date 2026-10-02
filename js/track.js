@@ -159,7 +159,8 @@ async function handleCancelClick(btn){
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight on Apps Script
       body: JSON.stringify({
         type: "cancel_order",
-        orderId: currentOrderId
+        orderId: currentOrderId,
+        apiToken: SITE_CONFIG.API_TOKEN || ""
       })
     });
 
