@@ -2,6 +2,14 @@
 // HEAVY SOUL — CLOUDFLARE WORKER (backend API)
 // Routes:
 //   POST /api/create-order            → creates a Razorpay order
+//   POST /api/verify-payment          → verifies a Razorpay payment
+//                                        signature server-side, THEN
+//                                        (and only then) writes the
+//                                        order to the Orders sheet.
+//                                        This is the ONLY place an
+//                                        order is allowed to be saved —
+//                                        the client can no longer save
+//                                        an order on its own.
 //   POST /api/phone-forgot-password   → verifies an MSG91 OTP access
 //                                        token, then resets the
 //                                        Firebase password for the
@@ -21,6 +29,10 @@ export default {
 
     if (url.pathname === "/api/phone-forgot-password" && request.method === "POST") {
       return handlePhoneForgotPassword(request, env, ctx);
+    }
+
+    if (url.pathname === "/api/verify-payment" && request.method === "POST") {
+      return handleVerifyPayment(request, env, ctx);
     }
 
     return env.ASSETS.fetch(request);
@@ -84,6 +96,77 @@ async function handleCreateOrder(request, env, ctx) {
   } catch (err) {
     return jsonResponse({ success: false, error: String(err) }, 500);
   }
+}
+
+/* ========================================================= VERIFY PAYMENT (server-side, authoritative) ========================================================= */
+// The client's Razorpay "handler" callback is JUST a UI event — it proves
+// nothing on its own and can fire without a real captured payment (stale
+// tab state, a replayed order_id, a browser/extension quirk, DevTools,
+// etc.). This endpoint re-derives the HMAC-SHA256 signature from
+// razorpay_order_id + razorpay_payment_id using OUR OWN key secret (never
+// trust a signature the client sends) and compares it to what the client
+// supplied. Only if that matches do we forward the order to Apps Script —
+// this is now the ONLY path that can create a row in the Orders sheet for
+// a prepaid/COD-advance order. The client is never trusted to save an
+// order directly anymore.
+
+async function handleVerifyPayment(request, env, ctx) {
+  try {
+    const body = await request.json();
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderPayload } = body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderPayload) {
+      return jsonResponse({ success: false, error: "Missing payment verification fields." }, 400);
+    }
+
+    if (!env.RAZORPAY_KEY_SECRET) {
+      return jsonResponse({ success: false, error: "Razorpay keys not configured on server" }, 500);
+    }
+
+    const keySecret = await env.RAZORPAY_KEY_SECRET.get();
+    const expectedSignature = await hmacSha256Hex_(keySecret, `${razorpay_order_id}|${razorpay_payment_id}`);
+
+    if (!timingSafeEqual_(expectedSignature, String(razorpay_signature))) {
+      return jsonResponse({ success: false, error: "Payment verification failed — signature mismatch." }, 400);
+    }
+
+    // Signature is valid -> this payment is genuinely captured by Razorpay.
+    // Now (and only now) forward the full order to Apps Script.
+    orderPayload.paymentReference = razorpay_payment_id;
+    orderPayload.apiToken = env.APPS_SCRIPT_API_TOKEN || orderPayload.apiToken || "";
+
+    if (!env.APPS_SCRIPT_URL) {
+      return jsonResponse({ success: false, error: "Order backend not configured on server" }, 500);
+    }
+
+    const sheetRes = await fetch(env.APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(orderPayload)
+    });
+    const sheetData = await sheetRes.json().catch(() => ({ success: false, error: "Invalid response from order backend." }));
+
+    return jsonResponse(sheetData, sheetRes.ok ? 200 : 500);
+
+  } catch (err) {
+    return jsonResponse({ success: false, error: String(err) }, 500);
+  }
+}
+
+async function hmacSha256Hex_(secret, message) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const sigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  return [...new Uint8Array(sigBuf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function timingSafeEqual_(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }
 
 /* ========================================================= PHONE FORGOT-PASSWORD ========================================================= */
@@ -261,4 +344,4 @@ function jsonResponse(data, status = 200) {
     status,
     headers: { "Content-Type": "application/json" }
   });
-} 
+}
