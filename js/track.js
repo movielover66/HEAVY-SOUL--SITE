@@ -211,36 +211,6 @@ const STATUS_COPY = {
   "Cancelled":        ["Cancelled", "This order has been cancelled."]
 };
 
-// Builds a stylized (non-geographic) SVG route card: a curved dashed path
-// from "Warehouse" to the customer, with a moving pin positioned at `t`
-// (0 = just placed, 1 = delivered) along a quadratic bezier curve.
-function buildRouteMapHtml_(t, latest, isDelivered){
-  t = Math.max(0.04, Math.min(0.96, t));
-  // Quadratic bezier: P(t) = (1-t)^2*S + 2(1-t)t*C + t^2*E
-  const S = { x: 36, y: 90 }, C = { x: 160, y: 10 }, E = { x: 284, y: 90 };
-  const mt = 1 - t;
-  const px = mt * mt * S.x + 2 * mt * t * C.x + t * t * E.x;
-  const py = mt * mt * S.y + 2 * mt * t * C.y + t * t * E.y;
-  const destLabel = latest && latest.location ? latest.location : "Your address";
-
-  return `
-    <div class="route-map">
-      <svg viewBox="0 0 320 110" width="100%" height="110" preserveAspectRatio="none">
-        <path d="M ${S.x} ${S.y} Q ${C.x} ${C.y} ${E.x} ${E.y}" class="route-path"/>
-        <circle cx="${S.x}" cy="${S.y}" r="5" class="route-dot route-dot-origin"/>
-        <circle cx="${E.x}" cy="${E.y}" r="5" class="route-dot route-dot-dest"/>
-        ${!isDelivered ? `<g class="route-marker" style="transform: translate(${px}px, ${py}px);">
-          <circle r="10" class="route-marker-pulse"/>
-          <circle r="5.5" class="route-marker-dot"/>
-        </g>` : ""}
-      </svg>
-      <div class="route-labels">
-        <span><small>Warehouse</small></span>
-        <span style="text-align:right;"><small>${escapeHtml(destLabel)}</small></span>
-      </div>
-    </div>`;
-}
-
 function renderStatus(data){
   const status = String(data.status || "");
   const currentIndex = STATUS_STEPS.findIndex(s => s.toLowerCase() === status.toLowerCase());
@@ -279,11 +249,11 @@ function renderStatus(data){
     <div class="tk-row tk-loc"><div><small>Current location</small><b>${e(latest.location || "In transit")}</b>
       <small style="margin-top:4px;">${e(latest.status)}${latest.time ? " · " + e(latest.time) : ""}</small></div></div>` : "";
 
-  // ---- Dummy route map: no real geo-coordinates — a stylized curved path
-  // from the warehouse to the customer, with a marker that advances along
-  // it based on the same progress fraction as the step-tracker above. Not
-  // a real map, just a visual sense of "how far along" the shipment is.
-  const routeMapHtml = (!isCancelled && currentIndex >= 0) ? buildRouteMapHtml_(progressPct / 100, latest, isDelivered) : "";
+  // Real checkpoint map (Leaflet + free OpenStreetMap tiles) — not live GPS,
+  // but each courier scan's city/hub is geocoded to a real lat/lon pin.
+  // The <div> is just a placeholder here; initRouteMap_() fills it in
+  // asynchronously after this HTML is in the DOM (see end of this function).
+  const routeMapHtml = (!isCancelled && currentIndex >= 0) ? `<div id="trackRouteMap" class="route-map-leaflet"></div>` : "";
 
   const hasRiderInfo = data.riderName || data.riderPhone;
   const courierHtml = (hasRiderInfo && !isDelivered) ? `
@@ -360,5 +330,110 @@ function renderStatus(data){
     startCancelCountdown(data.cancelDeadline);
   } else {
     stopCancelCountdown();
+  }
+
+  initRouteMap_(data, latest, isDelivered, isCancelled);
+}
+
+/* =========================================================
+   CHECKPOINT MAP (Leaflet + free OpenStreetMap/Nominatim)
+   Not live GPS — Delhivery only exposes hub/city-level scan
+   checkpoints, not a continuous moving position. Each scan's
+   location name is geocoded (via our own /api/geocode proxy,
+   which calls Nominatim) into a real lat/lon, so the map always
+   shows the most recent known checkpoint. It updates whenever a
+   new scan comes in on the 30s auto-refresh.
+   ========================================================= */
+
+let _routeMap = null;
+let _geocodeMemCache = (() => {
+  try { return JSON.parse(localStorage.getItem("hs_geocode_cache") || "{}"); }
+  catch (e) { return {}; }
+})();
+
+function saveGeocodeMemCache_(){
+  try { localStorage.setItem("hs_geocode_cache", JSON.stringify(_geocodeMemCache)); }
+  catch (e) { /* storage full/unavailable — fine, just skip persisting */ }
+}
+
+async function geocode_(query){
+  const key = String(query).trim().toLowerCase();
+  if (!key) return null;
+  if (_geocodeMemCache[key]) return _geocodeMemCache[key];
+
+  try {
+    const res = await fetch("/api/geocode?q=" + encodeURIComponent(query));
+    const data = await res.json();
+    if (!data.success) return null;
+    const point = { lat: data.lat, lon: data.lon };
+    _geocodeMemCache[key] = point;
+    saveGeocodeMemCache_();
+    return point;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Delhivery location strings look like "Hooghly_Chinsurah_D (West Bengal)"
+// — strip the trailing facility-code segment in parentheses and swap
+// underscores for spaces so it geocodes as a normal place name.
+function cleanLocationName_(raw){
+  if (!raw) return "";
+  return String(raw).replace(/_/g, " ").replace(/\s*\([^)]*\)\s*$/, "").trim();
+}
+
+async function initRouteMap_(data, latest, isDelivered, isCancelled){
+  const el = document.getElementById("trackRouteMap");
+  if (!el || isCancelled || typeof L === "undefined") return;
+
+  const originQuery = (window.SITE_CONFIG && SITE_CONFIG.WAREHOUSE_GEOCODE_QUERY) || "Hooghly, West Bengal, India";
+  const destQuery = data.address ? data.address + ", India" : null;
+  const currentLocRaw = (latest && latest.location) ? cleanLocationName_(latest.location) : null;
+
+  const [originPt, destPt, currentPt] = await Promise.all([
+    geocode_(originQuery),
+    destQuery ? geocode_(destQuery) : Promise.resolve(null),
+    (currentLocRaw && !isDelivered) ? geocode_(currentLocRaw + ", India") : Promise.resolve(null)
+  ]);
+
+  if (!document.getElementById("trackRouteMap")) return; // page re-rendered again while we were waiting
+
+  if (!originPt && !destPt && !currentPt) {
+    el.innerHTML = `<p class="hint" style="padding:16px; font-size:12px; margin:0;">Map unavailable right now.</p>`;
+    return;
+  }
+
+  if (_routeMap) { _routeMap.remove(); _routeMap = null; }
+
+  _routeMap = L.map(el, { zoomControl: false, attributionControl: true }).setView([22.5, 88.3], 7);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap, &copy; CARTO',
+    maxZoom: 18
+  }).addTo(_routeMap);
+
+  const dotIcon = (color) => L.divIcon({
+    className: '',
+    html: `<span style="display:block;width:12px;height:12px;border-radius:50%;background:${color};border:2px solid #0b0d0a;box-shadow:0 0 0 3px ${color}40;"></span>`,
+    iconSize: [12, 12]
+  });
+
+  const bounds = [];
+  if (originPt) {
+    L.marker([originPt.lat, originPt.lon], { icon: dotIcon('#7c8273') }).addTo(_routeMap).bindPopup("Warehouse");
+    bounds.push([originPt.lat, originPt.lon]);
+  }
+  if (currentPt && !isDelivered) {
+    L.marker([currentPt.lat, currentPt.lon], { icon: dotIcon('#b6f23a') }).addTo(_routeMap).bindPopup("Current location");
+    bounds.push([currentPt.lat, currentPt.lon]);
+  }
+  if (destPt) {
+    L.marker([destPt.lat, destPt.lon], { icon: dotIcon('#6aa6ff') }).addTo(_routeMap).bindPopup("Delivery address");
+    bounds.push([destPt.lat, destPt.lon]);
+  }
+
+  if (bounds.length > 1) {
+    _routeMap.fitBounds(bounds, { padding: [28, 28] });
+  } else if (bounds.length === 1) {
+    _routeMap.setView(bounds[0], 11);
   }
 }

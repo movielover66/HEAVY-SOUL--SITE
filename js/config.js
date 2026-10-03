@@ -52,6 +52,11 @@ const SITE_CONFIG = {
     appId: "1:421145657035:web:9fab0fec092fb3b575e54e"
   },
 
+  // Used by track.html's checkpoint map to place the "Warehouse" pin —
+  // a free-text place name good enough for OpenStreetMap to geocode.
+  // Not GPS-precise, just needs to land in the right town.
+  WAREHOUSE_GEOCODE_QUERY: "Hooghly, West Bengal, India",
+
   // Live site URL — used for og:url meta tags. No trailing slash.
   SITE_URL: "https://heavysoul.in",
 
