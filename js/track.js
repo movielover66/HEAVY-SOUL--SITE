@@ -211,6 +211,36 @@ const STATUS_COPY = {
   "Cancelled":        ["Cancelled", "This order has been cancelled."]
 };
 
+// Builds a stylized (non-geographic) SVG route card: a curved dashed path
+// from "Warehouse" to the customer, with a moving pin positioned at `t`
+// (0 = just placed, 1 = delivered) along a quadratic bezier curve.
+function buildRouteMapHtml_(t, latest, isDelivered){
+  t = Math.max(0.04, Math.min(0.96, t));
+  // Quadratic bezier: P(t) = (1-t)^2*S + 2(1-t)t*C + t^2*E
+  const S = { x: 36, y: 90 }, C = { x: 160, y: 10 }, E = { x: 284, y: 90 };
+  const mt = 1 - t;
+  const px = mt * mt * S.x + 2 * mt * t * C.x + t * t * E.x;
+  const py = mt * mt * S.y + 2 * mt * t * C.y + t * t * E.y;
+  const destLabel = latest && latest.location ? latest.location : "Your address";
+
+  return `
+    <div class="route-map">
+      <svg viewBox="0 0 320 110" width="100%" height="110" preserveAspectRatio="none">
+        <path d="M ${S.x} ${S.y} Q ${C.x} ${C.y} ${E.x} ${E.y}" class="route-path"/>
+        <circle cx="${S.x}" cy="${S.y}" r="5" class="route-dot route-dot-origin"/>
+        <circle cx="${E.x}" cy="${E.y}" r="5" class="route-dot route-dot-dest"/>
+        ${!isDelivered ? `<g class="route-marker" style="transform: translate(${px}px, ${py}px);">
+          <circle r="10" class="route-marker-pulse"/>
+          <circle r="5.5" class="route-marker-dot"/>
+        </g>` : ""}
+      </svg>
+      <div class="route-labels">
+        <span><small>Warehouse</small></span>
+        <span style="text-align:right;"><small>${escapeHtml(destLabel)}</small></span>
+      </div>
+    </div>`;
+}
+
 function renderStatus(data){
   const status = String(data.status || "");
   const currentIndex = STATUS_STEPS.findIndex(s => s.toLowerCase() === status.toLowerCase());
@@ -248,6 +278,12 @@ function renderStatus(data){
   const locHtml = (latest && !isCancelled) ? `
     <div class="tk-row tk-loc"><div><small>Current location</small><b>${e(latest.location || "In transit")}</b>
       <small style="margin-top:4px;">${e(latest.status)}${latest.time ? " · " + e(latest.time) : ""}</small></div></div>` : "";
+
+  // ---- Dummy route map: no real geo-coordinates — a stylized curved path
+  // from the warehouse to the customer, with a marker that advances along
+  // it based on the same progress fraction as the step-tracker above. Not
+  // a real map, just a visual sense of "how far along" the shipment is.
+  const routeMapHtml = (!isCancelled && currentIndex >= 0) ? buildRouteMapHtml_(progressPct / 100, latest, isDelivered) : "";
 
   const hasRiderInfo = data.riderName || data.riderPhone;
   const courierHtml = (hasRiderInfo && !isDelivered) ? `
@@ -310,6 +346,7 @@ function renderStatus(data){
         </div>
         ${isCancelled ? "" : `<div class="status-track"><div class="status-track-line"><div class="status-track-line-fill" style="width:${progressPct}%;"></div></div><div class="status-track-steps">${stepsHtml}</div></div>`}
         ${awbHtml}
+        ${routeMapHtml}
         ${locHtml}
         ${courierHtml}
         ${historyHtml}
