@@ -10,6 +10,15 @@
 //                                        order is allowed to be saved —
 //                                        the client can no longer save
 //                                        an order on its own.
+//   GET  /api/geocode                 → proxies a place-name search to
+//                                        OpenStreetMap's free Nominatim
+//                                        geocoder (adds a required
+//                                        User-Agent, caches results per
+//                                        isolate). Used by track.html's
+//                                        checkpoint map — NOT a live GPS
+//                                        feed, just turns each courier
+//                                        scan's city/hub name into a
+//                                        lat/lon pin.
 //   POST /api/phone-forgot-password   → verifies an MSG91 OTP access
 //                                        token, then resets the
 //                                        Firebase password for the
@@ -33,6 +42,10 @@ export default {
 
     if (url.pathname === "/api/verify-payment" && request.method === "POST") {
       return handleVerifyPayment(request, env, ctx);
+    }
+
+    if (url.pathname === "/api/geocode" && request.method === "GET") {
+      return handleGeocode(request, env, ctx);
     }
 
     return env.ASSETS.fetch(request);
@@ -266,6 +279,59 @@ async function handlePhoneForgotPassword(request, env, ctx) {
   }
 }
 
+/* ========================================================= GEOCODE (free, OpenStreetMap Nominatim) ========================================================= */
+// A tiny in-memory cache (reused across requests within the same Worker
+// isolate, same pattern as the products cache below) so repeat lookups of
+// the same hub/pincode — which happen constantly since the tracking page
+// auto-refreshes every 30s — don't re-hit Nominatim every time. Nominatim's
+// usage policy requires a descriptive User-Agent and asks for at most ~1
+// request/sec of genuinely new traffic, which this easily stays under for
+// a small shop.
+let _geocodeCache = new Map();
+const GEOCODE_CACHE_MAX = 500; // simple cap so the isolate's memory can't grow unbounded
+
+async function handleGeocode(request, env, ctx) {
+  try {
+    const url = new URL(request.url);
+    const q = (url.searchParams.get("q") || "").trim();
+
+    if (!q) {
+      return jsonResponse({ success: false, error: "Missing q parameter" }, 400);
+    }
+
+    const key = q.toLowerCase();
+    if (_geocodeCache.has(key)) {
+      return jsonResponse({ success: true, ..._geocodeCache.get(key), cached: true });
+    }
+
+    const nomRes = await fetch(
+      "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=in&q=" + encodeURIComponent(q),
+      { headers: { "User-Agent": "HeavySoul-OrderTracking/1.0 (contact: heavysoulclothing@gmail.com)" } }
+    );
+    const nomData = await nomRes.json().catch(() => null);
+
+    if (!nomRes.ok || !Array.isArray(nomData) || nomData.length === 0) {
+      return jsonResponse({ success: false, error: "No match found for this location." }, 404);
+    }
+
+    const result = {
+      lat: parseFloat(nomData[0].lat),
+      lon: parseFloat(nomData[0].lon),
+      display_name: nomData[0].display_name
+    };
+
+    if (_geocodeCache.size >= GEOCODE_CACHE_MAX) {
+      _geocodeCache.delete(_geocodeCache.keys().next().value); // drop oldest
+    }
+    _geocodeCache.set(key, result);
+
+    return jsonResponse({ success: true, ...result });
+
+  } catch (err) {
+    return jsonResponse({ success: false, error: String(err) }, 500);
+  }
+}
+
 /* ========================================================= PRICE VALIDATION ========================================================= */
 // A tiny in-memory cache so we don't hit the Apps Script products
 // endpoint on every single checkout — the sheet doesn't change that
@@ -344,4 +410,4 @@ function jsonResponse(data, status = 200) {
     status,
     headers: { "Content-Type": "application/json" }
   });
-}
+} 
