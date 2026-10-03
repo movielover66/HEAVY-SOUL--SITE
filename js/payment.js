@@ -163,7 +163,8 @@ function buildOrderPayload_(orderId, amountDue){
     size: item.size || "-",
     qty: item.qty || 1,
     price: item.price,
-    sku: item.sku || ""
+    sku: item.sku || "",
+    image: item.image || ""
   }));
 
   return {
