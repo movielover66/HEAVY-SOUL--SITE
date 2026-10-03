@@ -72,8 +72,9 @@
   .order-card:hover{ border-color:#3a4530; transform:translateY(-1px); }
   .order-card-thumb{
     width:56px; height:56px; min-width:56px; border-radius:10px; background:#0b0d0a; border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center; font-size:24px;
+    display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden;
   }
+  .order-card-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
   .order-card-body{ flex:1; min-width:200px; }
   .order-card-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
   .order-card-id{ font-family:var(--mono); font-size:13px; color:var(--accent); font-weight:600; }
@@ -238,12 +239,53 @@ const STATUS_ICON_CLASS = {
 let allOrdersCache = [];
 let statusCache = {}; // orderId -> {status, estimatedDelivery, eddIsEstimate, cancelEligible, cancelDeadline}
 let currentFilter = "all";
+let catalogCache = { bySku: {}, byName: {} };
 
-function renderOrderCard(order){
+// Fallback for orders saved before item images were recorded (older
+// orders only have name/size/qty/sku — no image URL). We fetch the live
+// product catalog once and match each item by SKU (preferred) or name,
+// so even old order cards can show a real product photo instead of the
+// placeholder icon.
+let _catalogPromise = null;
+function loadProductCatalog_(){
+  if (_catalogPromise) return _catalogPromise;
+  const url = SITE_CONFIG.APPS_SCRIPT_URL;
+  if (!url || url.includes('PASTE-YOUR')) return Promise.resolve({ bySku: {}, byName: {} });
+
+  _catalogPromise = fetch(url + '?type=products')
+    .then(res => res.json())
+    .then(data => {
+      const bySku = {}, byName = {};
+      (data && data.products ? data.products : []).forEach(p => {
+        const img = p.image || p.imageUrl || p.img || '';
+        if (!img) return;
+        if (p.sku) bySku[String(p.sku).trim().toLowerCase()] = img;
+        if (p.name) byName[String(p.name).trim().toLowerCase()] = img;
+      });
+      return { bySku, byName };
+    })
+    .catch(() => ({ bySku: {}, byName: {} }));
+
+  return _catalogPromise;
+}
+
+function resolveItemImage_(item, catalog){
+  if (!item) return '';
+  if (item.image) return item.image;
+  if (!catalog) return '';
+  const sku = String(item.sku || '').trim().toLowerCase();
+  if (sku && catalog.bySku[sku]) return catalog.bySku[sku];
+  const name = String(item.name || '').trim().toLowerCase();
+  if (name && catalog.byName[name]) return catalog.byName[name];
+  return '';
+}
+
+function renderOrderCard(order, catalog){
   const date = order.createdAt && order.createdAt.toDate ? order.createdAt.toDate() : null;
   const dateStr = date ? date.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
   const items = order.items || [];
   const itemsText = items.map(it => `${it.name}${it.size && it.size !== '-' ? ' (' + it.size + ')' : ''} ×${it.qty || 1}`).join(', ');
+  const resolvedThumb = resolveItemImage_(items[0], catalog);
   const total = order.subtotal || order.amountPaid || 0;
   const st = statusCache[order.orderId];
 
@@ -266,7 +308,7 @@ function renderOrderCard(order){
 
   return `
     <div class="order-card" data-order-id="${escapeHtml(order.orderId)}" data-status="${st ? escapeHtml(String(st.status || '').toLowerCase()) : ''}" data-search="${escapeHtml((order.orderId + ' ' + itemsText).toLowerCase())}">
-      <div class="order-card-thumb">👕</div>
+      <div class="order-card-thumb">${resolvedThumb ? `<img src="${escapeHtml(resolvedThumb)}" alt="${escapeHtml(items[0] && items[0].name || '')}">` : "👕"}</div>
       <div class="order-card-body">
         <div class="order-card-top">
           <span class="order-card-id">${escapeHtml(order.orderId)}</span>
@@ -330,7 +372,7 @@ function applyFiltersAndRender(){
     return;
   }
 
-  listEl.innerHTML = filtered.map(renderOrderCard).join('');
+  listEl.innerHTML = filtered.map(o => renderOrderCard(o, catalogCache)).join('');
 }
 
 async function hydrateOrderStatuses(orders){
@@ -349,15 +391,16 @@ async function hydrateOrderStatuses(orders){
 }
 
 async function loadAndRenderOrders(){
-  const orders = await loadUserOrders();
+  const [orders, catalog] = await Promise.all([loadUserOrders(), loadProductCatalog_()]);
   allOrdersCache = orders;
+  catalogCache = catalog;
 
   if (orders.length === 0) {
     applyFiltersAndRender();
     return;
   }
 
-  applyFiltersAndRender(); // render immediately with "Checking…" badges
+  applyFiltersAndRender(); // render immediately with real/catalog images + "Checking…" badges
   hydrateOrderStatuses(orders);
 }
 
