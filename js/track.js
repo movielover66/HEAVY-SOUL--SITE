@@ -374,6 +374,42 @@ async function geocode_(query){
   }
 }
 
+// A raw customer-typed address ("house no:6/ thana: anandapur/ pin
+// code:758021") rarely geocodes well as freeform text. A 6-digit PIN code
+// searched structurally is far more reliable, so we pull one out of the
+// address and prefer that; freeform text is only a fallback.
+async function geocodePin_(pin){
+  const key = "pin:" + pin;
+  if (_geocodeMemCache[key]) return _geocodeMemCache[key];
+
+  try {
+    const res = await fetch("/api/geocode?pin=" + encodeURIComponent(pin));
+    const data = await res.json();
+    if (!data.success) return null;
+    const point = { lat: data.lat, lon: data.lon };
+    _geocodeMemCache[key] = point;
+    saveGeocodeMemCache_();
+    return point;
+  } catch (e) {
+    return null;
+  }
+}
+
+function extractPincode_(address){
+  const m = String(address || "").match(/\b(\d{6})\b/);
+  return m ? m[1] : null;
+}
+
+// Straight-line ("as the crow flies") distance in km — not the real road
+// route, just enough to give a rough sense of how far away the shipment is.
+function haversineKm_(a, b){
+  const R = 6371;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat), dLon = toRad(b.lon - a.lon);
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+}
+
 // Delhivery location strings look like "Hooghly_Chinsurah_D (West Bengal)"
 // — strip the trailing facility-code segment in parentheses and swap
 // underscores for spaces so it geocodes as a normal place name.
@@ -387,13 +423,21 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
   if (!el || isCancelled || typeof L === "undefined") return;
 
   const originQuery = (window.SITE_CONFIG && SITE_CONFIG.WAREHOUSE_GEOCODE_QUERY) || "Hooghly, West Bengal, India";
-  const destQuery = data.address ? data.address + ", India" : null;
+  const destPincode = extractPincode_(data.address);
   const currentLocRaw = (latest && latest.location) ? cleanLocationName_(latest.location) : null;
 
-  const [originPt, destPt, currentPt] = await Promise.all([
+  // Trail: every distinct hub the shipment has scanned through so far, in
+  // chronological order (data.history is newest-first, so reverse it),
+  // capped to the most recent 6 stops to keep the number of geocode calls
+  // reasonable. This is what gets connected into the red dashed trail line.
+  const chronological = (data.history || []).map(h => cleanLocationName_(h.location)).filter(Boolean).reverse();
+  const trailLocs = [...new Set(chronological)].slice(-6);
+
+  const [originPt, destPt, currentPt, trailPts] = await Promise.all([
     geocode_(originQuery),
-    destQuery ? geocode_(destQuery) : Promise.resolve(null),
-    (currentLocRaw && !isDelivered) ? geocode_(currentLocRaw + ", India") : Promise.resolve(null)
+    destPincode ? geocodePin_(destPincode) : (data.address ? geocode_(data.address + ", India") : Promise.resolve(null)),
+    (currentLocRaw && !isDelivered) ? geocode_(currentLocRaw + ", India") : Promise.resolve(null),
+    Promise.all(trailLocs.map(loc => geocode_(loc + ", India")))
   ]);
 
   if (!document.getElementById("trackRouteMap")) return; // page re-rendered again while we were waiting
@@ -414,23 +458,50 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
     maxZoom: 19
   }).addTo(_routeMap);
 
-  const dotIcon = (color) => L.divIcon({
+  const dotIcon = (color, emoji) => L.divIcon({
     className: '',
-    html: `<span style="display:block;width:12px;height:12px;border-radius:50%;background:${color};border:2px solid #0b0d0a;box-shadow:0 0 0 3px ${color}40;"></span>`,
-    iconSize: [12, 12]
+    html: `<span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:${color};border:2px solid #0b0d0a;box-shadow:0 0 0 3px ${color}40;font-size:11px;">${emoji || ''}</span>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11]
   });
 
   const bounds = [];
   if (originPt) {
-    L.marker([originPt.lat, originPt.lon], { icon: dotIcon('#7c8273') }).addTo(_routeMap).bindPopup("Warehouse");
+    L.marker([originPt.lat, originPt.lon], { icon: dotIcon('#7c8273', '🏭') }).addTo(_routeMap).bindPopup("Warehouse");
     bounds.push([originPt.lat, originPt.lon]);
   }
+
+  // Red dashed trail: warehouse → every scanned checkpoint so far → current
+  // position (or the delivery address, once delivered). Grows stop by stop
+  // as new scans come in on refresh — not a real road route, just a
+  // straight-line "how far it's travelled" trail connecting the dots.
+  const trailPoints = [];
+  if (originPt) trailPoints.push([originPt.lat, originPt.lon]);
+  trailPts.forEach(p => { if (p) trailPoints.push([p.lat, p.lon]); });
+  if (isDelivered && destPt) trailPoints.push([destPt.lat, destPt.lon]);
+  else if (currentPt) trailPoints.push([currentPt.lat, currentPt.lon]);
+
+  // Drop consecutive duplicate points (same hub geocoded twice in a row)
+  const dedupedTrail = trailPoints.filter((pt, i) => i === 0 ||
+    Math.abs(pt[0] - trailPoints[i - 1][0]) > 0.0005 || Math.abs(pt[1] - trailPoints[i - 1][1]) > 0.0005);
+
+  if (dedupedTrail.length > 1) {
+    L.polyline(dedupedTrail, { color: '#e65c5c', weight: 3, opacity: 0.85, dashArray: '7 7' }).addTo(_routeMap);
+    dedupedTrail.forEach(pt => bounds.push(pt));
+  }
+
+  // Truck icon marks the courier's last known scan checkpoint — this is
+  // NOT a live GPS position, just the most recent hub/city Delhivery
+  // reported. It moves to a new spot only when a new scan comes in.
   if (currentPt && !isDelivered) {
-    L.marker([currentPt.lat, currentPt.lon], { icon: dotIcon('#b6f23a') }).addTo(_routeMap).bindPopup("Current location");
+    L.marker([currentPt.lat, currentPt.lon], { icon: dotIcon('#b6f23a', '🚚') })
+      .addTo(_routeMap)
+      .bindTooltip("Heavy Soul Parcel", { permanent: true, direction: 'top', offset: [0, -13], className: 'truck-label' })
+      .bindPopup("Last known checkpoint");
     bounds.push([currentPt.lat, currentPt.lon]);
   }
   if (destPt) {
-    L.marker([destPt.lat, destPt.lon], { icon: dotIcon('#6aa6ff') }).addTo(_routeMap).bindPopup("Delivery address");
+    L.marker([destPt.lat, destPt.lon], { icon: dotIcon('#6aa6ff', '📍') }).addTo(_routeMap).bindPopup("Delivery address");
     bounds.push([destPt.lat, destPt.lon]);
   }
 
@@ -438,5 +509,25 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
     _routeMap.fitBounds(bounds, { padding: [28, 28] });
   } else if (bounds.length === 1) {
     _routeMap.setView(bounds[0], 11);
+  }
+
+  // "How far" caption — straight-line distance from the last known
+  // checkpoint (or the warehouse, if not shipped yet) to the delivery
+  // address. Not the real road distance, just a rough sense of scale.
+  const fromPt = (currentPt && !isDelivered) ? currentPt : originPt;
+  let captionHtml = '';
+  if (fromPt && destPt) {
+    const km = haversineKm_(fromPt, destPt);
+    const label = (currentPt && !isDelivered) ? 'from last known checkpoint' : 'from warehouse';
+    captionHtml = `<div class="route-caption">~${km < 10 ? km.toFixed(1) : Math.round(km)} km ${label} to delivery address (straight-line, not road distance)</div>`;
+  } else if (!destPt) {
+    captionHtml = `<div class="route-caption">Couldn't pin the exact delivery address on the map — showing what we have.</div>`;
+  }
+  if (captionHtml) {
+    const existingCap = el.parentNode.querySelector('.route-caption');
+    if (existingCap) existingCap.remove();
+    const cap = document.createElement('div');
+    cap.innerHTML = captionHtml;
+    el.parentNode.insertBefore(cap.firstChild, el.nextSibling);
   }
 }
