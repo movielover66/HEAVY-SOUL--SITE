@@ -406,9 +406,12 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
   if (_routeMap) { _routeMap.remove(); _routeMap = null; }
 
   _routeMap = L.map(el, { zoomControl: false, attributionControl: true }).setView([22.5, 88.3], 7);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap, &copy; CARTO',
-    maxZoom: 18
+  // Standard OpenStreetMap tiles — free, no API key. Darkened via a CSS
+  // filter on the tile pane only (see .route-map-leaflet .leaflet-tile-pane
+  // in track.html), so markers/popups stay normal-colored.
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
   }).addTo(_routeMap);
 
   const dotIcon = (color) => L.divIcon({
