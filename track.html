@@ -159,6 +159,12 @@
     border: 1px solid var(--line);
     background: var(--paper-soft);
   }
+  /* Darkens the free standard-OSM tiles via CSS (no paid/key-gated dark
+     tile provider needed) — applied only to the tile layer, not markers
+     or popups, so pins/text stay normally colored. */
+  .route-map-leaflet .leaflet-tile-pane{
+    filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9) saturate(0.8);
+  }
   /* Leaflet ships its own CSS; these just restyle the attribution strip
      and popups to fit the dark theme instead of Leaflet's default white. */
   .leaflet-control-attribution{
@@ -253,18 +259,24 @@
   .checkpoint-icon.latest{ background: var(--accent); color: var(--paper); border-color: var(--accent); }
   .checkpoint-item.latest .checkpoint-status{ color: var(--accent); }
 
-  /* ===== DARK / LIME THEME (scoped — redefines the site variables on this page only) ===== */
-  body.track-dark{
+  /* ===== DARK / LIME THEME =====
+     Scoped to .dark-shell (a wrapper div around hero+content), NOT body —
+     applying these at body level made the site-wide header's nav text
+     (which uses var(--ink)) nearly invisible: light text on the header's
+     normal light background, since --ink cascades to every descendant
+     including the header that sits above/outside this page's dark area. */
+  body.track-dark{ background:#0b0d0a; }
+  .dark-shell{
     --paper:#0b0d0a; --paper-soft:#12160f; --ink:#f3f4ef; --ink-soft:#b9bdb0; --ink-faint:#7c8273;
     --line:#242b20; --accent:#b6f23a;
     background:#0b0d0a; color:var(--ink);
   }
-  body.track-dark .btn{ background:var(--accent); color:#0b0d0a; border-color:var(--accent); font-weight:700; }
-  body.track-dark .btn.outline{ background:transparent; color:var(--ink); border-color:var(--line); }
-  body.track-dark .step-dot svg{ stroke:#0b0d0a; }
-  body.track-dark .step-dot.pulse{ box-shadow:0 0 0 5px rgba(182,242,58,.16); }
-  body.track-dark .rider-call{ background:var(--accent); color:#0b0d0a; }
-  body.track-dark .track-search input{ background:#12160f; }
+  .dark-shell .btn{ background:var(--accent); color:#0b0d0a; border-color:var(--accent); font-weight:700; }
+  .dark-shell .btn.outline{ background:transparent; color:var(--ink); border-color:var(--line); }
+  .dark-shell .step-dot svg{ stroke:#0b0d0a; }
+  .dark-shell .step-dot.pulse{ box-shadow:0 0 0 5px rgba(182,242,58,.16); }
+  .dark-shell .rider-call{ background:var(--accent); color:#0b0d0a; }
+  .dark-shell .track-search input{ background:#12160f; }
   .track-hero{ background:radial-gradient(1200px 400px at 80% -10%, rgba(182,242,58,.10), transparent), #0b0d0a; text-align:left; padding:60px 24px 70px; }
   .track-hero > *{ max-width:1080px; margin-left:auto; margin-right:auto; }
   .track-hero h1{ font-size:44px; text-transform:uppercase; letter-spacing:.01em; }
@@ -337,6 +349,7 @@
   </div>
 </header>
 
+<div class="dark-shell">
 <div class="track-hero">
   <p class="eyebrow">Track your order</p>
   <h1>Where's your <em>order?</em></h1>
@@ -382,6 +395,7 @@
   <p>We're just a message away. Get in touch with our support team.</p>
   <a class="btn" href="https://wa.me/919339909978" target="_blank" rel="noopener">Contact us →</a>
 </section>
+</div><!-- /.dark-shell -->
 
 <footer class="site-footer">
   <div class="wrap">
