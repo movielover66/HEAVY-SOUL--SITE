@@ -52,10 +52,14 @@ const SITE_CONFIG = {
     appId: "1:421145657035:web:9fab0fec092fb3b575e54e"
   },
 
-  // Used by track.html's checkpoint map to place the "Warehouse" pin —
-  // a free-text place name good enough for OpenStreetMap to geocode.
-  // Not GPS-precise, just needs to land in the right town.
-  WAREHOUSE_GEOCODE_QUERY: "Hooghly, West Bengal, India",
+  // Used by track.html's checkpoint map to place the "Warehouse" pin.
+  // A PIN code geocodes FAR more precisely than a district/town name (a
+  // name like "Hooghly, West Bengal" is ambiguous — Nominatim can resolve
+  // it to the whole district's centroid, which can be many km from the
+  // actual town). Set this to your warehouse's real 6-digit PIN code.
+  WAREHOUSE_PINCODE: "712121",
+  // Fallback only, used if the PIN code above fails to geocode.
+  WAREHOUSE_GEOCODE_QUERY: "Chinsurah, Hooghly, West Bengal, India",
 
   // Live site URL — used for og:url meta tags. No trailing slash.
   SITE_URL: "https://heavysoul.in",

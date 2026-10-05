@@ -422,8 +422,33 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
   const el = document.getElementById("trackRouteMap");
   if (!el || isCancelled || typeof L === "undefined") return;
 
-  const originQuery = (window.SITE_CONFIG && SITE_CONFIG.WAREHOUSE_GEOCODE_QUERY) || "Hooghly, West Bengal, India";
-  const destPincode = extractPincode_(data.address);
+  // Resolve the warehouse pin: try the precise PIN code first, then fall
+  // back to the freeform town name if that specific PIN isn't in
+  // Nominatim's index (coverage of Indian postal codes is incomplete).
+  async function resolveOrigin_(){
+    const pin = (window.SITE_CONFIG && SITE_CONFIG.WAREHOUSE_PINCODE) || "";
+    if (pin) {
+      const p = await geocodePin_(pin);
+      if (p) return p;
+    }
+    const fallbackQuery = (window.SITE_CONFIG && SITE_CONFIG.WAREHOUSE_GEOCODE_QUERY) || "Hooghly, West Bengal, India";
+    return geocode_(fallbackQuery);
+  }
+
+  // Resolve the delivery address: structured PIN search first (most
+  // precise), then that same PIN as plain free text (sometimes indexed
+  // differently), then the full raw address as a last resort.
+  async function resolveDestination_(){
+    const pin = extractPincode_(data.address);
+    if (pin) {
+      const p1 = await geocodePin_(pin);
+      if (p1) return p1;
+      const p2 = await geocode_(pin + ", India");
+      if (p2) return p2;
+    }
+    return data.address ? geocode_(data.address + ", India") : null;
+  }
+
   const currentLocRaw = (latest && latest.location) ? cleanLocationName_(latest.location) : null;
 
   // Trail: every distinct hub the shipment has scanned through so far, in
@@ -434,8 +459,8 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
   const trailLocs = [...new Set(chronological)].slice(-6);
 
   const [originPt, destPt, currentPt, trailPts] = await Promise.all([
-    geocode_(originQuery),
-    destPincode ? geocodePin_(destPincode) : (data.address ? geocode_(data.address + ", India") : Promise.resolve(null)),
+    resolveOrigin_(),
+    resolveDestination_(),
     (currentLocRaw && !isDelivered) ? geocode_(currentLocRaw + ", India") : Promise.resolve(null),
     Promise.all(trailLocs.map(loc => geocode_(loc + ", India")))
   ]);
