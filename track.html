@@ -151,9 +151,15 @@
   }
   .edd-banner b{ color: var(--ink); }
 
+  .route-breadcrumb{
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    margin-top: 20px; margin-bottom: 8px;
+    font-size: 12px; color: var(--ink-soft); font-family: var(--mono);
+  }
+  .route-breadcrumb .rb-arrow{ color: var(--ink-faint); }
+
   .route-map-leaflet{
-    margin-top: 20px;
-    height: 220px;
+    height: 260px;
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid var(--line);
@@ -185,6 +191,21 @@
     box-shadow: none;
   }
   .truck-label.leaflet-tooltip::before{ display: none; } /* hide default tooltip arrow */
+
+  .origin-label.leaflet-tooltip, .dest-label.leaflet-tooltip{
+    background: #0b0d0a !important;
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    box-shadow: none;
+  }
+  .origin-label.leaflet-tooltip{ color: var(--ink-soft) !important; border: 1px solid var(--line) !important; }
+  .dest-label.leaflet-tooltip{ color: #6aa6ff !important; border: 1px solid #6aa6ff !important; }
+  .origin-label.leaflet-tooltip::before, .dest-label.leaflet-tooltip::before{ display: none; }
   /* Leaflet ships its own CSS; these just restyle the attribution strip
      and popups to fit the dark theme instead of Leaflet's default white. */
   .leaflet-control-attribution{
