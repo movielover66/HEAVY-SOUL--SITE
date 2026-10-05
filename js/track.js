@@ -267,7 +267,16 @@ function renderStatus(data){
   // but each courier scan's city/hub is geocoded to a real lat/lon pin.
   // The <div> is just a placeholder here; initRouteMap_() fills it in
   // asynchronously after this HTML is in the DOM (see end of this function).
-  const routeMapHtml = (!isCancelled && currentIndex >= 0) ? `<div id="trackRouteMap" class="route-map-leaflet"></div>` : "";
+  const breadcrumbCurrentLabel = (latest && latest.location && !isDelivered) ? cleanLocationName_(latest.location) : null;
+  const routeBreadcrumbHtml = (!isCancelled && currentIndex >= 0) ? `
+    <div class="route-breadcrumb">
+      <span>🏭 Warehouse</span>
+      ${breadcrumbCurrentLabel ? `<span class="rb-arrow">→</span><span>🚚 ${e(breadcrumbCurrentLabel)}</span>` : ""}
+      <span class="rb-arrow">→</span>
+      <span>📍 ${isDelivered ? "Delivered" : "Delivery address"}</span>
+    </div>` : "";
+
+  const routeMapHtml = (!isCancelled && currentIndex >= 0) ? `${routeBreadcrumbHtml}<div id="trackRouteMap" class="route-map-leaflet"></div>` : "";
 
   const hasRiderInfo = data.riderName || data.riderPhone;
   const courierHtml = (hasRiderInfo && !isDelivered) ? `
@@ -521,7 +530,10 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
 
   const bounds = [];
   if (originPt) {
-    L.marker([originPt.lat, originPt.lon], { icon: dotIcon('#7c8273', '🏭') }).addTo(_routeMap).bindPopup("Warehouse");
+    L.marker([originPt.lat, originPt.lon], { icon: dotIcon('#7c8273', '🏭') })
+      .addTo(_routeMap)
+      .bindTooltip("Warehouse", { permanent: true, direction: 'top', offset: [0, -13], className: 'origin-label' })
+      .bindPopup("Warehouse");
     bounds.push([originPt.lat, originPt.lon]);
   }
 
@@ -555,8 +567,24 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
     bounds.push([currentPt.lat, currentPt.lon]);
   }
   if (destPt) {
-    L.marker([destPt.lat, destPt.lon], { icon: dotIcon('#6aa6ff', '📍') }).addTo(_routeMap).bindPopup("Delivery address");
+    L.marker([destPt.lat, destPt.lon], { icon: dotIcon('#6aa6ff', '📍') })
+      .addTo(_routeMap)
+      .bindTooltip("Delivery address", { permanent: true, direction: 'top', offset: [0, -13], className: 'dest-label' })
+      .bindPopup("Delivery address");
     bounds.push([destPt.lat, destPt.lon]);
+  }
+
+  // Grey dotted "remaining" path — current position (or warehouse, if not
+  // yet dispatched) straight to the destination, so the red "traveled"
+  // trail and the grey "still to go" stretch are visually distinct. Not
+  // drawn once delivered, since the red trail already reaches the door.
+  if (!isDelivered && destPt) {
+    const remainingStart = currentPt || originPt;
+    if (remainingStart) {
+      L.polyline([[remainingStart.lat, remainingStart.lon], [destPt.lat, destPt.lon]], {
+        color: '#7c8273', weight: 2, opacity: 0.7, dashArray: '2 8'
+      }).addTo(_routeMap);
+    }
   }
 
   if (bounds.length > 1) {
