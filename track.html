@@ -208,6 +208,16 @@
   .checkpoint-status{ font-size: 13.5px; font-weight: 600; color: var(--ink); }
   .checkpoint-meta{ font-size: 12px; color: var(--ink-faint); display:flex; gap:10px; margin-top:2px; font-family: var(--mono); }
 
+  .checkpoint-extra{ display: none; }
+  .checkpoint-timeline.expanded .checkpoint-extra{ display: block; }
+  .show-more-history-btn{
+    margin-top: 10px; margin-left: 4px;
+    background: none; border: none; cursor: pointer;
+    color: var(--accent); font-family: var(--mono); font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: .03em; padding: 0;
+  }
+  .show-more-history-btn:hover{ text-decoration: underline; }
+
   /* ---- track card shell ---- */
   .track-card{
     background: var(--paper);
