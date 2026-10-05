@@ -27,8 +27,19 @@ form.addEventListener("submit", (e) => {
 // Event delegation — resultBox.innerHTML gets replaced on every render/refresh,
 // so we attach one listener here instead of re-binding a button listener each time.
 resultBox.addEventListener("click", (e) => {
-  const btn = e.target.closest(".cancel-order-btn");
-  if (btn) handleCancelClick(btn);
+  const cancelBtn = e.target.closest(".cancel-order-btn");
+  if (cancelBtn) { handleCancelClick(cancelBtn); return; }
+
+  const moreBtn = e.target.closest(".show-more-history-btn");
+  if (moreBtn) {
+    const timeline = moreBtn.closest(".checkpoint-timeline");
+    const extra = timeline && timeline.querySelector(".checkpoint-extra");
+    if (!extra) return;
+    const expanded = timeline.classList.toggle("expanded");
+    moreBtn.textContent = expanded
+      ? "Show less"
+      : "Show " + extra.querySelectorAll(".checkpoint-item").length + " more";
+  }
 });
 
 async function lookupOrder(orderId, showLoading){
@@ -219,7 +230,10 @@ function renderStatus(data){
   const isOutForDelivery = STATUS_STEPS[currentIndex] === "Out for Delivery";
   const progressPct = currentIndex >= 0 ? (currentIndex / (STATUS_STEPS.length - 1)) * 100 : 0;
   const copy = STATUS_COPY[status] || [status || "Processing", ""];
-  const latest = (data.history && data.history.length > 0) ? data.history[0] : null;
+  // IMPORTANT: data.history comes from the backend oldest-first
+  // (chronological ascending — index 0 is the very first scan, e.g.
+  // "Manifested"). The most recent scan is the LAST element, not [0].
+  const latest = (data.history && data.history.length > 0) ? data.history[data.history.length - 1] : null;
   const e = escapeHtml;
 
   const stepsHtml = STATUS_STEPS.map((step, i) => {
@@ -267,20 +281,35 @@ function renderStatus(data){
     <div class="rider-card muted"><div class="rider-info"><div class="rider-name">Your parcel is out for delivery</div>
       <div class="rider-sub">Courier partner hasn't shared rider contact for this shipment</div></div></div>` : "");
 
-  const historyHtml = (data.history && data.history.length > 0) ? `
+  // Display newest-first (reverse of the backend's oldest-first order) and
+  // cap to the 5 most recent by default — older entries sit in a hidden
+  // block toggled open by "Show more" (event-delegated, see resultBox
+  // click listener near the top of this file).
+  const HISTORY_PREVIEW_COUNT = 5;
+  const historyNewestFirst = (data.history || []).slice().reverse();
+
+  const renderCheckpoint_ = (entry, i) => `
+    <div class="checkpoint-item ${i === 0 ? "latest" : ""}" style="animation-delay:${Math.min(i, 8) * 60}ms;">
+      <span class="checkpoint-icon ${i === 0 ? "latest" : ""}">${iconForStatus(entry.status)}</span>
+      <div class="checkpoint-content">
+        <div class="checkpoint-status">${e(entry.status)}</div>
+        <div class="checkpoint-meta">
+          ${entry.location ? `<span>${e(entry.location)}</span>` : ""}
+          ${entry.time ? `<span>${e(entry.time)}</span>` : ""}
+        </div>
+      </div>
+    </div>`;
+
+  const historyHtml = (historyNewestFirst.length > 0) ? `
     <div class="checkpoint-timeline">
       <p class="eyebrow" style="margin-top:28px;">Shipment activity</p>
-      ${data.history.map((entry, i) => `
-        <div class="checkpoint-item ${i === 0 ? "latest" : ""}" style="animation-delay:${i * 60}ms;">
-          <span class="checkpoint-icon ${i === 0 ? "latest" : ""}">${iconForStatus(entry.status)}</span>
-          <div class="checkpoint-content">
-            <div class="checkpoint-status">${e(entry.status)}</div>
-            <div class="checkpoint-meta">
-              ${entry.location ? `<span>${e(entry.location)}</span>` : ""}
-              ${entry.time ? `<span>${e(entry.time)}</span>` : ""}
-            </div>
-          </div>
-        </div>`).join("")}
+      ${historyNewestFirst.slice(0, HISTORY_PREVIEW_COUNT).map((entry, i) => renderCheckpoint_(entry, i)).join("")}
+      ${historyNewestFirst.length > HISTORY_PREVIEW_COUNT ? `
+        <div class="checkpoint-extra">
+          ${historyNewestFirst.slice(HISTORY_PREVIEW_COUNT).map((entry, i) => renderCheckpoint_(entry, i + HISTORY_PREVIEW_COUNT)).join("")}
+        </div>
+        <button type="button" class="show-more-history-btn">Show ${historyNewestFirst.length - HISTORY_PREVIEW_COUNT} more</button>
+      ` : ""}
     </div>` : "";
 
   const items = Array.isArray(data.items) ? data.items : [];
@@ -451,11 +480,11 @@ async function initRouteMap_(data, latest, isDelivered, isCancelled){
 
   const currentLocRaw = (latest && latest.location) ? cleanLocationName_(latest.location) : null;
 
-  // Trail: every distinct hub the shipment has scanned through so far, in
-  // chronological order (data.history is newest-first, so reverse it),
-  // capped to the most recent 6 stops to keep the number of geocode calls
-  // reasonable. This is what gets connected into the red dashed trail line.
-  const chronological = (data.history || []).map(h => cleanLocationName_(h.location)).filter(Boolean).reverse();
+  // Trail: every distinct hub the shipment has scanned through so far.
+  // data.history is already oldest-first (chronological) from the backend,
+  // so no reversal needed — just dedupe and keep the most recent 6 stops
+  // (via slice(-6)) to cap the number of geocode calls.
+  const chronological = (data.history || []).map(h => cleanLocationName_(h.location)).filter(Boolean);
   const trailLocs = [...new Set(chronological)].slice(-6);
 
   const [originPt, destPt, currentPt, trailPts] = await Promise.all([
