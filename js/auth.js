@@ -43,7 +43,7 @@ async function authLogOut() {
   window.location.href = "index.html";
 }
 
-// ---- forgot password ----
+// ---- forgot password (email accounts) ----
 async function authSendPasswordReset(email) {
   if (!authReady()) throw new Error("Auth not configured yet.");
   // Send users to our own branded reset page instead of Firebase's
@@ -54,18 +54,28 @@ async function authSendPasswordReset(email) {
   await firebase.auth().sendPasswordResetEmail(email, actionCodeSettings);
 }
 
+// ---- check whether an account already exists for an email, and how ----
+// Returns an array of sign-in provider ids, e.g. ["password"],
+// ["google.com"], or [] if no account exists at all. This is the
+// single source of truth for "does this account exist" — no separate
+// Firestore index to keep in sync.
+async function authFetchSignInMethods(email) {
+  if (!authReady()) throw new Error("Auth not configured yet.");
+  return firebase.auth().fetchSignInMethodsForEmail(email);
+}
+
 // ---- friendly error text ----
 function authErrorMessage(err) {
   const map = {
-    "auth/email-already-in-use": "এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে। Log in করুন।",
-    "auth/invalid-email": "সঠিক ইমেইল দিন।",
-    "auth/weak-password": "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।",
-    "auth/user-not-found": "এই ইমেইলে কোনো অ্যাকাউন্ট নেই।",
-    "auth/wrong-password": "পাসওয়ার্ড ভুল হয়েছে।",
-    "auth/invalid-credential": "ইমেইল বা পাসওয়ার্ড ভুল।",
-    "auth/too-many-requests": "অনেকবার ভুল হয়েছে, একটু পরে চেষ্টা করুন।"
+    "auth/email-already-in-use": "An account already exists with this email. Please log in instead.",
+    "auth/invalid-email": "Please enter a valid email address.",
+    "auth/weak-password": "Password must be at least 6 characters.",
+    "auth/user-not-found": "No account found with this email.",
+    "auth/wrong-password": "Incorrect password.",
+    "auth/invalid-credential": "Incorrect email/phone or password.",
+    "auth/too-many-requests": "Too many attempts. Please try again in a little while."
   };
-  return map[err.code] || (err.message || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+  return map[err.code] || (err.message || "Something went wrong. Please try again.");
 }
 
 // ---- keep header account icon + menu link in sync ----
@@ -73,7 +83,7 @@ function renderAccountState(user) {
   const el = document.getElementById("accountBtn");
   if (el) {
     if (user) {
-      el.title = user.displayName || user.email;
+      el.title = user.displayName || "My Account";
       el.classList.add("logged-in");
     } else {
       el.title = "Login / Signup";

@@ -1,14 +1,21 @@
 // ============================================================
 // HEAVY SOUL — UNIFIED LOGIN / SIGNUP
-// One Firebase identity for everyone: Google, or Phone (verified
-// once via MSG91 OTP at signup only), or Email. All three land in
-// the same Firestore `users` collection. Include this ONE script
+// One Firebase identity for everyone: Google, Phone (verified once
+// via MSG91 OTP at signup only), or Email. Include this ONE script
 // (after config.js, auth.js, msg91-otp.js, and the Firebase
-// app/auth/firestore compat SDKs) on account.html, where the
-// step markup lives directly in the page HTML.
+// app/auth/firestore compat SDKs) on account.html, where the step
+// markup lives directly in the page HTML.
 //
-// Usage: the step markup below lives directly on account.html —
-// there is no popup. requireAuthThenGo(url) redirects to
+// Whether an account already exists is checked with Firebase Auth's
+// own fetchSignInMethodsForEmail() — NOT a separate Firestore index.
+// A separate index needs two writes to stay in sync (Firebase Auth +
+// Firestore); if the second write ever failed, an existing account
+// would stop being recognized and get bounced into "create a new
+// account" on its next login. fetchSignInMethodsForEmail asks
+// Firebase Auth directly, so there's nothing to fall out of sync.
+//
+// Usage: the step markup lives directly on account.html — there is
+// no popup. requireAuthThenGo(url) redirects to
 // account.html?redirect=url when a login is needed first.
 // ============================================================
 
@@ -17,7 +24,7 @@ const AUTH_RESEND_SECONDS = 30;
 
 let _authIdentifierType = null; // 'email' | 'phone'
 let _authIdentifierKey = null;  // normalized: lowercased email, or 'phone_<10digits>'
-let _authSyntheticEmail = null; // for phone accounts
+let _authSyntheticEmail = null; // for phone accounts — internal only, never shown to the user
 let _authPhoneVerified = false;
 let _authResendCount = 0;
 let _authResendTimer = null;
@@ -38,11 +45,11 @@ function normalizeIdentifier_(raw) {
   return null;
 }
 
-// NOTE: This is now an INLINE PAGE auth form, not a popup modal.
-// The step markup (#uAuthStep-entry / -login / -signup / -reset,
-// plus #uAuthMsg) lives directly in account.html's HTML. This file
-// only wires up the behaviour. On DOMContentLoaded, if that markup
-// is present on the page, we reset it to the "entry" step.
+// NOTE: This is an INLINE PAGE auth form, not a popup modal. The step
+// markup (#uAuthStep-entry / -login / -signup / -reset, plus
+// #uAuthMsg) lives directly in account.html's HTML. This file only
+// wires up the behaviour. On DOMContentLoaded, if that markup is
+// present on the page, we reset it to the "entry" step.
 document.addEventListener("DOMContentLoaded", function () {
   if (document.getElementById("uAuthStep-entry")) {
     uBackToEntry();
@@ -108,7 +115,7 @@ async function uHandleContinue() {
   const raw = document.getElementById("uAuthIdentifier").value;
   const parsed = normalizeIdentifier_(raw);
   if (!parsed) {
-    uShowMsg_("সঠিক email অথবা ১০ ডিজিটের mobile number দিন।", true);
+    uShowMsg_("Please enter a valid email or 10-digit mobile number.", true);
     return;
   }
   _authIdentifierType = parsed.type;
@@ -117,17 +124,28 @@ async function uHandleContinue() {
     _authSyntheticEmail = parsed.phone + "@phone.heavysoul.in";
   }
 
-  uShowMsg_("চেক করা হচ্ছে…");
+  const emailToCheck = parsed.type === "phone" ? _authSyntheticEmail : parsed.key;
+
+  uShowMsg_("Checking…");
   try {
-    const doc = await firebase.firestore().collection("accountIndex").doc(_authIdentifierKey).get();
-    if (doc.exists) {
+    const methods = await authFetchSignInMethods(emailToCheck);
+
+    if (methods.length > 0 && methods.indexOf("password") !== -1) {
+      // Existing account with a password set — show the login step.
       document.getElementById("uAuthLoginLabel").textContent =
         parsed.type === "phone" ? "+91 " + parsed.phone : raw.trim();
       document.getElementById("uAuthForgotWrap").style.display = "block";
       uShowStep_("login");
+
+    } else if (methods.length > 0) {
+      // Account exists but only via Google — there's no password to
+      // log in with here, point them at the Google button instead.
+      uShowMsg_("This account uses Google Sign-in. Please use \u201cContinue with Google\u201d above.", true);
+
     } else {
+      // No account yet — show the signup step.
       document.getElementById("uAuthSignupLabel").textContent =
-        parsed.type === "phone" ? "+91 " + parsed.phone + " — নতুন account" : raw.trim() + " — নতুন account";
+        parsed.type === "phone" ? "+91 " + parsed.phone + " — new account" : raw.trim() + " — new account";
       document.getElementById("uAuthOtpBlock").style.display = (parsed.type === "phone") ? "block" : "none";
       document.getElementById("uAuthCreateBtn").disabled = (parsed.type === "phone");
       document.getElementById("uAuthSendOtpBtn").textContent = "Send OTP";
@@ -136,13 +154,13 @@ async function uHandleContinue() {
       uShowStep_("signup");
     }
   } catch (err) {
-    uShowMsg_("সমস্যা হয়েছে, আবার চেষ্টা করুন।", true);
+    uShowMsg_("Something went wrong. Please try again.", true);
   }
 }
 
 async function uHandleLogin() {
   const password = document.getElementById("uAuthLoginPassword").value;
-  if (!password) { uShowMsg_("Password দিন।", true); return; }
+  if (!password) { uShowMsg_("Please enter your password.", true); return; }
   const email = (_authIdentifierType === "phone") ? _authSyntheticEmail : _authIdentifierKey;
   try {
     uShowMsg_("Logging in…");
@@ -182,7 +200,7 @@ async function uHandleForgot() {
   }
   try {
     await authSendPasswordReset(_authIdentifierKey);
-    uShowMsg_("Password reset link email-এ পাঠানো হয়েছে।");
+    uShowMsg_("A password reset link has been sent to your email.");
   } catch (err) {
     uShowMsg_(authErrorMessage ? authErrorMessage(err) : String(err), true);
   }
@@ -198,10 +216,10 @@ async function uHandleResetSendOtp() {
     document.getElementById("uResetOtpInput").disabled = false;
     document.getElementById("uResetVerifyOtpBtn").disabled = false;
     document.getElementById("uResetVerifyOtpBtn").textContent = "Verify OTP";
-    uShowMsg_("OTP পাঠানো হয়েছে।");
+    uShowMsg_("OTP sent.");
     uStartResetResendTimer_();
   } catch (err) {
-    uShowMsg_("OTP পাঠাতে সমস্যা হয়েছে, আবার চেষ্টা করুন।", true);
+    uShowMsg_("Could not send OTP. Please try again.", true);
   }
 }
 
@@ -223,7 +241,7 @@ function uStartResetResendTimer_() {
 
 async function uHandleResetVerifyOtp() {
   const otp = document.getElementById("uResetOtpInput").value.trim();
-  if (!otp) { uShowMsg_("OTP দিন।", true); return; }
+  if (!otp) { uShowMsg_("Please enter the OTP.", true); return; }
   const btn = document.getElementById("uResetVerifyOtpBtn");
   btn.disabled = true;
   btn.textContent = "Verifying…";
@@ -232,14 +250,14 @@ async function uHandleResetVerifyOtp() {
   } catch (err) {
     btn.disabled = false;
     btn.textContent = "Verify OTP";
-    uShowMsg_("Verify করা যায়নি, আবার চেষ্টা করুন।", true);
+    uShowMsg_("Could not verify. Please try again.", true);
   }
 }
 
 async function uHandleResetSubmit() {
   const newPassword = document.getElementById("uResetNewPassword").value;
-  if (newPassword.length < 6) { uShowMsg_("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।", true); return; }
-  if (!_authOtpAccessToken) { uShowMsg_("আগে OTP verify করুন।", true); return; }
+  if (newPassword.length < 6) { uShowMsg_("Password must be at least 6 characters.", true); return; }
+  if (!_authOtpAccessToken) { uShowMsg_("Please verify the OTP first.", true); return; }
 
   const btn = document.getElementById("uResetSubmitBtn");
   btn.disabled = true;
@@ -252,15 +270,15 @@ async function uHandleResetSubmit() {
     });
     const data = await res.json();
     if (data.success) {
-      uShowMsg_("পাসওয়ার্ড পরিবর্তন হয়েছে। এখন Login করুন।");
+      uShowMsg_("Password changed. Please log in now.");
       setTimeout(uBackToEntry, 1500);
     } else {
-      uShowMsg_(data.error || "সমস্যা হয়েছে, আবার চেষ্টা করুন।", true);
+      uShowMsg_(data.error || "Something went wrong. Please try again.", true);
       btn.disabled = false;
       btn.textContent = "Set new password";
     }
   } catch (err) {
-    uShowMsg_("সমস্যা হয়েছে, আবার চেষ্টা করুন।", true);
+    uShowMsg_("Something went wrong. Please try again.", true);
     btn.disabled = false;
     btn.textContent = "Set new password";
   }
@@ -287,7 +305,7 @@ async function uHandleSendOtp() {
   if (_authResendCount >= AUTH_RESEND_LIMIT) return;
   const parsed = normalizeIdentifier_(document.getElementById("uAuthIdentifier") ? document.getElementById("uAuthIdentifier").value : "");
   const phone = parsed ? parsed.phone : null;
-  if (!phone) { uShowMsg_("সঠিক mobile number দিন।", true); return; }
+  if (!phone) { uShowMsg_("Please enter a valid mobile number.", true); return; }
 
   _authFlowContext = "signup";
   try {
@@ -298,16 +316,16 @@ async function uHandleSendOtp() {
     document.getElementById("uAuthOtpInput").disabled = false;
     document.getElementById("uAuthVerifyOtpBtn").disabled = false;
     document.getElementById("uAuthVerifyOtpBtn").textContent = "Verify OTP";
-    uShowMsg_("OTP পাঠানো হয়েছে।");
+    uShowMsg_("OTP sent.");
     uStartResendTimer_();
   } catch (err) {
-    uShowMsg_("OTP পাঠাতে সমস্যা হয়েছে, আবার চেষ্টা করুন।", true);
+    uShowMsg_("Could not send OTP. Please try again.", true);
   }
 }
 
 async function uHandleVerifyOtp() {
   const otp = document.getElementById("uAuthOtpInput").value.trim();
-  if (!otp) { uShowMsg_("OTP দিন।", true); return; }
+  if (!otp) { uShowMsg_("Please enter the OTP.", true); return; }
   const btn = document.getElementById("uAuthVerifyOtpBtn");
   btn.disabled = true;
   btn.textContent = "Verifying…";
@@ -316,7 +334,7 @@ async function uHandleVerifyOtp() {
   } catch (err) {
     btn.disabled = false;
     btn.textContent = "Verify OTP";
-    uShowMsg_("Verify করা যায়নি, আবার চেষ্টা করুন।", true);
+    uShowMsg_("Could not verify. Please try again.", true);
   }
 }
 
@@ -328,7 +346,7 @@ window.addEventListener("hs:otpVerified", function (e) {
     document.getElementById("uResetSendOtpBtn").style.display = "none";
     document.getElementById("uResetPasswordField").style.display = "block";
     document.getElementById("uResetSubmitBtn").style.display = "block";
-    uShowMsg_("Phone verified ✓ — এখন নতুন পাসওয়ার্ড দিন।");
+    uShowMsg_("Phone verified ✓ — now set a new password.");
     return;
   }
   _authPhoneVerified = true;
@@ -344,28 +362,28 @@ window.addEventListener("hs:otpFailed", function () {
     const rbtn = document.getElementById("uResetVerifyOtpBtn");
     rbtn.disabled = false;
     rbtn.textContent = "Verify OTP";
-    uShowMsg_("OTP ভুল হয়েছে, আবার চেষ্টা করুন।", true);
+    uShowMsg_("Incorrect OTP. Please try again.", true);
     return;
   }
   const btn = document.getElementById("uAuthVerifyOtpBtn");
   btn.disabled = false;
   btn.textContent = "Verify OTP";
-  uShowMsg_("OTP ভুল হয়েছে, আবার চেষ্টা করুন।", true);
+  uShowMsg_("Incorrect OTP. Please try again.", true);
 });
 
 async function uHandleSignup() {
   const name = document.getElementById("uAuthSignupName").value.trim();
   const password = document.getElementById("uAuthSignupPassword").value;
-  if (name.length < 2) { uShowMsg_("নাম দিন।", true); return; }
-  if (password.length < 6) { uShowMsg_("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।", true); return; }
+  if (name.length < 2) { uShowMsg_("Please enter your name.", true); return; }
+  if (password.length < 6) { uShowMsg_("Password must be at least 6 characters.", true); return; }
   if (_authIdentifierType === "phone" && !_authPhoneVerified) {
-    uShowMsg_("আগে OTP verify করুন।", true);
+    uShowMsg_("Please verify the OTP first.", true);
     return;
   }
 
   const email = (_authIdentifierType === "phone") ? _authSyntheticEmail : _authIdentifierKey;
   try {
-    uShowMsg_("Account তৈরি হচ্ছে…");
+    uShowMsg_("Creating your account…");
     const user = await authSignUp(name, email, password);
     await uUpsertUserDoc_(user.uid, {
       name: name,
@@ -374,19 +392,21 @@ async function uHandleSignup() {
       phoneVerified: _authIdentifierType === "phone",
       provider: _authIdentifierType
     });
-    await firebase.firestore().collection("accountIndex").doc(_authIdentifierKey).set({ uid: user.uid });
 
-    uShowMsg_("Account সফলভাবে তৈরি হয়েছে!");
-    setTimeout(function() {
+    uShowMsg_("Account created successfully!");
+    setTimeout(function () {
       if (typeof renderAccountState === "function") renderAccountState(user);
       uAuthSuccess_();
     }, 1000);
 
   } catch (err) {
-    // যদি এই ইমেইল বা অ্যাকাউন্ট আগে থেকেই থাকে, তবে ইউজারকে সরাসরি Login পেজে নিয়ে যাবে
-    if (err && (err.code === 'auth/email-already-in-use' || err.message?.includes('already in use') || err.code === 'auth/account-exists-with-different-credential')) {
-      uShowMsg_("এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে। Log in করুন।", true);
-      document.getElementById("uAuthLoginLabel").textContent = _authIdentifierKey;
+    // If this account turns out to already exist (e.g. a signup was
+    // retried after a partial failure), send the user straight to
+    // the login step instead of showing a dead end.
+    if (err && (err.code === 'auth/email-already-in-use' || err.code === 'auth/account-exists-with-different-credential')) {
+      uShowMsg_("An account already exists. Please log in instead.", true);
+      document.getElementById("uAuthLoginLabel").textContent =
+        _authIdentifierType === "phone" ? "+91 " + _authIdentifierKey.replace("phone_", "") : _authIdentifierKey;
       document.getElementById("uAuthForgotWrap").style.display = "block";
       uShowStep_("login");
       return;
@@ -409,14 +429,12 @@ async function uUpsertUserDoc_(uid, data) {
 // ============================================================
 // CHECKOUT AUTH PROTECTION HELPER
 // ============================================================
-window.requireAuthThenGo = function(destinationUrl) {
+window.requireAuthThenGo = function (destinationUrl) {
   const currentUser = firebase && firebase.auth && firebase.auth().currentUser;
 
   if (currentUser) {
     window.location.href = destinationUrl;
   } else {
-    // No more popup — send the user to the real login page,
-    // which will forward them to destinationUrl after login.
     window.location.href = 'account.html?redirect=' + encodeURIComponent(destinationUrl);
   }
 };
