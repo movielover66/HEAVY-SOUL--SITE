@@ -6,13 +6,39 @@
 // app/auth/firestore compat SDKs) on account.html, where the step
 // markup lives directly in the page HTML.
 //
-// Whether an account already exists is checked with Firebase Auth's
-// own fetchSignInMethodsForEmail() — NOT a separate Firestore index.
-// A separate index needs two writes to stay in sync (Firebase Auth +
-// Firestore); if the second write ever failed, an existing account
-// would stop being recognized and get bounced into "create a new
-// account" on its next login. fetchSignInMethodsForEmail asks
-// Firebase Auth directly, so there's nothing to fall out of sync.
+// EXISTENCE CHECK — why this uses our own Firestore index, not
+// Firebase's fetchSignInMethodsForEmail():
+// Firebase Auth's "Email Enumeration Protection" (on by default for
+// newer projects, Firebase Console -> Authentication -> Settings ->
+// User actions) makes fetchSignInMethodsForEmail() always return []
+// regardless of whether the account exists, specifically so outsiders
+// can't probe which emails are registered. That makes it useless here.
+// So we keep our own `accountIndex` collection as the source of truth
+// for "does this account exist" — but unlike an earlier version of
+// this file, the accountIndex doc and the users/{uid} profile doc are
+// now written together in a single Firestore .batch(), so they can
+// never go out of sync with each other: either both are saved or
+// neither is (a batch is all-or-nothing). Firebase Auth account
+// creation itself is a separate system and can't be included in that
+// same atomic batch, so uHandleSignup() also self-heals on the rare
+// case where Auth account creation succeeded but the Firestore batch
+// didn't reach the server (e.g. tab closed mid-request): it catches
+// 'auth/email-already-in-use' on a later retry and routes straight to
+// login instead of leaving the person stuck.
+//
+// Firestore rules needed for this to work (the existence check runs
+// BEFORE the person is signed in, so it must be a public, unauthenticated
+// read — but keep the accountIndex documents free of any personal data,
+// just a marker, so a public read never leaks anything):
+//   match /accountIndex/{id} {
+//     allow get: if true;
+//     allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+//     allow update, delete: if false;
+//   }
+//   match /users/{uid} {
+//     allow get: if request.auth != null && request.auth.uid == uid;
+//     allow create, update: if request.auth != null && request.auth.uid == uid;
+//   }
 //
 // Usage: the step markup lives directly on account.html — there is
 // no popup. requireAuthThenGo(url) redirects to
@@ -98,7 +124,8 @@ async function uHandleGoogle() {
   try {
     uShowMsg_("Opening Google sign-in…");
     const user = await authGoogleSignIn();
-    await uUpsertUserDoc_(user.uid, {
+    const googleKey = String(user.email || "").toLowerCase();
+    await uCreateAccountRecords_(user.uid, googleKey, {
       name: user.displayName || "",
       email: user.email || "",
       provider: "google"
@@ -124,23 +151,21 @@ async function uHandleContinue() {
     _authSyntheticEmail = parsed.phone + "@phone.heavysoul.in";
   }
 
-  const emailToCheck = parsed.type === "phone" ? _authSyntheticEmail : parsed.key;
-
   uShowMsg_("Checking…");
   try {
-    const methods = await authFetchSignInMethods(emailToCheck);
+    const doc = await firebase.firestore().collection("accountIndex").doc(_authIdentifierKey).get();
 
-    if (methods.length > 0 && methods.indexOf("password") !== -1) {
-      // Existing account with a password set — show the login step.
+    if (doc.exists) {
+      // Existing account — show the login step.
       document.getElementById("uAuthLoginLabel").textContent =
         parsed.type === "phone" ? "+91 " + parsed.phone : raw.trim();
-      document.getElementById("uAuthForgotWrap").style.display = "block";
+      document.getElementById("uAuthForgotWrap").style.display =
+        (doc.data() && doc.data().provider === "google") ? "none" : "block";
+      if (doc.data() && doc.data().provider === "google") {
+        uShowMsg_("This account uses Google Sign-in. Please use \u201cContinue with Google\u201d above instead.", true);
+        return;
+      }
       uShowStep_("login");
-
-    } else if (methods.length > 0) {
-      // Account exists but only via Google — there's no password to
-      // log in with here, point them at the Google button instead.
-      uShowMsg_("This account uses Google Sign-in. Please use \u201cContinue with Google\u201d above.", true);
 
     } else {
       // No account yet — show the signup step.
@@ -385,7 +410,7 @@ async function uHandleSignup() {
   try {
     uShowMsg_("Creating your account…");
     const user = await authSignUp(name, email, password);
-    await uUpsertUserDoc_(user.uid, {
+    await uCreateAccountRecords_(user.uid, _authIdentifierKey, {
       name: name,
       email: _authIdentifierType === "email" ? _authIdentifierKey : "",
       phone: _authIdentifierType === "phone" ? _authIdentifierKey.replace("phone_", "") : "",
@@ -415,15 +440,29 @@ async function uHandleSignup() {
   }
 }
 
-async function uUpsertUserDoc_(uid, data) {
-  try {
-    await firebase.firestore().collection("users").doc(uid).set(
-      Object.assign({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, data),
-      { merge: true }
-    );
-  } catch (err) {
-    console.warn("Could not save user profile:", err);
-  }
+// Writes the full profile (users/{uid}) and the lightweight existence
+// marker (accountIndex/{identifierKey}) in ONE Firestore batch, so the
+// two can never go out of sync with each other — either both are saved
+// or neither is. The accountIndex doc intentionally carries almost no
+// data (just enough to route "Continue" correctly and show the right
+// provider message) since it must be publicly readable, unauthenticated,
+// for the existence check on account.html to work before sign-in.
+async function uCreateAccountRecords_(uid, identifierKey, data) {
+  const db = firebase.firestore();
+  const batch = db.batch();
+
+  batch.set(
+    db.collection("users").doc(uid),
+    Object.assign({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, data),
+    { merge: true }
+  );
+
+  batch.set(
+    db.collection("accountIndex").doc(identifierKey),
+    { uid: uid, provider: data.provider || "" }
+  );
+
+  await batch.commit();
 }
 
 // ============================================================
