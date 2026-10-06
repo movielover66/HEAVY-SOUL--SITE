@@ -24,6 +24,7 @@
   .u-auth-step h2{ font-family: var(--serif); font-size: 24px; margin-bottom: 4px; }
   .u-auth-msg{ font-size: 13px; color: var(--accent); display:none; margin: -4px 0 0; }
   .u-auth-msg.show{ display:block; }
+  .u-auth-msg.error{ color:#b3261e; }
   .u-auth-google{ display:flex; align-items:center; justify-content:center; }
   .u-auth-divider{
     display:flex; align-items:center; gap:12px; margin: 2px 0;
@@ -39,6 +40,10 @@
   .account-card h2{ font-size:20px; }
   .account-row{ display:flex; justify-content:space-between; font-size:14px; padding:8px 0; border-bottom:1px solid var(--line); }
   .account-row span:first-child{ color:var(--ink-soft); }
+  .account-badge{
+    display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:.05em;
+    padding:3px 9px; border:1px solid var(--accent); color:var(--accent); width:fit-content;
+  }
   .orders-section{ max-width: 640px; margin: 0 auto 80px; padding: 0 24px; }
   .orders-section h2{ font-size:18px; margin-bottom:16px; }
   .order-card{ border:1px solid var(--line); padding:18px; margin-bottom:14px; }
@@ -148,15 +153,15 @@
 
       <!-- STEP: phone password reset -->
       <div id="uAuthStep-reset" class="u-auth-step" style="display:none;">
-        <h2>Password reset করুন</h2>
-        <p class="u-auth-sub">আপনার নম্বর যাচাই করে নতুন পাসওয়ার্ড সেট করুন।</p>
+        <h2>Reset your password</h2>
+        <p class="u-auth-sub">Verify your mobile number, then set a new password.</p>
         <button type="button" class="btn ghost block" id="uResetSendOtpBtn" onclick="uHandleResetSendOtp()">Send OTP</button>
         <div class="field" id="uResetOtpField" style="display:none;">
           <input id="uResetOtpInput" type="tel" inputmode="numeric" maxlength="6" placeholder="Enter OTP">
         </div>
         <button type="button" class="btn ghost block" id="uResetVerifyOtpBtn" style="display:none;" onclick="uHandleResetVerifyOtp()">Verify OTP</button>
         <div class="field" id="uResetPasswordField" style="display:none;">
-          <input id="uResetNewPassword" type="password" placeholder="নতুন পাসওয়ার্ড (min 6 characters)">
+          <input id="uResetNewPassword" type="password" placeholder="New password (min 6 characters)">
         </div>
         <button type="button" class="btn accent block" id="uResetSubmitBtn" style="display:none;" onclick="uHandleResetSubmit()">Set new password</button>
         <p class="u-auth-link"><a href="#" onclick="uBackToEntry();return false;">&larr; Back</a></p>
@@ -168,9 +173,11 @@
   <!-- Shown only when logged IN -->
   <div class="account-card" id="accountBox" style="display:none;">
     <h2>My account</h2>
+    <div id="accVipBadge" class="account-badge" style="display:none;">VIP 👑</div>
     <div class="account-row"><span>Name</span><span id="accName">—</span></div>
-    <div class="account-row"><span>Email</span><span id="accEmail">—</span></div>
+    <div class="account-row"><span>Contact</span><span id="accContact">—</span></div>
     <a href="track.html" class="btn outline block">Track an order</a>
+    <a href="policy.html" class="btn outline block">Policies</a>
     <button class="btn block" onclick="authLogOut()">Log out</button>
   </div>
 
@@ -229,6 +236,52 @@ async function loadAndRenderOrders(){
   listEl.innerHTML = orders.map(renderOrderCard).join('');
 }
 
+// Shows the account's real contact info (phone OR email) and VIP badge.
+// IMPORTANT: never read user.email directly for display — phone-signup
+// accounts are created with a synthetic "<phone>@phone.heavysoul.in"
+// address purely so Firebase Auth (email/password only, on the free
+// Spark plan) has something to key the account on internally. The real
+// phone number lives in the users/{uid} Firestore doc written at signup
+// (see auth-unified.js's uUpsertUserDoc_), which is what this reads.
+async function loadAndRenderContactInfo(user){
+  const contactEl = document.getElementById('accContact');
+  const vipEl = document.getElementById('accVipBadge');
+  contactEl.textContent = '…';
+
+  let phone = '';
+  try {
+    const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+    const data = doc.exists ? doc.data() : null;
+    if (data && data.phone) {
+      phone = data.phone;
+      contactEl.textContent = '+91 ' + data.phone;
+    } else if (data && data.email) {
+      contactEl.textContent = data.email;
+    } else if (user.email && !user.email.endsWith('@phone.heavysoul.in')) {
+      contactEl.textContent = user.email; // real email (e.g. older Google sign-ins)
+    } else {
+      contactEl.textContent = '—';
+    }
+  } catch (err) {
+    console.warn('Could not load contact info:', err);
+    contactEl.textContent = '—';
+  }
+
+  // VIP status is tracked server-side in the Orders sheet (3+ orders, or
+  // any high-value order) — ask the backend for this phone number's tier.
+  if (phone && SITE_CONFIG.APPS_SCRIPT_URL && typeof fetch === 'function') {
+    try {
+      const res = await fetch(SITE_CONFIG.APPS_SCRIPT_URL + '?type=vip_status&phone=' + encodeURIComponent(phone));
+      const data = await res.json();
+      vipEl.style.display = (data && data.isVip) ? 'inline-block' : 'none';
+    } catch (err) {
+      vipEl.style.display = 'none';
+    }
+  } else {
+    vipEl.style.display = 'none';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function(){
   if (!authReady()) return;
   firebase.auth().onAuthStateChanged(function(user){
@@ -237,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function(){
     document.getElementById('ordersSection').style.display = user ? 'block' : 'none';
     if (user){
       document.getElementById('accName').textContent = user.displayName || '—';
-      document.getElementById('accEmail').textContent = user.email || '—';
+      loadAndRenderContactInfo(user);
       loadAndRenderOrders();
     }
   });
